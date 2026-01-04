@@ -229,7 +229,7 @@ export default function Navigation() {
             <div className="flex items-center">
               {isMobileMenuOpen ? (
                 <FiX 
-                  size={20} 
+                  size={28} 
                   style={{ 
                     color: '#008b8b',
                     filter: 'drop-shadow(0 0 4px rgba(0, 139, 139, 0.6))',
@@ -237,7 +237,7 @@ export default function Navigation() {
                 />
               ) : (
                 <FiMenu 
-                  size={20} 
+                  size={28} 
                   style={{ 
                     color: '#008b8b',
                     filter: 'drop-shadow(0 0 4px rgba(0, 139, 139, 0.6))',

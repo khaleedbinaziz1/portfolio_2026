@@ -29,6 +29,10 @@ export default function About() {
       >
         {/* About Me Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-center text-center sm:text-left mb-8 md:mb-12 gap-4">
+          {/* Mobile: Gradient line above title */}
+          <div className="md:hidden w-full mb-2">
+            <div className="retro-line-gradient"></div>
+          </div>
           <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-0 mx-auto sm:mx-0">
             <span className="section-number section-number-cyan sm:mr-4">01.</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1a1a1a] text-glow-cyan">About Me</h2>

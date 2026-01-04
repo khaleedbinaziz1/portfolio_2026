@@ -111,10 +111,12 @@ export default function Skills() {
     <section
       id="skills"
       ref={ref}
-      className="min-h-screen flex flex-col justify-center items-center w-full py-12 sm:py-16 md:py-24 lg:py-32 relative"
+      className="min-h-screen flex flex-col justify-center items-center w-full py-16 sm:py-20 md:py-24 lg:py-32 relative"
       style={{
         color: '#e0e0e0',
         backgroundColor: '#0a0a0a',
+        marginTop: '30px',
+        marginBottom: '30px',
       }}
     >
       {/* Background Effects */}
@@ -145,6 +147,15 @@ export default function Skills() {
       >
         {/* Skills & Expertise Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-center text-center sm:text-left mb-8 sm:mb-10 md:mb-12 gap-3 sm:gap-4">
+          {/* Mobile: Gradient line above title */}
+          <div className="md:hidden w-full mb-2">
+            <div 
+              className="h-px"
+              style={{
+                background: 'linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.6), transparent)',
+              }}
+            ></div>
+          </div>
           <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-0 mx-auto sm:mx-0">
             <span 
               className="text-base sm:text-lg font-mono mr-4"

@@ -36,9 +36,16 @@ export default function Contact() {
         style={{ paddingLeft: '5%', paddingRight: '5%' }}
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center text-center mb-8 md:mb-12 gap-4">
+          {/* Mobile: Gradient line above title */}
+          <div className="md:hidden w-full mb-2">
+            <div className="retro-line-gradient"></div>
+          </div>
           <div className="flex items-center justify-center gap-2 sm:gap-0 mx-auto sm:mx-0">
             <span className="section-number section-number-yellow sm:mr-4">04.</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1a1a1a]">What&apos;s Next?</h2>
+          </div>
+          <div className="hidden md:block flex-1 ml-6">
+            <div className="retro-line-gradient"></div>
           </div>
         </div>
 
@@ -67,9 +74,15 @@ export default function Contact() {
                 commands={[
                   {
                     prompt: '$',
-                    command: 'echo "Let&apos;s connect!" | mail -s "New Opportunity" khaled@example.com',
+                    command: `echo "Let's connect!" | mail -s "New Opportunity" ${personalInfo.email}`,
                     output: 'Message queued successfully ✓',
                     delay: 2000,
+                  },
+                  {
+                    prompt: '$',
+                    command: 'echo "Phone/WhatsApp: +880 1756922708"',
+                    output: 'Phone/WhatsApp: +880 1756922708 ✓',
+                    delay: 1500,
                   },
                 ]}
                 autoStart={isInView}

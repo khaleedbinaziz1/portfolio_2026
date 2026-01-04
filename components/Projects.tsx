@@ -23,10 +23,12 @@ export default function Projects() {
     <section
       id="projects"
       ref={ref}
-      className="min-h-screen flex flex-col justify-center items-center w-full py-8 sm:py-12 md:py-16 lg:py-20 xl:py-32"
+      className="min-h-screen flex flex-col justify-center items-center w-full py-16 sm:py-20 md:py-16 lg:py-20 xl:py-32"
       style={{
         background: 'linear-gradient(135deg, rgba(204, 102, 0, 0.05) 0%, rgba(250, 250, 245, 0.98) 35%, rgba(204, 102, 0, 0.05) 100%)',
         color: '#1a1a1a',
+        marginTop: '30px',
+        marginBottom: '30px',
       }}
     >
       
@@ -45,6 +47,10 @@ export default function Projects() {
           className="mb-8 sm:mb-10 md:mb-12"
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-center text-center sm:text-left gap-3 sm:gap-4">
+            {/* Mobile: Gradient line above title */}
+            <div className="md:hidden w-full mb-2">
+              <div className="retro-line-gradient"></div>
+            </div>
             <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-0 mx-auto sm:mx-0">
               <span className="section-number section-number-orange text-sm sm:text-base sm:mr-4">02.</span>
               <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#1a1a1a] text-glow-orange">
