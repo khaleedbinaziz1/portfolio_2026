@@ -27,7 +27,9 @@ import {
   SiCypress,
   SiNginx,
   SiStripe,
-  SiFastapi
+  SiFastapi,
+  SiPhp,
+  SiClerk
 } from 'react-icons/si';
 import { TbBrandFramerMotion } from 'react-icons/tb';
 
@@ -49,6 +51,7 @@ const technologyCategories = [
     technologies: [
       { name: 'Node.js 20', icon: SiNodedotjs, color: '#339933' },
       { name: 'Express.js', icon: SiExpress, color: '#ffffff' },
+      { name: 'PHP', icon: SiPhp, color: '#777BB4' },
       { name: 'GraphQL', icon: SiGraphql, color: '#E10098' },
       { name: 'Socket.io', icon: SiSocketdotio, color: '#010101' },
       { name: 'Prisma ORM', icon: SiPrisma, color: '#2D3748' },
@@ -89,8 +92,8 @@ const technologyCategories = [
   {
     name: 'Authentication & Payments',
     technologies: [
+      { name: 'Clerk', icon: SiClerk, color: '#6C47FF' },
       { name: 'Firebase Auth', icon: SiFirebase, color: '#FFCA28' },
-      { name: 'SSL Commerz', icon: SiStripe, color: '#635BFF' },
       { name: 'Stripe', icon: SiStripe, color: '#635BFF' },
     ],
     color: { primary: '#b8860b', name: 'yellow' }
@@ -115,8 +118,8 @@ export default function Skills() {
       style={{
         color: '#e0e0e0',
         backgroundColor: '#0a0a0a',
-        marginTop: '30px',
-        marginBottom: '30px',
+        paddingTop: '50px',
+        paddingBottom: '50px',
       }}
     >
       {/* Background Effects */}
@@ -238,15 +241,11 @@ export default function Skills() {
                           duration: 0.3, 
                           delay: 0.2 + categoryIndex * 0.1 + techIndex * 0.05 
                         }}
-                        className="flex flex-col items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 backdrop-blur-sm transition-all duration-300 cursor-pointer group/item"
-                        style={{
-                          backgroundColor: `rgba(25, 25, 25, 0.8)`,
-                          boxShadow: `0 0 10px ${color.primary}20`,
-                        }}
+                        className="flex flex-col items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 transition-all duration-300 cursor-pointer group/item"
+                        style={{}}
                         whileHover={{ 
                           scale: 1.1, 
                           y: -6,
-                          boxShadow: `0 0 25px ${color.primary}60`,
                         }}
                         whileTap={{ scale: 0.95 }}
                       >

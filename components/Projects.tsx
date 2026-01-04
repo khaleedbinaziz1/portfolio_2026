@@ -27,8 +27,8 @@ export default function Projects() {
       style={{
         background: 'linear-gradient(135deg, rgba(204, 102, 0, 0.05) 0%, rgba(250, 250, 245, 0.98) 35%, rgba(204, 102, 0, 0.05) 100%)',
         color: '#1a1a1a',
-        marginTop: '30px',
-        marginBottom: '30px',
+        paddingTop: '50px',
+        paddingBottom: '50px',
       }}
     >
       
