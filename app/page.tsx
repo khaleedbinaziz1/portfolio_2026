@@ -11,6 +11,7 @@ import FloatingTerminal from '@/components/FloatingTerminal';
 import TerminalSnippets from '@/components/TerminalSnippets';
 import RetroEffects from '@/components/RetroEffects';
 
+
 export default function Home() {
   return (
     <main className="relative min-h-screen">
@@ -40,6 +41,7 @@ export default function Home() {
         <Projects />
         <Contact />
         <Footer />
+
       </div>
     </main>
   );

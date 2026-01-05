@@ -8,6 +8,7 @@ export interface Project {
   live?: string;
   featured?: boolean;
   image?: string;
+  caseStudy?: string;
 }
 
 export interface Skill {

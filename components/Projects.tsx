@@ -6,13 +6,14 @@ import { useRef } from 'react';
 import { projects } from '@/data/projects';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FiExternalLink } from 'react-icons/fi';
+import { FiFileText } from 'react-icons/fi';
 import FloatingTerminal from './FloatingTerminal';
 
 const accentColors = [
-  { primary: '#006400', secondary: '#228b22', name: 'green' },
-  { primary: '#008b8b', secondary: '#00ced1', name: 'cyan' },
-  { primary: '#cc6600', secondary: '#ff6600', name: 'orange' },
+  { primary: '#065D71', secondary: '#0a7a94', name: 'teal' }, // Kumira
+  { primary: '#589440', secondary: '#6ba84f', name: 'green' }, // Better-e-mart
+  { primary: '#1B8A5F', secondary: '#22a572', name: 'green-teal' }, // TakaSphere
+  { primary: '#8F75E6', secondary: '#a68ef0', name: 'purple' }, // Pixentix
 ];
 
 export default function Projects() {
@@ -52,7 +53,7 @@ export default function Projects() {
               <div className="retro-line-gradient"></div>
             </div>
             <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-0 mx-auto sm:mx-0">
-              <span className="section-number section-number-orange text-sm sm:text-base sm:mr-4">02.</span>
+              <span className="section-number section-number-orange text-sm sm:text-base sm:mr-4">04.</span>
               <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#1a1a1a] text-glow-orange">
                 Some Things I&apos;ve Built
               </h2>
@@ -109,22 +110,21 @@ export default function Projects() {
                           </p>
                         </div>
                         
-                        {/* Links */}
-                        {project.live && (
-                          <div className="flex gap-3 sm:gap-4 flex-shrink-0 justify-center sm:justify-start">
+                        {/* Case Study Link */}
+                        {project.caseStudy && (
+                          <div className="flex-shrink-0 justify-center sm:justify-start">
                             <Link
-                              href={project.live}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 border transition-all duration-300 hover:scale-110 active:scale-95"
+                              href={project.caseStudy}
+                              className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg border transition-all duration-300 hover:scale-105 active:scale-95 font-medium text-sm sm:text-base"
                               style={{
                                 color: accent.primary,
                                 borderColor: `${accent.primary}40`,
                                 backgroundColor: `${accent.primary}08`,
                               }}
-                              aria-label="Live Demo"
+                              aria-label="View Case Study"
                             >
-                              <FiExternalLink className="text-base sm:text-lg" />
+                              <FiFileText className="text-base sm:text-lg" />
+                              <span>Case Study</span>
                             </Link>
                           </div>
                         )}
@@ -149,7 +149,23 @@ export default function Projects() {
                     </div>
                     
                     {/* Project Image */}
-                    {project.image && (
+                    {project.image && project.caseStudy && (
+                      <Link 
+                        href={project.caseStudy}
+                        className="relative w-full h-32 sm:h-52 md:h-56 lg:h-64 overflow-hidden border-2 group/image order-first md:order-last block cursor-pointer"
+                        style={{ borderColor: `${accent.primary}30` }}
+                      >
+                        <Image
+                          src={project.image}
+                          alt={project.title}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover/image:scale-105 md:group-hover/image:scale-110"
+                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, 300px"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-300"></div>
+                      </Link>
+                    )}
+                    {project.image && !project.caseStudy && (
                       <div className="relative w-full h-32 sm:h-52 md:h-56 lg:h-64 overflow-hidden border-2 group/image order-first md:order-last"
                         style={{ borderColor: `${accent.primary}30` }}
                       >

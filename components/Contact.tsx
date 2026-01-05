@@ -42,7 +42,7 @@ export default function Contact() {
             <div className="retro-line-gradient"></div>
           </div>
           <div className="flex items-center justify-center gap-2 sm:gap-0 mx-auto sm:mx-0">
-            <span className="section-number section-number-yellow sm:mr-4">04.</span>
+            <span className="section-number section-number-yellow sm:mr-4">05.</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#1a1a1a] gradient-text text-glow-strong">Get In Touch</h2>
           </div>
           <div className="hidden md:block flex-1 ml-6">

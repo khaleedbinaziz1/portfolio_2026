@@ -74,7 +74,7 @@ export default function About() {
                   {
                     prompt: '$',
                     command: 'cat ~/.bashrc | grep experience',
-                    output: 'export EXPERIENCE="3 years"',
+                    output: 'export EXPERIENCE="3+ years"',
                     delay: 1500,
                   },
                 ]}
@@ -94,7 +94,7 @@ export default function About() {
             className="space-y-4 sm:space-y-6 text-center md:text-left"
           >
             <p className="text-sm sm:text-base md:text-lg text-[#4a4a4a] leading-relaxed max-w-3xl mx-auto md:mx-0">
-              Full Stack Engineer with <span className="text-[#008b8b] font-semibold">3 years</span> of experience building scalable web applications. Expert in TypeScript, Next.js, Node.js, system design, and cloud deployment.
+              Full Stack Engineer with <span className="text-[#008b8b] font-semibold">3+ years</span> of experience building scalable web applications. Expert in TypeScript, Next.js, Node.js, system design, and cloud deployment.
             </p>
             
             <p className="text-sm sm:text-base md:text-lg text-[#4a4a4a] leading-relaxed max-w-3xl mx-auto md:mx-0">
@@ -164,7 +164,7 @@ export default function About() {
             className="space-y-3 text-center px-4"
           >
             <p className="text-sm text-[#4a4a4a] leading-relaxed">
-              Full Stack Engineer with <span className="text-[#008b8b] font-semibold">3 years</span> of experience building scalable web applications. Expert in TypeScript, Next.js, and Node.js.
+              Full Stack Engineer with <span className="text-[#008b8b] font-semibold">3+ years</span> of experience building scalable web applications. Expert in TypeScript, Next.js, and Node.js.
             </p>
             
             <p className="text-sm text-[#4a4a4a] leading-relaxed">

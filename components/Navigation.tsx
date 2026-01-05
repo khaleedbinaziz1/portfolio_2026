@@ -7,9 +7,9 @@ import { FiUser, FiFolder, FiCode, FiBriefcase, FiMail, FiMenu, FiX } from 'reac
 
 const navLinks = [
   { name: 'About', href: '#about', number: '01.', color: '#008b8b', icon: FiUser, command: 'cat about.txt' },
-  { name: 'Projects', href: '#projects', number: '02.', color: '#cc6600', icon: FiFolder, command: 'ls projects/' },
-  { name: 'Skills', href: '#skills', number: '03.', color: '#b8860b', icon: FiCode, command: 'npm list --depth=0' },
-  { name: 'Experience', href: '#experience', number: '04.', color: '#006400', icon: FiBriefcase, command: 'cat experience.json' },
+  { name: 'Skills', href: '#skills', number: '02.', color: '#b8860b', icon: FiCode, command: 'npm list --depth=0' },
+  { name: 'Experience', href: '#experience', number: '03.', color: '#006400', icon: FiBriefcase, command: 'cat experience.json' },
+  { name: 'Projects', href: '#projects', number: '04.', color: '#cc6600', icon: FiFolder, command: 'ls projects/' },
   { name: 'Contact', href: '#contact', number: '05.', color: '#c71585', icon: FiMail, command: 'mail -s "Hello" user@example.com' },
 ];
 

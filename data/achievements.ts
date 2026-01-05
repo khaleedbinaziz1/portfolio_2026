@@ -64,7 +64,7 @@ export const achievements: Achievement[] = [
     title: 'Years Experience',
     description: 'In production development',
     icon: FiCode,
-    value: '3',
+    value: '2+',
     color: '#c71585',
   },
 ];

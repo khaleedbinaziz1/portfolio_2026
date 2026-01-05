@@ -11,6 +11,7 @@ export const projects: Project[] = [
     github: '#',
     featured: true,
     image: '/images/kumira.png',
+    caseStudy: '/case-studies/kumira',
   },
   {
     id: 2,
@@ -22,6 +23,7 @@ export const projects: Project[] = [
     github: '#',
     featured: true,
     image: '/images/better.png',
+    caseStudy: '/case-studies/better-e-mart',
   },
   {
     id: 3,
@@ -33,6 +35,7 @@ export const projects: Project[] = [
     github: '#',
     featured: true,
     image: '/images/takasphere.png',
+    caseStudy: '/case-studies/takasphere',
   },
   {
     id: 4,
@@ -44,6 +47,7 @@ export const projects: Project[] = [
     github: '#',
     featured: true,
     image: '/images/website_builder.png',
+    caseStudy: '/case-studies/pixentix-auto-pilot',
   },
 ];
 
