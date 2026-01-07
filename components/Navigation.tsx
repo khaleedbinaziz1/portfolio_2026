@@ -43,18 +43,22 @@ export default function Navigation() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed top-0 w-full z-50 transition-all duration-300 backdrop-blur-md"
+      className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 backdrop-blur-md"
       style={{
         backgroundColor: 'rgba(245, 245, 240, 0.95)',
         borderBottom: '1px solid rgba(0, 100, 0, 0.3)',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1), 0 0 30px rgba(0, 100, 0, 0.1)',
+        top: 0,
+        left: 0,
+        right: 0,
+        margin: 0,
+        paddingTop: 'max(0px, env(safe-area-inset-top, 0px))',
       }}
     >
       {/* Terminal-style top border */}
       <div 
         className="h-0.5 opacity-100"
         style={{
-          paddingTop: '4px',
           background: `linear-gradient(90deg, 
             transparent 0%, 
             #008b8b 20%, 
@@ -71,7 +75,7 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16 md:h-20 min-h-[64px]">
           {/* Terminal-style Logo */}
           <Link
-            href="#hero"
+            href="/"
             className="group relative font-mono text-sm sm:text-base md:text-lg font-bold transition-all duration-300 flex items-center"
             style={{
               color: '#008b8b',
@@ -81,7 +85,6 @@ export default function Navigation() {
             onMouseLeave={() => setHoveredLink(null)}
           >
             <div className="flex items-center gap-2 h-full">
-              <span style={{ color: '#006400' }}>$</span>
               <span 
                 style={{
                   textShadow: '0 0 8px rgba(0, 139, 139, 0.5), 0 0 15px rgba(0, 139, 139, 0.3)',

@@ -36,11 +36,16 @@ export default function Hero() {
   return (
     <section 
       id="hero" 
-      className="min-h-screen flex items-center justify-center w-full retro-pixel-bg-light relative"
+      className="min-h-screen flex items-center justify-center w-full retro-pixel-bg-light relative overflow-hidden"
       style={{
         color: '#1a1a1a',
+        background: 'linear-gradient(135deg, rgba(184, 134, 11, 0.1) 0%, rgba(245, 245, 240, 0.95) 40%, rgba(184, 134, 11, 0.08) 100%)',
       }}
     >
+      {/* Pixelated decorative elements */}
+      <div className="absolute top-20 left-10 w-20 h-20 border-2 border-[#008b8b] border-opacity-20 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated' }}></div>
+      <div className="absolute bottom-20 right-10 w-16 h-16 border-2 border-[#006400] border-opacity-20 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated' }}></div>
+      <div className="absolute top-1/2 right-5 w-12 h-12 border-2 border-[#cc6600] border-opacity-15 pointer-events-none hidden lg:block" style={{ imageRendering: 'pixelated' }}></div>
       <div className="retro-grid-pattern"></div>
       <div className="retro-scanlines"></div>
       <div className="w-full max-w-7xl mb-5 mx-auto py-12 sm:py-16 md:py-20 relative z-10 md:pl-[calc(5%+5px)]" style={{ paddingLeft: '5%', paddingRight: '5%' }}>

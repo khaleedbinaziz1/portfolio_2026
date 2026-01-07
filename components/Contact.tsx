@@ -24,11 +24,16 @@ export default function Contact() {
     <section
       id="contact"
       ref={ref}
-      className="min-h-screen flex flex-col justify-center items-center py-20 md:py-32 text-center"
+      className="min-h-screen flex flex-col justify-center items-center py-20 md:py-32 text-center retro-pixel-bg-dark relative overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, rgba(199, 21, 133, 0.1) 0%, rgba(245, 245, 240, 0.95) 35%, rgba(199, 21, 133, 0.08) 100%)',
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #151515 40%, #0f0f0f 60%, #0a0a0a 100%)',
+        color: '#e0e0e0',
       }}
     >
+      {/* Pixelated decorative elements */}
+      <div className="absolute top-10 left-10 w-16 h-16 border-2 border-[#b8860b] border-opacity-40 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated', boxShadow: '0 0 10px #b8860b' }}></div>
+      <div className="absolute bottom-20 right-10 w-12 h-12 border-2 border-[#b8860b] border-opacity-40 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated', boxShadow: '0 0 10px #b8860b' }}></div>
+      <div className="absolute top-1/2 right-5 w-8 h-8 border-2 border-[#b8860b] border-opacity-30 pointer-events-none hidden lg:block" style={{ imageRendering: 'pixelated', boxShadow: '0 0 8px #b8860b' }}></div>
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -42,8 +47,8 @@ export default function Contact() {
             <div className="retro-line-gradient"></div>
           </div>
           <div className="flex items-center justify-center gap-2 sm:gap-0 mx-auto sm:mx-0">
-            <span className="section-number section-number-yellow sm:mr-4">05.</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[#1a1a1a] gradient-text text-glow-strong">Get In Touch</h2>
+            <span className="section-number section-number-yellow sm:mr-4" style={{ color: '#b8860b', textShadow: '0 0 8px #b8860b' }}>05.</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-glow-strong" style={{ color: '#e0e0e0', textShadow: '0 0 10px rgba(184, 134, 11, 0.6)' }}>Get In Touch</h2>
           </div>
           <div className="hidden md:block flex-1 ml-6">
             <div className="retro-line-gradient"></div>
@@ -54,7 +59,8 @@ export default function Contact() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-base sm:text-lg md:text-xl text-[#4a4a4a] mb-8 md:mb-12 leading-relaxed px-4"
+          className="text-base sm:text-lg md:text-xl mb-8 md:mb-12 leading-relaxed px-4"
+          style={{ color: '#b0b0b0' }}
         >
           I&apos;m open to new opportunities and collaborations. Feel free to reach out if you&apos;d like to discuss a project, have a question, or just want to connect!
         </motion.p>
@@ -71,7 +77,10 @@ export default function Contact() {
               <FiMail className="text-xl text-[#cc6600]" />
               <a 
                 href={`mailto:${personalInfo.email}`}
-                className="text-base sm:text-lg text-[#4a4a4a] hover:text-[#cc6600] transition-colors"
+                className="text-base sm:text-lg transition-colors"
+                style={{ color: '#b0b0b0' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#b8860b'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#b0b0b0'}
               >
                 {personalInfo.email}
               </a>
@@ -82,7 +91,10 @@ export default function Contact() {
                 href="https://wa.me/8801756922708"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-base sm:text-lg text-[#4a4a4a] hover:text-[#25D366] transition-colors"
+                className="text-base sm:text-lg transition-colors"
+                style={{ color: '#b0b0b0' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#25D366'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#b0b0b0'}
               >
                 +880 1756922708
               </a>

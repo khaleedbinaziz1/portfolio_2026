@@ -6,7 +6,7 @@ import { useRef } from 'react';
 import { projects } from '@/data/projects';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FiFileText } from 'react-icons/fi';
+import { FiFileText, FiExternalLink } from 'react-icons/fi';
 import FloatingTerminal from './FloatingTerminal';
 
 const accentColors = [
@@ -14,6 +14,7 @@ const accentColors = [
   { primary: '#589440', secondary: '#6ba84f', name: 'green' }, // Better-e-mart
   { primary: '#1B8A5F', secondary: '#22a572', name: 'green-teal' }, // TakaSphere
   { primary: '#8F75E6', secondary: '#a68ef0', name: 'purple' }, // Pixentix
+  { primary: '#9333ea', secondary: '#a855f7', name: 'purple' }, // Open Stack JS
 ];
 
 export default function Projects() {
@@ -24,7 +25,7 @@ export default function Projects() {
     <section
       id="projects"
       ref={ref}
-      className="min-h-screen flex flex-col justify-center items-center w-full py-16 sm:py-20 md:py-16 lg:py-20 xl:py-32"
+      className="min-h-screen flex flex-col justify-center items-center w-full py-16 sm:py-20 md:py-16 lg:py-20 xl:py-32 retro-pixel-bg-light relative overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, rgba(204, 102, 0, 0.05) 0%, rgba(250, 250, 245, 0.98) 35%, rgba(204, 102, 0, 0.05) 100%)',
         color: '#1a1a1a',
@@ -32,6 +33,10 @@ export default function Projects() {
         paddingBottom: '50px',
       }}
     >
+      {/* Pixelated decorative elements */}
+      <div className="absolute top-10 right-5 w-16 h-16 border-2 border-[#cc6600] border-opacity-20 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated' }}></div>
+      <div className="absolute bottom-20 left-10 w-12 h-12 border-2 border-[#cc6600] border-opacity-20 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated' }}></div>
+      <div className="absolute top-1/2 left-5 w-8 h-8 border-2 border-[#cc6600] border-opacity-15 pointer-events-none hidden lg:block" style={{ imageRendering: 'pixelated' }}></div>
       
       <motion.div
         initial={{ opacity: 0, y: 50 }}
@@ -65,7 +70,7 @@ export default function Projects() {
         </motion.div>
 
         {/* Projects Grid */}
-        <div className="grid grid-cols-1 gap-6 sm:gap-6 md:gap-7 lg:gap-8">
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 md:gap-5 lg:gap-6">
           {projects.map((project, index) => {
             const accent = accentColors[index % accentColors.length];
             
@@ -78,11 +83,22 @@ export default function Projects() {
                 className="group m-2.5 sm:m-0"
               >
                 <div 
-                  className="relative p-5 sm:p-6 md:p-7 lg:p-8 xl:p-10 border-2 transition-all duration-300 shadow-md hover:shadow-lg"
+                  className="relative p-4 sm:p-5 md:p-5 lg:p-6 border-2 transition-all duration-300 shadow-md hover:shadow-lg group/card"
                   style={{
                     borderColor: `${accent.primary}30`,
                     backgroundColor: 'rgba(255, 255, 255, 0.6)',
                     boxShadow: `0 2px 8px ${accent.primary}10, 0 1px 3px rgba(0, 0, 0, 0.08)`,
+                    imageRendering: 'pixelated',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.borderColor = `${accent.primary}50`;
+                    e.currentTarget.style.boxShadow = `0 8px 24px ${accent.primary}20, 0 4px 12px rgba(0, 0, 0, 0.12)`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.borderColor = `${accent.primary}30`;
+                    e.currentTarget.style.boxShadow = `0 2px 8px ${accent.primary}10, 0 1px 3px rgba(0, 0, 0, 0.08)`;
                   }}
                 >
                   {/* Accent line on left */}
@@ -94,48 +110,81 @@ export default function Projects() {
                     }}
                   ></div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] lg:grid-cols-[1fr_300px] gap-5 sm:gap-6 md:gap-6 items-center">
-                    <div className="pl-7 sm:pl-9 project-card-content">
+                  <div className="grid grid-cols-1 md:grid-cols-[1fr_240px] lg:grid-cols-[1fr_260px] gap-4 sm:gap-5 items-center">
+                    <div className="pl-6 sm:pl-7 project-card-content">
                       {/* Header */}
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4 sm:mb-5 md:mb-5 lg:mb-6">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3 sm:mb-4">
                         <div className="flex-1 text-center sm:text-left">
                           <h3 
-                            className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold mb-1.5 sm:mb-2 md:mb-2 leading-tight"
+                            className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold mb-1 sm:mb-1.5 leading-tight"
                             style={{ color: accent.primary }}
                           >
                             {project.title}
                           </h3>
-                          <p className="text-[10px] sm:text-xs md:text-base text-[#4a4a4a] leading-relaxed mt-0.5 sm:mt-1">
-                            {project.longDescription}
+                          <p className="text-[10px] sm:text-xs text-[#4a4a4a] leading-relaxed mt-0.5 line-clamp-2">
+                            {project.description}
                           </p>
                         </div>
                         
-                        {/* Case Study Link */}
+                        {/* Action Buttons */}
+                        <div className="flex-shrink-0 flex flex-row gap-1.5 sm:gap-2 justify-center sm:justify-start">
                           {project.caseStudy && (
-                          <div className="flex-shrink-0 justify-center sm:justify-start">
                             <Link
                               href={project.caseStudy}
-                              className="inline-flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg border transition-all duration-300 hover:scale-105 active:scale-95 font-medium text-sm sm:text-base"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 border-2 transition-all duration-300 hover:scale-105 active:scale-95 font-medium text-xs sm:text-xs font-mono"
                               style={{
                                 color: accent.primary,
-                                borderColor: `${accent.primary}40`,
-                                backgroundColor: `${accent.primary}08`,
+                                borderColor: accent.primary,
+                                backgroundColor: 'transparent',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = `${accent.primary}10`;
+                                e.currentTarget.style.boxShadow = `0 0 8px ${accent.primary}30`;
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.boxShadow = 'none';
                               }}
                               aria-label="View Case Study"
                             >
-                              <FiFileText className="text-base sm:text-lg" />
+                              <FiFileText className="text-xs sm:text-sm" />
                               <span>Case Study</span>
                             </Link>
+                          )}
+                          {project.live && (
+                            <Link
+                              href={project.live}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 border-2 transition-all duration-300 hover:scale-105 active:scale-95 font-medium text-xs sm:text-xs font-mono"
+                              style={{
+                                color: accent.primary,
+                                borderColor: accent.primary,
+                                backgroundColor: 'transparent',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = `${accent.primary}10`;
+                                e.currentTarget.style.boxShadow = `0 0 8px ${accent.primary}30`;
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                              aria-label="Visit Live Website"
+                            >
+                              <FiExternalLink className="text-xs sm:text-sm" />
+                              <span>Visit</span>
+                            </Link>
+                          )}
                         </div>
-                        )}
                       </div>
 
                       {/* Tech Stack */}
-                      <div className="flex flex-wrap gap-2 sm:gap-2.5 justify-center sm:justify-start mt-4 sm:mt-5">
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center sm:justify-start mt-3 sm:mt-4">
                         {project.tech.map((tech) => (
                           <span
                             key={tech}
-                            className="text-[10px] sm:text-xs font-medium px-2.5 sm:px-3 md:px-3 py-1 sm:py-1.5 md:py-1.5 transition-all duration-300"
+                            className="text-[9px] sm:text-[10px] font-medium px-2 sm:px-2.5 py-0.5 sm:py-1 transition-all duration-300 font-mono"
                             style={{
                               color: `${accent.primary}cc`,
                               border: `1px solid ${accent.primary}30`,
@@ -152,29 +201,29 @@ export default function Projects() {
                     {project.image && project.caseStudy && (
                       <Link 
                         href={project.caseStudy}
-                        className="relative w-full h-32 sm:h-52 md:h-56 lg:h-64 overflow-hidden border-2 group/image order-first md:order-last block cursor-pointer"
+                        className="relative w-full h-28 sm:h-40 md:h-44 lg:h-48 overflow-hidden border-2 group/image order-first md:order-last block cursor-pointer"
                         style={{ borderColor: `${accent.primary}30` }}
                       >
                         <Image
                           src={project.image}
                           alt={project.title}
                           fill
-                          className="object-cover transition-transform duration-300 group-hover/image:scale-105 md:group-hover/image:scale-110"
-                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, 300px"
+                          className="object-cover transition-transform duration-300 group-hover/image:scale-105"
+                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, 260px"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-300"></div>
                       </Link>
                     )}
                     {project.image && !project.caseStudy && (
-                      <div className="relative w-full h-32 sm:h-52 md:h-56 lg:h-64 overflow-hidden border-2 group/image order-first md:order-last"
+                      <div className="relative w-full h-28 sm:h-40 md:h-44 lg:h-48 overflow-hidden border-2 group/image order-first md:order-last"
                         style={{ borderColor: `${accent.primary}30` }}
                       >
                         <Image
                           src={project.image}
                           alt={project.title}
                           fill
-                          className="object-cover transition-transform duration-300 group-hover/image:scale-105 md:group-hover/image:scale-110"
-                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, 300px"
+                          className="object-cover transition-transform duration-300 group-hover/image:scale-105"
+                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, 260px"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-300"></div>
                       </div>

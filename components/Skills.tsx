@@ -114,32 +114,18 @@ export default function Skills() {
     <section
       id="skills"
       ref={ref}
-      className="min-h-screen flex flex-col justify-center items-center w-full py-16 sm:py-20 md:py-24 lg:py-32 relative"
+      className="min-h-screen flex flex-col justify-center items-center w-full py-12 sm:py-16 md:py-20 relative retro-pixel-bg-light overflow-hidden"
       style={{
-        color: '#e0e0e0',
-        backgroundColor: '#0a0a0a',
-        paddingTop: '50px',
-        paddingBottom: '50px',
+        color: '#1a1a1a',
+        background: 'linear-gradient(135deg, rgba(184, 134, 11, 0.1) 0%, rgba(245, 245, 240, 0.95) 40%, rgba(184, 134, 11, 0.08) 100%)',
+        paddingTop: '40px',
+        paddingBottom: '40px',
       }}
     >
-      {/* Background Effects */}
-      <div 
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(184, 134, 11, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(184, 134, 11, 0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px',
-        }}
-      ></div>
-      <div 
-        className="absolute inset-0 opacity-20"
-        style={{
-          background: 'linear-gradient(180deg, transparent 0%, rgba(184, 134, 11, 0.05) 50%, transparent 100%)',
-          animation: 'scanline 8s linear infinite',
-        }}
-      ></div>
+      {/* Pixelated decorative elements */}
+      <div className="absolute top-10 right-5 w-16 h-16 border-2 border-[#b8860b] border-opacity-20 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated' }}></div>
+      <div className="absolute bottom-20 left-10 w-12 h-12 border-2 border-[#b8860b] border-opacity-20 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated' }}></div>
+      <div className="absolute top-1/2 left-5 w-8 h-8 border-2 border-[#b8860b] border-opacity-15 pointer-events-none hidden lg:block" style={{ imageRendering: 'pixelated' }}></div>
       
       <motion.div
         initial={{ opacity: 0, y: 50 }}
@@ -148,57 +134,57 @@ export default function Skills() {
         className="max-w-7xl mx-auto w-full relative z-10 md:pl-[calc(5%+5px)]"
         style={{ paddingLeft: '5%', paddingRight: '5%' }}
       >
-        {/* Skills & Expertise Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-center text-center sm:text-left mb-8 sm:mb-10 md:mb-12 gap-3 sm:gap-4">
-          {/* Mobile: Gradient line above title */}
-          <div className="md:hidden w-full mb-2">
-            <div 
-              className="h-px"
-              style={{
-                background: 'linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.6), transparent)',
-              }}
-            ></div>
-          </div>
-          <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-0 mx-auto sm:mx-0">
-            <span 
-              className="text-base sm:text-lg font-mono mr-4"
-              style={{ color: '#b8860b' }}
-            >
-              02.
-            </span>
-            <h2 
-              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold" 
-              style={{ 
-                color: '#e0e0e0', 
-                textShadow: '0 0 10px rgba(184, 134, 11, 0.4)' 
-              }}
-            >
-              Skills & Expertise
-            </h2>
-          </div>
-          <div className="hidden md:block flex-1 ml-6">
-            <div 
-              className="h-px"
-              style={{
-                background: 'linear-gradient(90deg, rgba(184, 134, 11, 0.6), transparent)',
-              }}
-            ></div>
-          </div>
-        </div>
+            {/* Skills & Expertise Section Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-center text-center sm:text-left mb-4 sm:mb-6 md:mb-8 gap-2 sm:gap-3">
+              {/* Mobile: Gradient line above title */}
+              <div className="md:hidden w-full mb-1">
+                <div 
+                  className="h-px"
+                  style={{
+                    background: 'linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.6), transparent)',
+                  }}
+                ></div>
+              </div>
+              <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-0 mx-auto sm:mx-0">
+                <span 
+                  className="text-sm sm:text-base font-mono mr-3"
+                  style={{ color: '#b8860b' }}
+                >
+                  02.
+                </span>
+                <h2 
+                  className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold" 
+                  style={{ 
+                    color: '#1a1a1a', 
+                    textShadow: '0 0 10px rgba(184, 134, 11, 0.3)' 
+                  }}
+                >
+                  Skills & Expertise
+                </h2>
+              </div>
+              <div className="hidden md:block flex-1 ml-4">
+                <div 
+                  className="h-px"
+                  style={{
+                    background: 'linear-gradient(90deg, rgba(184, 134, 11, 0.6), transparent)',
+                  }}
+                ></div>
+              </div>
+            </div>
 
-        {/* Subtitle */}
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-xs sm:text-sm md:text-base max-w-2xl text-center mx-auto mb-8 sm:mb-10 md:mb-12" 
-          style={{ color: '#b0b0b0' }}
-        >
-          Technologies for building modern, scalable applications
-        </motion.p>
+            {/* Subtitle */}
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-xs sm:text-sm max-w-2xl text-center mx-auto mb-4 sm:mb-6 md:mb-8" 
+              style={{ color: '#4a4a4a' }}
+            >
+              Technologies for building modern, scalable applications
+            </motion.p>
 
-        {/* Technology Categories Grid - Enhanced Mobile-Friendly Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10">
+            {/* Technology Categories Grid - Enhanced Mobile-Friendly Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
           {technologyCategories.map((category, categoryIndex) => {
             const color = category.color;
             
@@ -208,28 +194,29 @@ export default function Skills() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.2 + categoryIndex * 0.1 }}
-                className="group relative p-6 sm:p-8 backdrop-blur-sm transition-all duration-300"
+                className="group relative p-4 sm:p-5 md:p-6 backdrop-blur-sm transition-all duration-300"
                 style={{
-                  border: `2px solid ${color.primary}60`,
-                  backgroundColor: `rgba(30, 30, 30, 0.7)`,
-                  boxShadow: `0 0 20px ${color.primary}30, 0 6px 16px rgba(0, 0, 0, 0.4)`,
+                  border: `2px solid ${color.primary}40`,
+                  backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                  boxShadow: `0 0 20px ${color.primary}20, 0 6px 16px rgba(0, 0, 0, 0.1), inset 0 0 20px ${color.primary}08`,
+                  imageRendering: 'pixelated',
                 }}
                 whileHover={{ 
-                  y: -6,
+                  y: -4,
                   boxShadow: `0 0 30px ${color.primary}50, 0 10px 25px rgba(0, 0, 0, 0.5)`,
                 }}
               >
                 {/* Category Header */}
                 <h3 
-                  className="text-base sm:text-lg md:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3"
+                  className="text-sm sm:text-base md:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2"
                   style={{ color: color.primary }}
                 >
-                  <FiChevronRight className="text-lg sm:text-xl md:text-2xl flex-shrink-0" />
+                  <FiChevronRight className="text-base sm:text-lg flex-shrink-0" />
                   <span>{category.name}</span>
                 </h3>
 
                 {/* Technology Grid - Extra Large Icons with Names Below */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 sm:gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                   {category.technologies.map((tech, techIndex) => {
                     const Icon = tech.icon;
                     return (
@@ -241,21 +228,23 @@ export default function Skills() {
                           duration: 0.3, 
                           delay: 0.2 + categoryIndex * 0.1 + techIndex * 0.05 
                         }}
-                        className="flex flex-col items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 transition-all duration-300 cursor-pointer group/item"
-                        style={{}}
+                        className="flex flex-col items-center justify-center gap-1.5 sm:gap-2 p-2 sm:p-3 transition-all duration-300 cursor-pointer group/item"
+                        style={{
+                          imageRendering: 'pixelated',
+                        }}
                         whileHover={{ 
-                          scale: 1.1, 
-                          y: -6,
+                          scale: 1.08, 
+                          y: -4,
                         }}
                         whileTap={{ scale: 0.95 }}
                       >
                         <Icon 
-                          className="text-lg sm:text-xl md:text-2xl flex-shrink-0 group-hover/item:scale-110 transition-transform duration-300" 
+                          className="text-base sm:text-lg md:text-xl flex-shrink-0 group-hover/item:scale-110 transition-transform duration-300" 
                           style={{ color: tech.color }}
                         />
                         <span 
-                          className="text-xs sm:text-sm font-medium text-center group-hover/item:text-white transition-colors duration-300 mt-1"
-                          style={{ color: '#b0b0b0' }}
+                          className="text-[10px] sm:text-xs font-medium text-center group-hover/item:text-[#1a1a1a] transition-colors duration-300 mt-0.5"
+                          style={{ color: '#4a4a4a' }}
                         >
                           {tech.name}
                         </span>

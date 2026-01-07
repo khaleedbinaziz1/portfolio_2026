@@ -23,6 +23,12 @@ export const metadata: Metadata = {
     description: "Full-Stack Developer specializing in React, Next.js, and Node.js",
     type: "website",
   },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    viewportFit: "cover",
+  },
 };
 
 export default function RootLayout({

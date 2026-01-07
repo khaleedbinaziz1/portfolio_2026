@@ -17,15 +17,18 @@ export default function Experience() {
     <section
       id="experience"
       ref={ref}
-      className="min-h-screen flex flex-col justify-center items-center w-full py-20 md:py-32 retro-pixel-bg-light relative overflow-hidden"
+      className="min-h-screen flex flex-col justify-center items-center w-full py-12 sm:py-16 md:py-20 retro-pixel-bg-light relative overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, rgba(0, 100, 0, 0.12) 0%, rgba(228, 228, 223, 0.92) 40%, rgba(0, 100, 0, 0.1) 100%)',
+        background: 'linear-gradient(135deg, rgba(184, 134, 11, 0.1) 0%, rgba(245, 245, 240, 0.95) 40%, rgba(184, 134, 11, 0.08) 100%)',
+        color: '#1a1a1a',
+        paddingTop: '40px',
+        paddingBottom: '40px',
       }}
     >
       {/* Pixelated decorative elements */}
-      <div className="absolute top-10 right-5 w-16 h-16 border-2 border-[#006400] border-opacity-20 pointer-events-none hidden md:block"></div>
-      <div className="absolute bottom-20 left-10 w-12 h-12 border-2 border-[#006400] border-opacity-20 pointer-events-none hidden md:block"></div>
-      <div className="absolute top-1/2 left-5 w-8 h-8 border-2 border-[#006400] border-opacity-15 pointer-events-none hidden lg:block"></div>
+      <div className="absolute top-10 right-5 w-16 h-16 border-2 border-[#006400] border-opacity-20 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated' }}></div>
+      <div className="absolute bottom-20 left-10 w-12 h-12 border-2 border-[#006400] border-opacity-20 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated' }}></div>
+      <div className="absolute top-1/2 left-5 w-8 h-8 border-2 border-[#006400] border-opacity-15 pointer-events-none hidden lg:block" style={{ imageRendering: 'pixelated' }}></div>
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -33,21 +36,21 @@ export default function Experience() {
         className="max-w-7xl mx-auto w-full md:pl-[calc(5%+5px)]"
         style={{ paddingLeft: '5%', paddingRight: '5%' }}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-center text-center sm:text-left mb-8 md:mb-12 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-center text-center sm:text-left mb-4 sm:mb-6 md:mb-8 gap-2 sm:gap-3">
           {/* Mobile: Gradient line above title */}
-          <div className="md:hidden w-full mb-2">
+          <div className="md:hidden w-full mb-1">
             <div className="retro-line-gradient"></div>
           </div>
           <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-0 mx-auto sm:mx-0">
-            <span className="section-number section-number-green sm:mr-4">03.</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1a1a1a] text-glow">Where I&apos;ve Worked</h2>
+            <span className="section-number section-number-green text-sm sm:text-base sm:mr-3">03.</span>
+            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#1a1a1a] text-glow">Where I&apos;ve Worked</h2>
           </div>
-          <div className="hidden md:block flex-1 ml-6">
+          <div className="hidden md:block flex-1 ml-4">
             <div className="retro-line-gradient"></div>
           </div>
         </div>
 
-        <div className="space-y-6 md:space-y-8">
+        <div className="space-y-4 sm:space-y-5 md:space-y-6">
           {experiences.map((exp, index) => (
               <motion.div
                 key={exp.id}
@@ -84,12 +87,12 @@ export default function Experience() {
                     </div>
                   </div>
                   
-                  <div className="terminal-body">
-                    <div className="flex flex-col sm:flex-row sm:items-start gap-6 mb-4">
+                  <div className="terminal-body p-4 sm:p-5">
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-5 mb-3">
                       {/* Logo */}
                       <div className="flex-shrink-0 relative">
                         {exp.logo ? (
-                          <div className="relative w-20 h-20 border-2 overflow-hidden"
+                          <div className="relative w-16 h-16 border-2 overflow-hidden"
                             style={{ 
                               borderColor: 'rgba(0, 100, 0, 0.4)',
                               imageRendering: 'pixelated',
@@ -106,12 +109,12 @@ export default function Experience() {
                               alt={exp.company}
                               fill
                               className="object-contain p-2"
-                              sizes="80px"
+                              sizes="64px"
                               style={{ imageRendering: 'pixelated' }}
                             />
                           </div>
                         ) : (
-                          <div className="w-20 h-20 border-2 flex items-center justify-center"
+                          <div className="w-16 h-16 border-2 flex items-center justify-center"
                             style={{ 
                               borderColor: 'rgba(0, 100, 0, 0.4)', 
                               backgroundColor: 'rgba(0, 100, 0, 0.1)',
@@ -119,7 +122,7 @@ export default function Experience() {
                               boxShadow: '0 0 0 2px rgba(0, 100, 0, 0.1)',
                             }}
                           >
-                            <FiBriefcase className="text-[#006400]" size={28} />
+                            <FiBriefcase className="text-[#006400]" size={22} />
                           </div>
                         )}
                       </div>
@@ -129,19 +132,19 @@ export default function Experience() {
                         {/* Accent line */}
                         <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#006400] bg-opacity-20 hidden md:block"></div>
                         
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-[#006400] font-mono text-base font-bold">$</span>
-                          <h3 className="text-xl md:text-2xl font-bold text-[#1a1a1a] font-mono">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-[#006400] font-mono text-sm font-bold">$</span>
+                          <h3 className="text-base sm:text-lg md:text-xl font-bold text-[#1a1a1a] font-mono">
                             {exp.position}
                           </h3>
                         </div>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-[#006400] font-semibold font-mono mb-4">
-                          <span className="flex items-center gap-1.5 px-2 py-1 border border-[#006400] border-opacity-20 bg-[#006400] bg-opacity-5">
-                            <FiCode size={14} />
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-[#006400] font-semibold font-mono mb-3">
+                          <span className="flex items-center gap-1 px-1.5 py-0.5 sm:px-2 sm:py-1 border border-[#006400] border-opacity-20 bg-[#006400] bg-opacity-5">
+                            <FiCode size={12} />
                             {exp.company}
                           </span>
-                          <span className="flex items-center gap-1.5 px-2 py-1 border border-[#006400] border-opacity-20 bg-[#006400] bg-opacity-5">
-                            <FiCalendar size={14} />
+                          <span className="flex items-center gap-1 px-1.5 py-0.5 sm:px-2 sm:py-1 border border-[#006400] border-opacity-20 bg-[#006400] bg-opacity-5">
+                            <FiCalendar size={12} />
                             {exp.duration}
                           </span>
                         </div>
@@ -153,7 +156,7 @@ export default function Experience() {
                         transition={{ duration: 0.3 }}
                         className="flex-shrink-0"
                       >
-                        <FiChevronRight className="text-[#006400] text-2xl" />
+                        <FiChevronRight className="text-[#006400] text-xl sm:text-2xl" />
                       </motion.div>
                     </div>
 
@@ -167,16 +170,16 @@ export default function Experience() {
                       transition={{ duration: 0.3 }}
                       className="overflow-hidden"
                     >
-                      <div className="pt-4 border-t border-[#006400] border-opacity-30 relative">
+                      <div className="pt-3 border-t border-[#006400] border-opacity-30 relative">
                         {/* Pixelated accent line */}
-                        <div className="absolute left-0 top-0 w-12 h-0.5 bg-[#006400] opacity-40"></div>
+                        <div className="absolute left-0 top-0 w-10 h-0.5 bg-[#006400] opacity-40"></div>
                         
-                        <div className="terminal-prompt mb-3 relative pl-4">
-                          <span className="text-[#006400] font-bold font-mono text-base">$</span>
-                          <span className="text-[#4a4a4a] ml-2 font-mono">cat achievements.txt</span>
+                        <div className="terminal-prompt mb-2 relative pl-3">
+                          <span className="text-[#006400] font-bold font-mono text-sm">$</span>
+                            <span className="text-[#4a4a4a] ml-2 font-mono text-xs sm:text-sm">cat achievements.txt</span>
                           <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#006400] bg-opacity-20"></div>
                         </div>
-                        <ul className="space-y-2.5 ml-6 relative">
+                        <ul className="space-y-2 ml-4 sm:ml-5 relative">
                           {exp.description.map((desc, i) => (
                             <motion.li
                               key={i}
@@ -186,28 +189,28 @@ export default function Experience() {
                                 x: hoveredIndex === index ? 0 : -10
                               }}
                               transition={{ delay: i * 0.1 }}
-                              className="flex items-start gap-2 text-sm text-[#4a4a4a] leading-relaxed font-mono relative pl-2"
+                              className="flex items-start gap-1.5 text-xs sm:text-sm text-[#4a4a4a] leading-relaxed font-mono relative pl-1.5"
                             >
-                              <span className="text-[#006400] mt-1 flex-shrink-0 font-bold">▸</span>
+                              <span className="text-[#006400] mt-0.5 flex-shrink-0 font-bold text-xs">▸</span>
                               <span>{desc}</span>
                             </motion.li>
                           ))}
                         </ul>
                         
                         {/* Tech Stack */}
-                        <div className="mt-5 pt-4 border-t border-[#006400] border-opacity-30 relative">
-                          <div className="absolute left-0 top-0 w-12 h-0.5 bg-[#006400] opacity-40"></div>
+                        <div className="mt-4 pt-3 border-t border-[#006400] border-opacity-30 relative">
+                          <div className="absolute left-0 top-0 w-10 h-0.5 bg-[#006400] opacity-40"></div>
                           
-                          <div className="terminal-prompt mb-3 relative pl-4">
-                            <span className="text-[#006400] font-bold font-mono text-base">$</span>
-                            <span className="text-[#4a4a4a] ml-2 font-mono">tech_stack</span>
+                          <div className="terminal-prompt mb-2 relative pl-3">
+                            <span className="text-[#006400] font-bold font-mono text-sm">$</span>
+                            <span className="text-[#4a4a4a] ml-2 font-mono text-xs sm:text-sm">tech_stack</span>
                             <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#006400] bg-opacity-20"></div>
                           </div>
-                          <div className="flex flex-wrap gap-2 ml-6">
+                          <div className="flex flex-wrap gap-1.5 sm:gap-2 ml-4 sm:ml-5">
                             {exp.technologies.map((tech) => (
                               <span
                                 key={tech}
-                                className="text-xs font-medium px-3 py-1.5 font-mono transition-all duration-300 hover:scale-105 cursor-default"
+                                className="text-[10px] sm:text-xs font-medium px-2 sm:px-2.5 py-1 font-mono transition-all duration-300 hover:scale-105 cursor-default"
                                 style={{
                                   color: '#006400',
                                   border: '1px solid rgba(0, 100, 0, 0.4)',

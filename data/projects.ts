@@ -49,5 +49,17 @@ export const projects: Project[] = [
     image: '/images/website_builder.png',
     caseStudy: '/case-studies/pixentix-auto-pilot',
   },
+  {
+    id: 5,
+    title: 'Open Stack JS - Visual Learning Platform',
+    description: 'Open-source visual learning platform for mastering fullstack web development',
+    longDescription: 'Comprehensive visual learning platform with interactive guides, flow diagrams, and Stack Builder tool. Covers 40+ technologies across frontend, backend, databases, authentication, testing, and DevOps with production-ready examples.',
+    tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'],
+    live: 'https://opentackjs.vercel.app/',
+    github: 'https://github.com/khaleedbinaziz1/openstackjs.git',
+    featured: true,
+    image: '/images/openstack.png',
+    caseStudy: '/case-studies/open-stack-js',
+  },
 ];
 
