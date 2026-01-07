@@ -100,28 +100,28 @@ const KumiraCaseStudy = () => {
               </Link>
             </motion.div>
           </div>
-        </div>
+            </div>
       </section>
 
       {/* Hero Image */}
       <section className="pb-20 md:pb-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
+            <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
+              animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
             className="rounded-2xl overflow-hidden shadow-2xl"
-          >
+            >
             <div className="relative w-full aspect-video">
-              <Image 
-                src={kumira} 
-                alt="Kumira Boat Ticketing Platform" 
+                <Image 
+                  src={kumira} 
+                  alt="Kumira Boat Ticketing Platform" 
                 fill
                 className="object-cover"
-                priority
+                  priority 
                 sizes="100vw"
-              />
-            </div>
+                />
+              </div>
           </motion.div>
         </div>
       </section>
@@ -132,11 +132,11 @@ const KumiraCaseStudy = () => {
         {/* Project Overview */}
         <section className="mb-20 md:mb-28">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-          >
+          transition={{ duration: 0.6 }}
+        >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Project Overview</h2>
             <div className="h-1 w-16 mb-8 rounded-full" style={{ backgroundColor: primaryColor }}></div>
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-12">
@@ -160,19 +160,19 @@ const KumiraCaseStudy = () => {
                     transition={{ duration: 0.5, delay: idx * 0.1 }}
                     className="p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-300 hover:shadow-lg bg-white"
                   >
-                    <div className="flex items-start gap-4">
+                <div className="flex items-start gap-4">
                       <div className="p-3 rounded-lg flex-shrink-0" style={{ backgroundColor: `${primaryColor}10` }}>
                         <Icon style={{ color: primaryColor, fontSize: '1.5rem' }} />
-                      </div>
-                      <div>
+                  </div>
+                  <div>
                         <h3 className="font-semibold text-lg mb-2 text-gray-900">{item.title}</h3>
                         <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
-                      </div>
-                    </div>
+                  </div>
+                </div>
                   </motion.div>
                 );
               })}
-            </div>
+                  </div>
           </motion.div>
         </section>
 
@@ -207,15 +207,15 @@ const KumiraCaseStudy = () => {
         {/* Management System */}
         <section className="mb-20 md:mb-28">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Management System</h2>
             <div className="h-1 w-16 mb-12 rounded-full" style={{ backgroundColor: primaryColor }}></div>
-
-            {/* Counter Dashboard */}
+          
+          {/* Counter Dashboard */}
             <div className="mb-16 md:mb-20">
               <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
                 <div>
@@ -239,38 +239,38 @@ const KumiraCaseStudy = () => {
                         <span className="text-sm font-bold mt-1 flex-shrink-0 rounded-full w-7 h-7 flex items-center justify-center text-xs text-white" 
                           style={{ backgroundColor: primaryColor }}>{idx + 1}</span>
                         <span className="text-gray-700 leading-relaxed pt-1">{item}</span>
-                      </li>
+                  </li>
                     ))}
-                  </ul>
-                </div>
+                </ul>
+              </div>
                 <div className="rounded-xl overflow-hidden shadow-xl border border-gray-200">
                   <div className="relative w-full aspect-[4/3]">
-                    <Image 
-                      src={kumira_dashboard} 
-                      alt="Kumira Counter Dashboard" 
+                <Image 
+                  src={kumira_dashboard} 
+                  alt="Kumira Counter Dashboard" 
                       fill
                       className="object-contain"
                       sizes="(max-width: 1024px) 100vw, 50vw"
-                    />
-                  </div>
-                </div>
+                />
               </div>
+                </div>
             </div>
+          </div>
 
             {/* Admin Panel */}
             <div>
               <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
                 <div className="order-2 lg:order-1 rounded-xl overflow-hidden shadow-xl border border-gray-200">
                   <div className="relative w-full aspect-[4/3]">
-                    <Image 
-                      src={kumira_admin} 
-                      alt="Kumira Admin Dashboard" 
+                <Image 
+                  src={kumira_admin} 
+                  alt="Kumira Admin Dashboard" 
                       fill
                       className="object-contain"
                       sizes="(max-width: 1024px) 100vw, 50vw"
-                    />
-                  </div>
-                </div>
+                />
+              </div>
+            </div>
                 <div className="order-1 lg:order-2">
                   <div className="flex items-center gap-4 mb-6">
                     <div className="p-3 rounded-lg" style={{ backgroundColor: `${primaryColor}10` }}>
@@ -281,7 +281,7 @@ const KumiraCaseStudy = () => {
                   <p className="text-gray-700 mb-6 leading-relaxed text-lg">
                     The comprehensive Admin Panel empowers business owners with powerful tools to track performance, analyze trends, and optimize operations.
                   </p>
-                  <div>
+            <div>
                     <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-gray-900">Business Intelligence Features:</h4>
                     <ul className="space-y-4">
                       {[
@@ -340,17 +340,17 @@ const KumiraCaseStudy = () => {
                   </motion.div>
                 );
               })}
-            </div>
+          </div>
           </motion.div>
         </section>
 
         {/* Technology Stack */}
         <section className="mb-20 md:mb-28">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Technology Stack</h2>
             <div className="h-1 w-16 mb-12 rounded-full" style={{ backgroundColor: primaryColor }}></div>

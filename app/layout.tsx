@@ -14,9 +14,9 @@ export const metadata: Metadata = {
   keywords: ["Full-Stack Developer", "React", "Next.js", "Node.js", "Web Developer", "Portfolio"],
   authors: [{ name: "Khaled Bin Aziz" }],
   icons: {
-    icon: "/icon.svg",
-    shortcut: "/icon.svg",
-    apple: "/icon.svg",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
   },
   openGraph: {
     title: "Khaled Bin Aziz | Full-Stack Developer",

@@ -111,7 +111,7 @@ export default function Projects() {
                         </div>
                         
                         {/* Case Study Link */}
-                        {project.caseStudy && (
+                          {project.caseStudy && (
                           <div className="flex-shrink-0 justify-center sm:justify-start">
                             <Link
                               href={project.caseStudy}
@@ -126,7 +126,7 @@ export default function Projects() {
                               <FiFileText className="text-base sm:text-lg" />
                               <span>Case Study</span>
                             </Link>
-                          </div>
+                        </div>
                         )}
                       </div>
 
