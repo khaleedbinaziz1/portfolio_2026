@@ -68,8 +68,8 @@ const TakaSphereCaseStudy = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-5xl sm:text-6xl md:text-7xl font-bold mb-6 leading-tight text-gray-900"
-            >
-              TakaSphere
+              >
+                TakaSphere
             </motion.h1>
             
             <motion.p
@@ -78,7 +78,7 @@ const TakaSphereCaseStudy = () => {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-xl md:text-2xl text-gray-600 mb-10 leading-relaxed"
             >
-              Financial literacy platform with gamified learning, interactive dashboards, progress tracking, and secure authentication. Making financial education engaging and accessible.
+                Financial literacy platform with gamified learning, interactive dashboards, progress tracking, and secure authentication. Making financial education engaging and accessible.
             </motion.p>
             
             <motion.div
@@ -97,28 +97,28 @@ const TakaSphereCaseStudy = () => {
               </Link>
             </motion.div>
           </div>
-        </div>
+            </div>
       </section>
 
       {/* Hero Image */}
       <section className="pb-20 md:pb-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
+            <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
+              animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
             className="rounded-2xl overflow-hidden shadow-2xl"
-          >
+            >
             <div className="relative w-full aspect-video">
-              <Image 
-                src={takasphere} 
+                <Image 
+                  src={takasphere} 
                 alt="TakaSphere Financial Literacy Platform" 
                 fill
                 className="object-cover"
-                priority
+                  priority 
                 sizes="100vw"
-              />
-            </div>
+                />
+              </div>
           </motion.div>
         </div>
       </section>
@@ -129,16 +129,16 @@ const TakaSphereCaseStudy = () => {
         {/* Project Overview */}
         <section className="mb-20 md:mb-28">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-          >
+          transition={{ duration: 0.6 }}
+        >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Project Overview</h2>
             <div className="h-1 w-16 mb-8 rounded-full" style={{ backgroundColor: primaryColor }}></div>
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-12">
               TakaSphere is a gamified financial literacy platform that makes learning about finance engaging and interactive. Built with modern web technologies for seamless user experience and comprehensive progress tracking. The platform transforms traditional financial education into an enjoyable journey with rewards, achievements, and personalized learning paths.
-            </p>
+              </p>
 
             <div className="grid sm:grid-cols-2 gap-6">
               {[
@@ -157,19 +157,19 @@ const TakaSphereCaseStudy = () => {
                     transition={{ duration: 0.5, delay: idx * 0.1 }}
                     className="p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-300 hover:shadow-lg bg-white"
                   >
-                    <div className="flex items-start gap-4">
+                <div className="flex items-start gap-4">
                       <div className="p-3 rounded-lg flex-shrink-0" style={{ backgroundColor: `${primaryColor}10` }}>
                         <Icon style={{ color: primaryColor, fontSize: '1.5rem' }} />
-                      </div>
-                      <div>
+                  </div>
+                  <div>
                         <h3 className="font-semibold text-lg mb-2 text-gray-900">{item.title}</h3>
                         <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
-                      </div>
-                    </div>
+                  </div>
+                </div>
                   </motion.div>
                 );
               })}
-            </div>
+                  </div>
           </motion.div>
         </section>
 
@@ -204,10 +204,10 @@ const TakaSphereCaseStudy = () => {
         {/* Key Features */}
         <section className="mb-20 md:mb-28">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Key Features</h2>
             <div className="h-1 w-16 mb-12 rounded-full" style={{ backgroundColor: primaryColor }}></div>
@@ -230,8 +230,8 @@ const TakaSphereCaseStudy = () => {
                     <div className="mb-6 flex justify-center">
                       <div className="p-4 rounded-2xl" style={{ backgroundColor: `${primaryColor}10` }}>
                         <Icon style={{ color: primaryColor, fontSize: '2rem' }} />
-                      </div>
-                    </div>
+          </div>
+            </div>
                     <h3 className="font-semibold text-xl mb-3 text-gray-900">{item.title}</h3>
                     <p className="text-gray-600 leading-relaxed text-sm">{item.desc}</p>
                   </motion.div>
@@ -244,10 +244,10 @@ const TakaSphereCaseStudy = () => {
         {/* Technology Stack */}
         <section className="mb-20 md:mb-28">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Technology Stack</h2>
             <div className="h-1 w-16 mb-12 rounded-full" style={{ backgroundColor: primaryColor }}></div>

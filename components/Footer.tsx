@@ -11,9 +11,6 @@ export default function Footer() {
       background: 'linear-gradient(135deg, #0a0a0a 0%, #151515 40%, #0f0f0f 60%, #0a0a0a 100%)',
       color: '#b0b0b0',
     }}>
-      {/* Pixelated decorative elements */}
-      <div className="absolute top-5 left-10 w-12 h-12 border-2 border-[#b8860b] border-opacity-20 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated' }}></div>
-      <div className="absolute top-5 right-10 w-12 h-12 border-2 border-[#b8860b] border-opacity-20 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated' }}></div>
       <motion.p
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}

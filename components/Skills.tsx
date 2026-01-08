@@ -134,56 +134,56 @@ export default function Skills() {
         className="max-w-7xl mx-auto w-full relative z-10 md:pl-[calc(5%+5px)]"
         style={{ paddingLeft: '5%', paddingRight: '5%' }}
       >
-            {/* Skills & Expertise Section Header */}
+        {/* Skills & Expertise Section Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-center text-center sm:text-left mb-4 sm:mb-6 md:mb-8 gap-2 sm:gap-3">
-              {/* Mobile: Gradient line above title */}
+          {/* Mobile: Gradient line above title */}
               <div className="md:hidden w-full mb-1">
-                <div 
-                  className="h-px"
-                  style={{
-                    background: 'linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.6), transparent)',
-                  }}
-                ></div>
-              </div>
-              <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-0 mx-auto sm:mx-0">
-                <span 
+            <div 
+              className="h-px"
+              style={{
+                background: 'linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.6), transparent)',
+              }}
+            ></div>
+          </div>
+          <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-0 mx-auto sm:mx-0">
+            <span 
                   className="text-sm sm:text-base font-mono mr-3"
-                  style={{ color: '#b8860b' }}
-                >
-                  02.
-                </span>
-                <h2 
+              style={{ color: '#b8860b' }}
+            >
+              02.
+            </span>
+            <h2 
                   className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold" 
-                  style={{ 
+              style={{ 
                     color: '#1a1a1a', 
                     textShadow: '0 0 10px rgba(184, 134, 11, 0.3)' 
-                  }}
-                >
-                  Skills & Expertise
-                </h2>
-              </div>
+              }}
+            >
+              Skills & Expertise
+            </h2>
+          </div>
               <div className="hidden md:block flex-1 ml-4">
-                <div 
-                  className="h-px"
-                  style={{
-                    background: 'linear-gradient(90deg, rgba(184, 134, 11, 0.6), transparent)',
-                  }}
-                ></div>
-              </div>
-            </div>
+            <div 
+              className="h-px"
+              style={{
+                background: 'linear-gradient(90deg, rgba(184, 134, 11, 0.6), transparent)',
+              }}
+            ></div>
+          </div>
+        </div>
 
-            {/* Subtitle */}
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.1 }}
+        {/* Subtitle */}
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.1 }}
               className="text-xs sm:text-sm max-w-2xl text-center mx-auto mb-4 sm:mb-6 md:mb-8" 
               style={{ color: '#4a4a4a' }}
-            >
-              Technologies for building modern, scalable applications
-            </motion.p>
+        >
+          Technologies for building modern, scalable applications
+        </motion.p>
 
-            {/* Technology Categories Grid - Enhanced Mobile-Friendly Layout */}
+        {/* Technology Categories Grid - Enhanced Mobile-Friendly Layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
           {technologyCategories.map((category, categoryIndex) => {
             const color = category.color;

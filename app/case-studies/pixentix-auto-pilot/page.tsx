@@ -48,7 +48,7 @@ const PixentixAutoPilotCaseStudy = () => {
             <Link 
               href="/#projects"
               className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
-            >
+          >
               <FaArrowLeft className="text-xs" />
               <span>Back to Projects</span>
             </Link>
@@ -137,7 +137,7 @@ const PixentixAutoPilotCaseStudy = () => {
           whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          >
+        >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Project Overview</h2>
             <div className="h-1 w-16 mb-8 rounded-full" style={{ backgroundColor: primaryColor }}></div>
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-12">
@@ -215,7 +215,7 @@ const PixentixAutoPilotCaseStudy = () => {
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Builder Interface</h2>
             <div className="h-1 w-16 mb-12 rounded-full" style={{ backgroundColor: primaryColor }}></div>
-
+          
             <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
               <div>
                 <div className="flex items-center gap-4 mb-6">
