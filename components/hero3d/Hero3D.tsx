@@ -510,9 +510,9 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       crtScene.add(crtPlane);
       const nameStr = personalInfo.name;
       const greetingStr = personalInfo.greeting;
-      const NAME_TYPING_SPEED = 14;
-      const GREETING_TYPING_SPEED = 14;
-      const GREETING_START_DELAY = 1;
+      const NAME_TYPING_SPEED = 20;
+      const GREETING_TYPING_SPEED = 20;
+      const GREETING_START_DELAY = 0.5;
 
       const computerColor = new THREE.Color(0xffffff);
       const floorMaterial = new THREE.MeshStandardMaterial({

@@ -19,7 +19,7 @@ export default function About() {
         initial={{ opacity: 0, y: 32 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px', amount: 0.1 }}
-        transition={{ duration: 0.6, ease: [...EASE] }}
+        transition={{ duration: 0.6, ease: EASE }}
         className="about-content relative z-10"
       >
         <div className="about-header">
@@ -36,7 +36,7 @@ export default function About() {
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-20px' }}
-          transition={{ duration: 0.5, delay: STAGGER, ease: [...EASE] }}
+          transition={{ duration: 0.5, delay: STAGGER, ease: EASE }}
           className="about-terminal-wrap"
         >
           <div className="about-terminal-window">
@@ -80,7 +80,7 @@ export default function About() {
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-10px' }}
-              transition={{ duration: 0.5, delay: i * STAGGER, ease: [...EASE] }}
+              transition={{ duration: 0.5, delay: i * STAGGER, ease: EASE }}
               className="about-story-p"
             >
               <span className="about-story-bullet">▸</span>

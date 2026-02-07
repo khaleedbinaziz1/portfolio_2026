@@ -88,7 +88,7 @@ export default function ExploreGate({
   }, [showButton, disabled, onExplore, scrollToLanding]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && showButton && !disabled) {
+    if ((e.key === 'Enter' || e.key === 'Escape') && showButton && !disabled) {
       e.preventDefault();
       handleLaunch();
     }
@@ -147,7 +147,7 @@ export default function ExploreGate({
                   &gt; launch interface
                 </span>
               </button>
-              <p className="hero3d-explore-hint">Press Enter to launch</p>
+              <p className="hero3d-explore-hint">Press Enter or Escape to launch</p>
             </div>
           )}
         </div>

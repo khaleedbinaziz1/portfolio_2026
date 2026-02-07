@@ -101,24 +101,50 @@ export function playClick(): void {
 
 /**
  * Play a short typing / key tap sound (synced with typing animations).
- * Soft sine "tick" — subtle and pleasant, not harsh.
+ * Soft mechanical tap: brief filtered noise + low soft thud — typewriter-like, not beepy.
  */
 export function playTyping(): void {
   if (typeof window === 'undefined') return;
   initFromStorage();
   if (soundMuted) return;
   ensureResumed().then((ctx) => {
+    const t0 = ctx.currentTime;
+
+    // Short filtered noise burst — key-cap tap
+    const duration = 0.012;
+    const sampleRate = ctx.sampleRate;
+    const length = Math.ceil(sampleRate * duration);
+    const buffer = ctx.createBuffer(1, length, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (length * 0.4));
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'lowpass';
+    noiseFilter.frequency.value = 1200;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.08, t0);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noise.start(t0);
+    noise.stop(t0 + duration);
+
+    // Soft low thud — body of the tap
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(680, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(520, ctx.currentTime + 0.018);
-    gain.gain.setValueAtTime(0.06, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.02);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.02);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(140, t0);
+    osc.frequency.exponentialRampToValueAtTime(90, t0 + 0.022);
+    gain.gain.setValueAtTime(0.04, t0);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.022);
+    osc.start(t0);
+    osc.stop(t0 + 0.022);
   }).catch(() => {});
 }
 

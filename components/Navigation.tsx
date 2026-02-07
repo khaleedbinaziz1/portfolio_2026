@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { FiUser, FiFolder, FiCode, FiBriefcase, FiMail, FiMenu, FiX } from 'react-icons/fi';
+import { FiUser, FiFolder, FiCode, FiMail, FiMenu, FiX } from 'react-icons/fi';
 import RetroSoundToggle from './RetroSoundToggle';
 
 const NAV_AMBER = '#ffaa44';
@@ -14,20 +14,22 @@ const NAV_BG = 'rgba(10, 10, 10, 0.85)';
 const navLinks = [
   { name: 'About', href: '#about', number: '01', icon: FiUser },
   { name: 'Skills', href: '#skills', number: '02', icon: FiCode },
-  { name: 'Experience', href: '#experience', number: '03', icon: FiBriefcase },
-  { name: 'Projects', href: '#projects', number: '04', icon: FiFolder },
-  { name: 'Contact', href: '#contact', number: '05', icon: FiMail },
+  { name: 'Projects', href: '#projects', number: '03', icon: FiFolder },
+  { name: 'Contact', href: '#contact', number: '04', icon: FiMail },
 ];
 
-export default function Navigation() {
+type NavigationProps = { contentVisible?: boolean };
+
+export default function Navigation({ contentVisible = true }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [scrolled, setScrolled] = useState(false);
 
-  // Starfield background effect
+  // Starfield background effect — only run when main content is visible
   useEffect(() => {
+    if (!contentVisible) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -40,7 +42,6 @@ export default function Navigation() {
     };
     resizeCanvas();
 
-    // Create fewer, subtler stars for nav
     const stars: { x: number; y: number; size: number; opacity: number; speed: number }[] = [];
     for (let i = 0; i < 30; i++) {
       stars.push({
@@ -55,24 +56,18 @@ export default function Navigation() {
     let animationId: number;
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw stars
       stars.forEach((star) => {
         ctx.fillStyle = `rgba(255, 204, 119, ${star.opacity})`;
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
         ctx.fill();
-
-        // Gentle drift
         star.y -= star.speed;
         star.opacity = 0.2 + Math.sin(Date.now() * 0.001 + star.x) * 0.2;
-
         if (star.y < 0) {
           star.y = canvas.height;
           star.x = Math.random() * canvas.width;
         }
       });
-
       animationId = requestAnimationFrame(animate);
     };
     animate();
@@ -82,7 +77,7 @@ export default function Navigation() {
       cancelAnimationFrame(animationId);
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, []);
+  }, [contentVisible]);
 
   useEffect(() => {
     const handleScroll = () => {

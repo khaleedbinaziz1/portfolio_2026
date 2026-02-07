@@ -5,7 +5,6 @@ import Navigation from '@/components/Navigation';
 import Hero3D from '@/components/hero3d/Hero3D';
 import About from '@/components/About';
 import Skills from '@/components/Skills';
-import Experience from '@/components/Experience';
 import Projects from '@/components/Projects';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
@@ -55,14 +54,13 @@ export default function Home() {
         <RetroEffects type="terminal" intensity="medium" />
         <TerminalSnippets />
         <div className="relative z-10">
-          <Navigation />
+          <Navigation contentVisible={exploreStarted} />
           <Hero3D
             experienceStarted={exploreStarted}
             onLoaded={() => setHeroLoaded(true)}
           />
           <About />
           <Skills />
-          {/* <Experience /> */}
           <Projects />
           <Contact />
           <Footer />

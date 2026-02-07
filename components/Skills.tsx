@@ -108,17 +108,14 @@ export default function Skills() {
   useEffect(() => {
     const interval = setInterval(() => {
       setTime(t => t + 0.05);
-    }, 50);
+    }, 200);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <section 
-      id="skills" 
+    <section
+      id="skills"
       className="skills-section relative min-h-screen py-20 md:py-28 overflow-hidden"
-      style={{
-        background: 'linear-gradient(180deg, #0a0807 0%, #0f0c0a 25%, #120d0a 50%, #0d0a08 75%, #0a0807 100%)',
-      }}
     >
       <div className="skills-bg" aria-hidden="true" />
       <div className="skills-glow" aria-hidden="true" />

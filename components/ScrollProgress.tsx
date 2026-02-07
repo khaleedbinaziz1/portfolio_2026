@@ -18,14 +18,22 @@ export default function ScrollProgress() {
   }, []);
 
   return (
-    <div className="scroll-progress" aria-hidden>
+    <div
+      className="scroll-progress"
+      role="status"
+      aria-live="polite"
+      aria-label={`Scroll progress: ${percent} percent`}
+    >
+      <div className="scroll-progress-accent" aria-hidden />
       <div className="scroll-progress-track">
         <div
-          className="scroll-progress-bar"
+          className="scroll-progress-fill"
           style={{ height: `${percent}%` }}
         />
       </div>
-      <span className="scroll-progress-text">{percent}%</span>
+      <span className="scroll-progress-label" aria-hidden="true">
+        {percent}%
+      </span>
     </div>
   );
 }

@@ -17,7 +17,7 @@ export default function Projects() {
         initial={{ opacity: 0, y: 28 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px', amount: 0.1 }}
-        transition={{ duration: 0.55, ease: [...EASE] }}
+        transition={{ duration: 0.55, ease: EASE }}
         className="proj-content"
       >
         <header className="proj-header">
@@ -33,7 +33,7 @@ export default function Projects() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-24px' }}
-              transition={{ duration: 0.45, delay: index * 0.06, ease: [...EASE] }}
+              transition={{ duration: 0.45, delay: index * 0.06, ease: EASE }}
               className="proj-card"
             >
               <div className="proj-inner">
