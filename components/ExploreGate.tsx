@@ -1,12 +1,32 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 const LINE_1 = '> run khaledbinaziz.dev';
 const LINE_2 = '> load khaled.core...100%';
 const LINE_3 = 'Ready.';
 const CHAR_DELAY_MS = 42;
 const LINE_DELAY_MS = 380;
+
+const LANDING_PROGRESS = 0.04; // 4% scroll as default landing after launch
+const LANDING_SCROLL_DURATION_MS = 900;
+const EASE_IN_OUT_CUBIC = (t: number) =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+function smoothScrollTo(top: number, durationMs: number) {
+  const startTop = window.scrollY;
+  const distance = top - startTop;
+  const startTime = performance.now();
+  let rafId: number;
+  const tick = (now: number) => {
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / durationMs, 1);
+    const eased = EASE_IN_OUT_CUBIC(t);
+    window.scrollTo(0, startTop + distance * eased);
+    if (t < 1) rafId = requestAnimationFrame(tick);
+  };
+  rafId = requestAnimationFrame(tick);
+}
 
 export default function ExploreGate({
   onExplore,
@@ -50,10 +70,27 @@ export default function ExploreGate({
     return () => clearTimeout(t);
   }, [showButton]);
 
+  const scrollToLanding = useCallback(() => {
+    const { scrollHeight, clientHeight } = document.documentElement;
+    const maxScroll = Math.max(0, scrollHeight - clientHeight);
+    const targetTop = maxScroll * LANDING_PROGRESS;
+    smoothScrollTo(targetTop, LANDING_SCROLL_DURATION_MS);
+  }, []);
+
+  const handleLaunch = useCallback(() => {
+    if (!showButton || disabled) return;
+    onExplore();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setTimeout(scrollToLanding, 80);
+      });
+    });
+  }, [showButton, disabled, onExplore, scrollToLanding]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && showButton && !disabled) {
       e.preventDefault();
-      onExplore();
+      handleLaunch();
     }
   };
 
@@ -102,7 +139,7 @@ export default function ExploreGate({
               <button
                 type="button"
                 className="hero3d-explore-btn"
-                onClick={onExplore}
+                onClick={handleLaunch}
                 disabled={disabled}
                 aria-label={disabled ? 'Loading' : 'Launch interface'}
               >

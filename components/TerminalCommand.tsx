@@ -36,7 +36,7 @@ export default function TerminalCommand({
   const currentCommand = commands[currentCommandIndex];
 
   useEffect(() => {
-    if (!autoStart || isComplete) return;
+    if (!autoStart || isComplete || !currentCommand) return;
 
     setIsTyping(true);
     setCurrentText('');
@@ -73,7 +73,7 @@ export default function TerminalCommand({
     return () => clearInterval(typingInterval);
   }, [currentCommandIndex, autoStart, loop, speed, currentCommand, commands.length, isComplete, onComplete]);
 
-  if (!currentCommand) return null;
+  if (!commands.length || !currentCommand) return null;
 
   return (
     <motion.div
@@ -84,12 +84,12 @@ export default function TerminalCommand({
       <div className="flex items-start gap-2">
         <span className="font-bold flex-shrink-0" style={{ color: 'var(--retro-green)' }}>{currentCommand.prompt}</span>
         <div className="flex-1">
-          <span className="text-[#4a4a4a]">{currentText}</span>
+          <span className="terminal-command-text">{currentText}</span>
           {isTyping && (
             <motion.span
               animate={{ opacity: [0, 1, 0] }}
               transition={{ duration: 0.8, repeat: Infinity }}
-              className="inline-block w-2 h-4 ml-1"
+              className="terminal-command-cursor inline-block w-2 h-4 ml-1"
               style={{ backgroundColor: 'var(--retro-green)' }}
             />
           )}
@@ -102,8 +102,7 @@ export default function TerminalCommand({
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="mt-1 ml-4 text-[10px]"
-            style={{ color: 'var(--retro-cyan)' }}
+            className="mt-1 ml-4 terminal-command-output"
           >
             {currentCommand.output}
           </motion.div>

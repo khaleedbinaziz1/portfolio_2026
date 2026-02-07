@@ -320,6 +320,9 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
   const lastOpacityRef = useRef(1);
   const timeRef = useRef(0);
   const typingStartTimeRef = useRef<number | null>(null);
+  const [gameMode, setGameMode] = useState<'desktop' | 'menu' | 'snake' | 'pong' | 'breakout' | 'dodge'>('desktop');
+  const setGameModeRef = useRef(setGameMode);
+  setGameModeRef.current = setGameMode;
 
   useEffect(() => {
     setMounted(true);
@@ -507,9 +510,9 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       crtScene.add(crtPlane);
       const nameStr = personalInfo.name;
       const greetingStr = personalInfo.greeting;
-      const NAME_TYPING_SPEED = 22;
-      const GREETING_TYPING_SPEED = 28;
-      const GREETING_START_DELAY = 0.2;
+      const NAME_TYPING_SPEED = 14;
+      const GREETING_TYPING_SPEED = 14;
+      const GREETING_START_DELAY = 1;
 
       const computerColor = new THREE.Color(0xffffff);
       const floorMaterial = new THREE.MeshStandardMaterial({
@@ -669,11 +672,16 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         valMap(window.innerHeight / window.innerWidth, [0.75, 1.75], [0, 2]);
 
       const PLAY_GAME_RECT = { x: 338, y: 334, w: 260, h: 28 };
+      const BACK_BUTTON_RECT = { x: 10, y: 8, w: 72, h: 22 };
       const GAME_COLS = 32;
       const GAME_ROWS = 24;
       const GAME_CELL = 20;
       type GameMode = 'desktop' | 'menu' | 'snake' | 'pong' | 'breakout' | 'dodge';
       let gameMode: GameMode = 'desktop';
+      const syncGameMode = (mode: GameMode) => {
+        gameMode = mode;
+        setGameModeRef.current(mode);
+      };
       let menuSelectedIndex = 0;
       let snake: { x: number; y: number }[] = [];
       let snakeDir: 'up' | 'down' | 'left' | 'right' | null = null;
@@ -709,11 +717,25 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         { id: 'dodge' as const, label: '4. Dodge', rect: { x: 220, y: 256, w: 200, h: 24 } },
       ];
 
+      function drawBackButton(ctx: CanvasRenderingContext2D, time: number) {
+        const r = BACK_BUTTON_RECT;
+        const pulse = 0.5 + 0.5 * Math.sin(time * 3);
+        ctx.fillStyle = `rgba(30, 18, 12, ${0.85 + 0.1 * pulse})`;
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+        ctx.strokeStyle = `rgba(255, 170, 68, ${0.6 + 0.3 * pulse})`;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(r.x, r.y, r.w, r.h);
+        ctx.font = 'bold 13px "Courier New", monospace';
+        ctx.fillStyle = '#ffaa44';
+        ctx.fillText('← Back', r.x + 8, r.y + 16);
+      }
+
       function drawMenuScreen(ctx: CanvasRenderingContext2D, selectedIndex: number, time: number) {
         const W = screenW;
         const H = screenH;
         ctx.fillStyle = 'rgb(45, 30, 22)';
         ctx.fillRect(0, 0, W, H);
+        drawBackButton(ctx, time);
         ctx.font = 'bold 18px "Courier New", monospace';
         ctx.fillStyle = '#ffaa44';
         ctx.fillText('Select game', 220, 158);
@@ -745,6 +767,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         const H = screenH;
         ctx.fillStyle = 'rgb(45, 30, 22)';
         ctx.fillRect(0, 0, W, H);
+        drawBackButton(ctx, time);
         ctx.font = '14px "Courier New", monospace';
         if (gameOver) {
           ctx.fillStyle = '#ffaa44';
@@ -789,6 +812,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         const H = screenH;
         ctx.fillStyle = 'rgb(45, 30, 22)';
         ctx.fillRect(0, 0, W, H);
+        drawBackButton(ctx, time);
         ctx.font = '14px "Courier New", monospace';
         if (pongGameOver) {
           ctx.fillStyle = '#ffaa44';
@@ -844,6 +868,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         const H = screenH;
         ctx.fillStyle = 'rgb(45, 30, 22)';
         ctx.fillRect(0, 0, W, H);
+        drawBackButton(ctx, time);
         ctx.font = '14px "Courier New", monospace';
         if (breakoutGameOver) {
           ctx.fillStyle = '#ffaa44';
@@ -887,6 +912,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         const H = screenH;
         ctx.fillStyle = 'rgb(45, 30, 22)';
         ctx.fillRect(0, 0, W, H);
+        drawBackButton(ctx, time);
         ctx.font = '14px "Courier New", monospace';
         if (dodgeGameOver) {
           ctx.fillStyle = '#ffaa44';
@@ -936,17 +962,24 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         if (!uv) return;
         const px = uv.x * screenW;
         const py = (1 - uv.y) * screenH;
+        const back = BACK_BUTTON_RECT;
+        const hitBack = px >= back.x && px <= back.x + back.w && py >= back.y && py <= back.y + back.h;
+        if (hitBack && (gameMode === 'menu' || gameMode === 'snake' || gameMode === 'pong' || gameMode === 'breakout' || gameMode === 'dodge')) {
+          if (gameMode === 'menu') syncGameMode('desktop');
+          else syncGameMode('menu');
+          return;
+        }
         if (gameMode === 'desktop') {
           const r = PLAY_GAME_RECT;
           if (px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h) {
-            gameMode = 'menu';
+            syncGameMode('menu');
             menuSelectedIndex = 0;
           }
         } else if (gameMode === 'menu') {
           for (const item of MENU_ITEMS) {
             const r = item.rect;
             if (px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h) {
-              gameMode = item.id;
+              syncGameMode(item.id);
               if (item.id === 'snake') initSnakeGame();
               else if (item.id === 'pong') initPongGame();
               else if (item.id === 'breakout') initBreakoutGame();
@@ -958,8 +991,8 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       };
       const onKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
-          if (gameMode === 'menu') gameMode = 'desktop';
-          else if (['snake', 'pong', 'breakout', 'dodge'].includes(gameMode)) gameMode = 'menu';
+          if (gameMode === 'menu') syncGameMode('desktop');
+          else if (['snake', 'pong', 'breakout', 'dodge'].includes(gameMode)) syncGameMode('menu');
           return;
         }
         if (gameMode === 'menu') {
@@ -971,22 +1004,22 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
             e.preventDefault();
           } else if (e.key === 'Enter') {
             const item = MENU_ITEMS[menuSelectedIndex];
-            gameMode = item.id;
+            syncGameMode(item.id);
             if (item.id === 'snake') initSnakeGame();
             else if (item.id === 'pong') initPongGame();
             else if (item.id === 'breakout') initBreakoutGame();
             else if (item.id === 'dodge') initDodgeGame();
             e.preventDefault();
           } else if (e.key === 'b' || e.key === 'B') {
-            gameMode = 'desktop';
+            syncGameMode('desktop');
             e.preventDefault();
           } else if (e.key === 'x' || e.key === 'X') {
-            gameMode = 'desktop';
+            syncGameMode('desktop');
             e.preventDefault();
-          } else if (e.key === '1') { gameMode = 'snake'; initSnakeGame(); e.preventDefault(); }
-          else if (e.key === '2') { gameMode = 'pong'; initPongGame(); e.preventDefault(); }
-          else if (e.key === '3') { gameMode = 'breakout'; initBreakoutGame(); e.preventDefault(); }
-          else if (e.key === '4') { gameMode = 'dodge'; initDodgeGame(); e.preventDefault(); }
+          } else if (e.key === '1') { syncGameMode('snake'); initSnakeGame(); e.preventDefault(); }
+          else if (e.key === '2') { syncGameMode('pong'); initPongGame(); e.preventDefault(); }
+          else if (e.key === '3') { syncGameMode('breakout'); initBreakoutGame(); e.preventDefault(); }
+          else if (e.key === '4') { syncGameMode('dodge'); initDodgeGame(); e.preventDefault(); }
           return;
         }
         if (gameMode === 'snake' && !gameOver) {
@@ -1023,7 +1056,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         time += 0.016;
         timeRef.current = time;
         const rawTypingTime = typingStartTimeRef.current === null ? 0 : time - typingStartTimeRef.current;
-        const TYPING_DELAY = 0.3;
+        const TYPING_DELAY = 1;
         const typingTime = Math.max(0, rawTypingTime - TYPING_DELAY);
         const scroll = scrollRef.current;
         const easedScroll = easeInOutCubic(Math.min(1, scroll));
@@ -1314,11 +1347,17 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
     }
   }, [experienceStarted]);
 
+  const onMobileKey = (key: string) => (e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+  };
+
   return (
     <section id="hero" className="hero3d-section">
       {mounted && (
         <div 
-          className={`hero3d-canvas-wrap ${loaded ? 'hero3d-canvas-loaded' : ''} ${experienceStarted ? 'hero3d-reveal' : ''}`}
+          className={`hero3d-canvas-wrap ${loaded ? 'hero3d-canvas-loaded' : ''}`}
           style={{ opacity: canvasOpacity }}
         >
           <div className="hero3d-canvas-chromatic" aria-hidden />
@@ -1347,7 +1386,30 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
           zIndex: 2,
         }}
       />
-      
+
+      {experienceStarted && (gameMode === 'snake' || gameMode === 'pong' || gameMode === 'breakout' || gameMode === 'dodge') && (
+        <div className="hero3d-mobile-controls" aria-label="Game controls">
+          <div className="hero3d-mobile-dpad">
+            <button type="button" className="hero3d-mobile-btn hero3d-mobile-up" onPointerDown={onMobileKey('ArrowUp')} aria-label="Up">
+              <svg className="hero3d-mobile-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+            </button>
+            <button type="button" className="hero3d-mobile-btn hero3d-mobile-left" onPointerDown={onMobileKey('ArrowLeft')} aria-label="Left">
+              <svg className="hero3d-mobile-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+            </button>
+            <button type="button" className="hero3d-mobile-btn hero3d-mobile-center" aria-hidden />
+            <button type="button" className="hero3d-mobile-btn hero3d-mobile-right" onPointerDown={onMobileKey('ArrowRight')} aria-label="Right">
+              <svg className="hero3d-mobile-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+            </button>
+            <button type="button" className="hero3d-mobile-btn hero3d-mobile-down" onPointerDown={onMobileKey('ArrowDown')} aria-label="Down">
+              <svg className="hero3d-mobile-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
+            </button>
+          </div>
+          <div className="hero3d-mobile-actions">
+            <button type="button" className="hero3d-mobile-btn hero3d-mobile-ok" onPointerDown={onMobileKey('Enter')} aria-label="Select">OK</button>
+            <button type="button" className="hero3d-mobile-btn hero3d-mobile-back" onPointerDown={onMobileKey('Escape')} aria-label="Back">Esc</button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
