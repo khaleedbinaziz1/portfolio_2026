@@ -39,10 +39,10 @@ export default function TypingAnimation({
 
   return (
     <span className={`font-mono ${className}`} style={style}>
-      {prefix && <span className="text-[#008b8b]">{prefix}</span>}
+      {prefix && <span style={{ color: 'var(--retro-cyan)' }}>{prefix}</span>}
       <span>{displayedText}</span>
       {showCursor && (
-        <span className={`inline-block w-2 h-4 ml-1 ${!isComplete ? 'animate-pulse' : ''}`} style={{ backgroundColor: style?.color || '#006400' }}></span>
+        <span className={`inline-block w-2 h-4 ml-1 ${!isComplete ? 'animate-pulse' : ''}`} style={{ backgroundColor: style?.color || 'var(--retro-green)' }}></span>
       )}
     </span>
   );

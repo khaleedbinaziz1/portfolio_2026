@@ -1,26 +1,93 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { FiUser, FiFolder, FiCode, FiBriefcase, FiMail, FiMenu, FiX } from 'react-icons/fi';
+import RetroSoundToggle from './RetroSoundToggle';
+
+const NAV_AMBER = '#ffaa44';
+const NAV_ACCENT = '#ffcc77';
+const NAV_DARK = '#160c0a';
+const NAV_BG = 'rgba(10, 10, 10, 0.85)';
 
 const navLinks = [
-  { name: 'About', href: '#about', number: '01.', color: '#008b8b', icon: FiUser, command: 'cat about.txt' },
-  { name: 'Skills', href: '#skills', number: '02.', color: '#b8860b', icon: FiCode, command: 'npm list --depth=0' },
-  { name: 'Experience', href: '#experience', number: '03.', color: '#006400', icon: FiBriefcase, command: 'cat experience.json' },
-  { name: 'Projects', href: '#projects', number: '04.', color: '#cc6600', icon: FiFolder, command: 'ls projects/' },
-  { name: 'Contact', href: '#contact', number: '05.', color: '#c71585', icon: FiMail, command: 'mail -s "Hello" user@example.com' },
+  { name: 'About', href: '#about', number: '01', icon: FiUser },
+  { name: 'Skills', href: '#skills', number: '02', icon: FiCode },
+  { name: 'Experience', href: '#experience', number: '03', icon: FiBriefcase },
+  { name: 'Projects', href: '#projects', number: '04', icon: FiFolder },
+  { name: 'Contact', href: '#contact', number: '05', icon: FiMail },
 ];
 
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Starfield background effect
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = 80;
+    };
+    resizeCanvas();
+
+    // Create fewer, subtler stars for nav
+    const stars: { x: number; y: number; size: number; opacity: number; speed: number }[] = [];
+    for (let i = 0; i < 30; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 1.5 + 0.5,
+        opacity: Math.random() * 0.4 + 0.2,
+        speed: Math.random() * 0.02 + 0.01,
+      });
+    }
+
+    let animationId: number;
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw stars
+      stars.forEach((star) => {
+        ctx.fillStyle = `rgba(255, 204, 119, ${star.opacity})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Gentle drift
+        star.y -= star.speed;
+        star.opacity = 0.2 + Math.sin(Date.now() * 0.001 + star.x) * 0.2;
+
+        if (star.y < 0) {
+          star.y = canvas.height;
+          star.x = Math.random() * canvas.width;
+        }
+      });
+
+      animationId = requestAnimationFrame(animate);
+    };
+    animate();
+
+    window.addEventListener('resize', resizeCanvas);
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', resizeCanvas);
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Detect active section
+      setScrolled(window.scrollY > 50);
+      
       const sections = navLinks.map(link => link.href.substring(1));
       const currentSection = sections.find(section => {
         const element = document.getElementById(section);
@@ -33,90 +100,118 @@ export default function Navigation() {
       setActiveSection(currentSection || '');
     };
     
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 backdrop-blur-md"
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.8, ease: 'easeOut' }}
+      className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-500 font-mono"
       style={{
-        backgroundColor: 'rgba(245, 245, 240, 0.95)',
-        borderBottom: '1px solid rgba(0, 100, 0, 0.3)',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1), 0 0 30px rgba(0, 100, 0, 0.1)',
-        top: 0,
-        left: 0,
-        right: 0,
-        margin: 0,
-        paddingTop: 'max(0px, env(safe-area-inset-top, 0px))',
+        backgroundColor: scrolled ? 'rgba(10, 10, 10, 0.95)' : NAV_BG,
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: `1px solid rgba(255, 170, 68, ${scrolled ? 0.3 : 0.15})`,
+        boxShadow: scrolled 
+          ? '0 4px 30px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255, 170, 68, 0.08)'
+          : '0 2px 20px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 170, 68, 0.05)',
       }}
     >
-      {/* Terminal-style top border */}
+      {/* Starfield canvas background */}
+      <canvas
+        ref={canvasRef}
+        className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-40"
+        style={{ mixBlendMode: 'screen' }}
+      />
+
+      {/* CRT scan line effect */}
       <div 
-        className="h-0.5 opacity-100"
+        className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20"
+        style={{
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 170, 68, 0.03) 2px, rgba(255, 170, 68, 0.03) 4px)',
+        }}
+      />
+
+      {/* Top glow line */}
+      <div 
+        className="absolute top-0 left-0 w-full h-px"
         style={{
           background: `linear-gradient(90deg, 
             transparent 0%, 
-            #008b8b 20%, 
-            #cc6600 40%,
-            #b8860b 50%,
-            #cc6600 60%,
-            #008b8b 80%, 
+            ${NAV_AMBER}40 20%,
+            ${NAV_ACCENT}60 50%,
+            ${NAV_AMBER}40 80%, 
             transparent 100%)`,
-          boxShadow: '0 0 8px rgba(0, 139, 139, 0.4), 0 0 15px rgba(204, 102, 0, 0.3)',
+          boxShadow: `0 0 12px rgba(255, 170, 68, 0.4), 0 0 24px rgba(255, 204, 119, 0.2)`,
         }}
       />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-16" style={{ paddingLeft: '10px', paddingRight: '10px' }}>
-        <div className="flex justify-between items-center h-16 md:h-20 min-h-[64px]">
-          {/* Terminal-style Logo */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-12 lg:px-16">
+        <div className="flex justify-between items-center h-20 min-h-[80px]">
+          {/* Logo with CRT glow */}
           <Link
             href="/"
-            className="group relative font-mono text-sm sm:text-base md:text-lg font-bold transition-all duration-300 flex items-center"
-            style={{
-              color: '#008b8b',
-              textShadow: '0 0 8px rgba(0, 139, 139, 0.4)',
-            }}
+            className="group relative text-base md:text-lg font-bold transition-all duration-300 flex items-center"
             onMouseEnter={() => setHoveredLink('logo')}
             onMouseLeave={() => setHoveredLink(null)}
           >
-            <div className="flex items-center gap-2 h-full">
-              <span 
+            <div className="flex items-center gap-2">
+              <motion.span
+                className="relative"
                 style={{
-                  textShadow: '0 0 8px rgba(0, 139, 139, 0.5), 0 0 15px rgba(0, 139, 139, 0.3)',
+                  color: NAV_AMBER,
+                  textShadow: `0 0 10px ${NAV_AMBER}80, 0 0 20px ${NAV_AMBER}40, 0 0 30px ${NAV_AMBER}20`,
+                }}
+                animate={{
+                  textShadow: [
+                    `0 0 10px ${NAV_AMBER}80, 0 0 20px ${NAV_AMBER}40`,
+                    `0 0 15px ${NAV_AMBER}90, 0 0 30px ${NAV_AMBER}50`,
+                    `0 0 10px ${NAV_AMBER}80, 0 0 20px ${NAV_AMBER}40`,
+                  ],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
                 }}
               >
                 Khaled Bin Aziz
-              </span>
-              {hoveredLink === 'logo' && (
-                <motion.span
-                  initial={{ opacity: 0, x: -5 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  style={{ color: '#006400' }}
-                  className="text-xs ml-2"
-                >
-                  cd ~/
-                </motion.span>
-              )}
+              </motion.span>
+              
+              {/* Blinking cursor */}
+              <motion.span
+                className="inline-block w-2 h-5 ml-1"
+                style={{
+                  backgroundColor: NAV_AMBER,
+                  boxShadow: `0 0 8px ${NAV_AMBER}`,
+                }}
+                animate={{ opacity: [1, 0, 1] }}
+                transition={{ duration: 1.2, repeat: Infinity }}
+              />
             </div>
-            {/* Terminal cursor on hover */}
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: hoveredLink === 'logo' ? 1 : 0 }}
-              className="inline-block w-2 h-4 ml-1"
-              style={{
-                backgroundColor: '#008b8b',
-                boxShadow: '0 0 6px rgba(0, 139, 139, 0.6)',
-              }}
-            />
+
+            {/* Hover effect */}
+            <AnimatePresence>
+              {hoveredLink === 'logo' && (
+                <motion.div
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="overflow-hidden ml-3 text-xs"
+                  style={{ color: NAV_ACCENT }}
+                >
+                  ~/portfolio
+                </motion.div>
+              )}
+            </AnimatePresence>
           </Link>
 
-          {/* Desktop Navigation - Terminal Style */}
-          <ul className="hidden md:flex gap-3 lg:gap-4 list-none items-center h-full">
+          {/* Desktop Navigation */}
+          <ul className="hidden md:flex gap-1 lg:gap-2 list-none items-center">
             {navLinks.map((link, index) => {
               const isActive = activeSection === link.href.substring(1);
               const isHovered = hoveredLink === link.href;
@@ -127,84 +222,56 @@ export default function Navigation() {
                   key={link.href}
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="relative"
+                  transition={{ delay: index * 0.1 + 0.3 }}
                 >
                   <Link
                     href={link.href}
-                    className="group relative font-mono text-xs sm:text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 px-4 py-2.5 h-full"
+                    className="group relative font-mono text-sm font-medium transition-all duration-300 flex items-center gap-2 px-4 py-2.5 rounded"
                     style={{
-                      color: isActive ? link.color : '#4a4a4a',
-                      backgroundColor: isActive ? `${link.color}15` : 'transparent',
-                      border: isActive ? `1px solid ${link.color}50` : '1px solid transparent',
-                      textShadow: isActive ? `0 0 6px ${link.color}60` : 'none',
+                      color: isActive ? NAV_AMBER : 'rgba(255, 204, 119, 0.6)',
+                      backgroundColor: isActive ? 'rgba(255, 170, 68, 0.08)' : 'transparent',
+                      border: `1px solid ${isActive ? 'rgba(255, 170, 68, 0.3)' : 'transparent'}`,
+                      textShadow: isActive ? `0 0 10px ${NAV_AMBER}60` : 'none',
+                      boxShadow: isActive ? `0 0 20px rgba(255, 170, 68, 0.15)` : 'none',
                     }}
                     onMouseEnter={() => setHoveredLink(link.href)}
                     onMouseLeave={() => setHoveredLink(null)}
                   >
-                    {/* Icon with retro glow */}
+                    {/* Icon */}
                     <Icon 
                       className="transition-all duration-300"
                       style={{
-                        color: link.color,
-                        filter: isActive ? `drop-shadow(0 0 4px ${link.color})` : 'none',
+                        color: isActive ? NAV_AMBER : NAV_ACCENT,
+                        filter: isActive ? `drop-shadow(0 0 6px ${NAV_AMBER})` : 'none',
                       }}
-                      size={18}
+                      size={16}
                     />
                     
-                    {/* Terminal prompt indicator */}
-                    {isActive && (
-                      <motion.span
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="font-bold"
-                        style={{ color: '#006400' }}
-                      >
-                        ▹
-                      </motion.span>
-                    )}
+                    {/* Number */}
+                    <span 
+                      className="text-xs font-mono"
+                      style={{ 
+                        color: 'rgba(255, 170, 68, 0.5)',
+                      }}
+                    >
+                      {link.number}
+                    </span>
                     
-                    <span style={{ color: '#008b8b', fontSize: '11px' }}>{link.number}</span>
+                    {/* Name */}
                     <span>{link.name}</span>
                     
-                    {/* Terminal command tooltip on hover */}
-                    {isHovered && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 text-[10px] font-mono whitespace-nowrap z-50 pointer-events-none"
-                        style={{
-                          backgroundColor: 'rgba(245, 245, 240, 0.98)',
-                          border: `1px solid ${link.color}60`,
-                          color: link.color,
-                          boxShadow: `0 4px 12px rgba(0, 0, 0, 0.2), 0 0 15px ${link.color}30`,
-                        }}
-                      >
-                        <span style={{ color: '#006400' }}>$</span> {link.command}
-                        <div 
-                          className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45"
-                          style={{
-                            backgroundColor: 'rgba(245, 245, 240, 0.98)',
-                            borderLeft: `1px solid ${link.color}60`,
-                            borderTop: `1px solid ${link.color}60`,
-                          }}
-                        ></div>
-                      </motion.div>
-                    )}
-                    
-                    {/* Active indicator glow */}
+                    {/* Active indicator */}
                     {isActive && (
                       <motion.div
-                        className="absolute inset-0 opacity-50"
+                        className="absolute inset-0 rounded pointer-events-none"
                         style={{
-                          boxShadow: `0 0 8px ${link.color}40`,
+                          border: `1px solid rgba(255, 170, 68, 0.3)`,
                         }}
                         animate={{
                           boxShadow: [
-                            `0 0 8px ${link.color}40`,
-                            `0 0 12px ${link.color}60`,
-                            `0 0 8px ${link.color}40`,
+                            '0 0 10px rgba(255, 170, 68, 0.2)',
+                            '0 0 20px rgba(255, 170, 68, 0.4)',
+                            '0 0 10px rgba(255, 170, 68, 0.2)',
                           ],
                         }}
                         transition={{
@@ -214,80 +281,89 @@ export default function Navigation() {
                         }}
                       />
                     )}
+
+                    {/* Hover glow */}
+                    {isHovered && (
+                      <motion.div
+                        layoutId="navHover"
+                        className="absolute inset-0 rounded pointer-events-none"
+                        style={{
+                          backgroundColor: 'rgba(255, 170, 68, 0.05)',
+                          boxShadow: '0 0 15px rgba(255, 170, 68, 0.2)',
+                        }}
+                        transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
                   </Link>
                 </motion.li>
               );
             })}
           </ul>
 
-          {/* Mobile Menu Button - Terminal Style */}
-          <button
-            className="md:hidden font-mono text-sm focus:outline-none transition-colors duration-300 flex items-center justify-center h-full"
-            style={{
-              color: '#008b8b',
-            }}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <div className="flex items-center">
-              {isMobileMenuOpen ? (
-                <FiX 
-                  size={28} 
-                  style={{ 
-                    color: '#008b8b',
-                    filter: 'drop-shadow(0 0 4px rgba(0, 139, 139, 0.6))',
-                  }} 
-                />
-              ) : (
-                <FiMenu 
-                  size={28} 
-                  style={{ 
-                    color: '#008b8b',
-                    filter: 'drop-shadow(0 0 4px rgba(0, 139, 139, 0.6))',
-                  }} 
-                />
-              )}
-            </div>
-          </button>
+          <div className="flex items-center gap-3">
+            <RetroSoundToggle />
+            
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden focus:outline-none transition-all duration-300 flex items-center justify-center min-w-[44px] min-h-[44px] rounded"
+              style={{ 
+                color: NAV_AMBER,
+                backgroundColor: isMobileMenuOpen ? 'rgba(255, 170, 68, 0.1)' : 'transparent',
+                border: `1px solid ${isMobileMenuOpen ? 'rgba(255, 170, 68, 0.3)' : 'transparent'}`,
+              }}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <motion.div
+                animate={{ rotate: isMobileMenuOpen ? 90 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {isMobileMenuOpen ? (
+                  <FiX 
+                    size={24} 
+                    style={{ 
+                      filter: `drop-shadow(0 0 8px ${NAV_AMBER})`,
+                    }} 
+                  />
+                ) : (
+                  <FiMenu 
+                    size={24} 
+                    style={{ 
+                      filter: `drop-shadow(0 0 8px ${NAV_AMBER})`,
+                    }} 
+                  />
+                )}
+              </motion.div>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Mobile Menu - Terminal Window Style */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0, y: -20 }}
-            animate={{ opacity: 1, height: 'auto', y: 0 }}
-            exit={{ opacity: 0, height: 0, y: -20 }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden terminal-window border-t-0 rounded-t-none"
+            className="md:hidden relative"
             style={{
-              borderLeft: 'none',
-              borderRight: 'none',
-              borderBottom: 'none',
+              backgroundColor: 'rgba(10, 10, 10, 0.98)',
+              borderTop: '1px solid rgba(255, 170, 68, 0.2)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
             }}
           >
-            {/* Terminal Header */}
-            <div className="terminal-header">
-              <div className="terminal-buttons">
-                <span className="terminal-btn terminal-btn-close"></span>
-                <span className="terminal-btn terminal-btn-minimize"></span>
-                <span className="terminal-btn terminal-btn-maximize"></span>
-              </div>
-              <div className="terminal-title">
-                <span style={{ color: '#008b8b' }}>┌─</span>
-                <span className="mx-2">navigation.sh</span>
-                <span style={{ color: '#008b8b' }}>─┐</span>
-              </div>
-            </div>
+            {/* Mobile starfield effect */}
+            <div 
+              className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20"
+              style={{
+                background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 170, 68, 0.03) 2px, rgba(255, 170, 68, 0.03) 4px)',
+              }}
+            />
             
-            {/* Terminal Body */}
-            <div className="terminal-body py-2">
-              <div className="terminal-prompt mb-3">
-                <span className="font-bold" style={{ color: '#006400' }}>$</span>
-                <span className="text-[#4a4a4a] ml-2 font-mono text-sm">cat menu.txt</span>
-              </div>
-              
+            <div className="relative py-4 px-4">
               <ul className="flex flex-col space-y-2">
                 {navLinks.map((link, index) => {
                   const isActive = activeSection === link.href.substring(1);
@@ -296,59 +372,63 @@ export default function Navigation() {
                   return (
                     <motion.li
                       key={link.href}
-                      initial={{ opacity: 0, x: -10 }}
+                      initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
                     >
                       <Link
                         href={link.href}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="block px-5 py-3 font-mono text-base transition-all duration-300"
+                        className="flex items-center gap-3 px-5 py-4 font-mono text-base transition-all duration-300 rounded"
                         style={{
-                          color: isActive ? link.color : '#4a4a4a',
-                          backgroundColor: isActive ? `${link.color}15` : 'transparent',
-                          border: isActive ? `1px solid ${link.color}40` : '1px solid transparent',
-                          textShadow: isActive ? `0 0 6px ${link.color}50` : 'none',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = link.color;
-                          e.currentTarget.style.backgroundColor = `${link.color}20`;
-                          e.currentTarget.style.textShadow = `0 0 6px ${link.color}50`;
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = isActive ? link.color : '#4a4a4a';
-                          e.currentTarget.style.backgroundColor = isActive ? `${link.color}15` : 'transparent';
-                          e.currentTarget.style.textShadow = isActive ? `0 0 6px ${link.color}50` : 'none';
+                          color: isActive ? NAV_AMBER : 'rgba(255, 204, 119, 0.7)',
+                          backgroundColor: isActive ? 'rgba(255, 170, 68, 0.1)' : 'transparent',
+                          border: `1px solid ${isActive ? 'rgba(255, 170, 68, 0.3)' : 'transparent'}`,
+                          textShadow: isActive ? `0 0 10px ${NAV_AMBER}60` : 'none',
+                          boxShadow: isActive ? `0 0 20px rgba(255, 170, 68, 0.15)` : 'none',
                         }}
                       >
-                        <div className="flex items-center gap-3">
-                          <Icon 
-                            size={20}
-                            style={{
-                              color: link.color,
-                              filter: isActive ? `drop-shadow(0 0 4px ${link.color})` : 'none',
-                            }}
-                          />
-                          {isActive && (
-                            <span style={{ color: '#006400' }}>▹</span>
-                          )}
-                          <span style={{ color: '#008b8b', fontSize: '12px' }}>{link.number}</span>
-                          <span>{link.name}</span>
-                          <span className="text-[#6a6a6a] text-sm ml-auto">→</span>
-                        </div>
+                        <Icon 
+                          size={20}
+                          style={{
+                            color: isActive ? NAV_AMBER : NAV_ACCENT,
+                            filter: isActive ? `drop-shadow(0 0 6px ${NAV_AMBER})` : 'none',
+                          }}
+                        />
+                        <span 
+                          className="text-xs font-mono"
+                          style={{ color: 'rgba(255, 170, 68, 0.5)' }}
+                        >
+                          {link.number}
+                        </span>
+                        <span className="flex-1">{link.name}</span>
+                        {isActive && (
+                          <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            style={{ color: NAV_AMBER }}
+                          >
+                            ▹
+                          </motion.span>
+                        )}
                       </Link>
                     </motion.li>
                   );
                 })}
               </ul>
-              
-              <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(0, 139, 139, 0.2)' }}>
-                <div className="terminal-prompt">
-                  <span className="font-bold" style={{ color: '#006400' }}>$</span>
-                  <span className="text-[#4a4a4a] ml-2 font-mono text-sm">_</span>
-                </div>
-              </div>
             </div>
+
+            {/* Bottom glow */}
+            <div 
+              className="h-px w-full"
+              style={{
+                background: `linear-gradient(90deg, 
+                  transparent 0%, 
+                  ${NAV_AMBER}30 50%, 
+                  transparent 100%)`,
+                boxShadow: `0 0 10px rgba(255, 170, 68, 0.3)`,
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>

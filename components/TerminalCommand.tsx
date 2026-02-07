@@ -82,14 +82,15 @@ export default function TerminalCommand({
       className={`font-mono text-xs ${className}`}
     >
       <div className="flex items-start gap-2">
-        <span className="text-[#006400] font-bold flex-shrink-0">{currentCommand.prompt}</span>
+        <span className="font-bold flex-shrink-0" style={{ color: 'var(--retro-green)' }}>{currentCommand.prompt}</span>
         <div className="flex-1">
           <span className="text-[#4a4a4a]">{currentText}</span>
           {isTyping && (
             <motion.span
               animate={{ opacity: [0, 1, 0] }}
               transition={{ duration: 0.8, repeat: Infinity }}
-              className="inline-block w-2 h-4 ml-1 bg-[#006400]"
+              className="inline-block w-2 h-4 ml-1"
+              style={{ backgroundColor: 'var(--retro-green)' }}
             />
           )}
         </div>
@@ -101,7 +102,8 @@ export default function TerminalCommand({
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="mt-1 ml-4 text-[#008b8b] text-[10px]"
+            className="mt-1 ml-4 text-[10px]"
+            style={{ color: 'var(--retro-cyan)' }}
           >
             {currentCommand.output}
           </motion.div>

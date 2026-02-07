@@ -1,14 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useInView } from 'framer-motion';
-import { useRef } from 'react';
-import { FiChevronRight } from 'react-icons/fi';
-import { 
-  SiReact, 
-  SiNodedotjs, 
-  SiTypescript, 
-  SiMongodb, 
+import {
+  SiReact,
+  SiNodedotjs,
+  SiTypescript,
+  SiMongodb,
   SiTailwindcss,
   SiGraphql,
   SiGit,
@@ -29,257 +27,326 @@ import {
   SiStripe,
   SiFastapi,
   SiPhp,
-  SiClerk
+  SiClerk,
 } from 'react-icons/si';
 import { TbBrandFramerMotion } from 'react-icons/tb';
 
 const technologyCategories = [
   {
     name: 'Frontend Development',
+    cmd: 'ls -la /skills/frontend',
     technologies: [
-      { name: 'TypeScript', icon: SiTypescript, color: '#3178C6' },
-      { name: 'React 18', icon: SiReact, color: '#61DAFB' },
+      { name: 'TypeScript', icon: SiTypescript, color: '#ffaa44' },
+      { name: 'React 18', icon: SiReact, color: '#ffcc77' },
       { name: 'Next.js 14', icon: SiNextdotjs, color: '#ffffff' },
-      { name: 'Tailwind CSS', icon: SiTailwindcss, color: '#06B6D4' },
-      { name: 'Redux Toolkit', icon: SiRedux, color: '#764ABC' },
-      { name: 'Framer Motion', icon: TbBrandFramerMotion, color: '#FF0055' },
+      { name: 'Tailwind CSS', icon: SiTailwindcss, color: '#ffdd99' },
+      { name: 'Redux Toolkit', icon: SiRedux, color: 'var(--retro-amber)' },
+      { name: 'Framer Motion', icon: TbBrandFramerMotion, color: '#ffaa44' },
     ],
-    color: { primary: '#006400', name: 'green' }
   },
   {
     name: 'Backend & APIs',
+    cmd: 'cat /skills/backend/*',
     technologies: [
-      { name: 'Node.js 20', icon: SiNodedotjs, color: '#339933' },
+      { name: 'Node.js 20', icon: SiNodedotjs, color: '#ffaa44' },
       { name: 'Express.js', icon: SiExpress, color: '#ffffff' },
-      { name: 'PHP', icon: SiPhp, color: '#777BB4' },
-      { name: 'GraphQL', icon: SiGraphql, color: '#E10098' },
-      { name: 'Socket.io', icon: SiSocketdotio, color: '#010101' },
-      { name: 'Prisma ORM', icon: SiPrisma, color: '#2D3748' },
-      { name: 'FastAPI', icon: SiFastapi, color: '#009688' },
+      { name: 'PHP', icon: SiPhp, color: 'var(--retro-amber)' },
+      { name: 'GraphQL', icon: SiGraphql, color: '#ffcc77' },
+      { name: 'Socket.io', icon: SiSocketdotio, color: '#ffaa44' },
+      { name: 'Prisma ORM', icon: SiPrisma, color: '#ffffff' },
+      { name: 'FastAPI', icon: SiFastapi, color: '#ffdd99' },
     ],
-    color: { primary: '#008b8b', name: 'cyan' }
   },
   {
     name: 'Database & Storage',
+    cmd: 'show databases',
     technologies: [
-      { name: 'PostgreSQL', icon: SiPostgresql, color: '#4169E1' },
-      { name: 'MongoDB', icon: SiMongodb, color: '#47A248' },
-      { name: 'Firestore', icon: SiFirebase, color: '#FFCA28' },
-      { name: 'MySQL', icon: SiMysql, color: '#4479A1' },
+      { name: 'PostgreSQL', icon: SiPostgresql, color: '#ffaa44' },
+      { name: 'MongoDB', icon: SiMongodb, color: '#ffcc77' },
+      { name: 'Firestore', icon: SiFirebase, color: '#ffdd99' },
+      { name: 'MySQL', icon: SiMysql, color: 'var(--retro-amber)' },
     ],
-    color: { primary: '#b19cd9', name: 'purple' }
   },
   {
     name: 'Testing & Quality',
+    cmd: 'npm run test',
     technologies: [
-      { name: 'Jest', icon: SiJest, color: '#C21325' },
-      { name: 'Cypress', icon: SiCypress, color: '#17202C' },
-      { name: 'React Testing Library', icon: SiReact, color: '#61DAFB' },
+      { name: 'Jest', icon: SiJest, color: '#ffaa44' },
+      { name: 'Cypress', icon: SiCypress, color: '#ffffff' },
+      { name: 'React Testing Library', icon: SiReact, color: '#ffcc77' },
     ],
-    color: { primary: '#cc6600', name: 'orange' }
   },
   {
     name: 'DevOps & Cloud',
+    cmd: 'kubectl get deployments',
     technologies: [
-      { name: 'Docker', icon: SiDocker, color: '#2496ED' },
-      { name: 'AWS', icon: SiAwsamplify, color: '#FF9900' },
+      { name: 'Docker', icon: SiDocker, color: '#ffaa44' },
+      { name: 'AWS', icon: SiAwsamplify, color: 'var(--retro-amber)' },
       { name: 'Vercel', icon: SiVercel, color: '#ffffff' },
-      { name: 'Nginx', icon: SiNginx, color: '#009639' },
-      { name: 'Git/GitHub', icon: SiGit, color: '#F05032' },
+      { name: 'Nginx', icon: SiNginx, color: '#ffcc77' },
+      { name: 'Git/GitHub', icon: SiGit, color: '#ffdd99' },
     ],
-    color: { primary: '#ff1493', name: 'pink' }
   },
   {
     name: 'Authentication & Payments',
+    cmd: 'auth --status',
     technologies: [
-      { name: 'Clerk', icon: SiClerk, color: '#6C47FF' },
-      { name: 'Firebase Auth', icon: SiFirebase, color: '#FFCA28' },
-      { name: 'Stripe', icon: SiStripe, color: '#635BFF' },
+      { name: 'Clerk', icon: SiClerk, color: '#ffaa44' },
+      { name: 'Firebase Auth', icon: SiFirebase, color: '#ffdd99' },
+      { name: 'Stripe', icon: SiStripe, color: '#ffcc77' },
     ],
-    color: { primary: '#b8860b', name: 'yellow' }
   },
 ];
 
-// Floating Terminal Component (simplified for this demo)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const FloatingTerminal = ({ maxCommands = 1, spawnInterval = 9000 }) => {
-  return null; // Placeholder - replace with your actual FloatingTerminal component
-};
+const EASE = [0.22, 0.61, 0.36, 1] as const;
+const STAGGER = 0.1;
 
 export default function Skills() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [time, setTime] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(t => t + 0.05);
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <section
-      id="skills"
-      ref={ref}
-      className="min-h-screen flex flex-col justify-center items-center w-full py-12 sm:py-16 md:py-20 relative retro-pixel-bg-light overflow-hidden"
+    <section 
+      id="skills" 
+      className="skills-section relative min-h-screen py-20 md:py-28 overflow-hidden"
       style={{
-        color: '#1a1a1a',
-        background: 'linear-gradient(135deg, rgba(184, 134, 11, 0.1) 0%, rgba(245, 245, 240, 0.95) 40%, rgba(184, 134, 11, 0.08) 100%)',
-        paddingTop: '40px',
-        paddingBottom: '40px',
+        background: 'linear-gradient(180deg, #0a0807 0%, #0f0c0a 25%, #120d0a 50%, #0d0a08 75%, #0a0807 100%)',
       }}
     >
-      {/* Pixelated decorative elements */}
-      <div className="absolute top-10 right-5 w-16 h-16 border-2 border-[#b8860b] border-opacity-20 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated' }}></div>
-      <div className="absolute bottom-20 left-10 w-12 h-12 border-2 border-[#b8860b] border-opacity-20 pointer-events-none hidden md:block" style={{ imageRendering: 'pixelated' }}></div>
-      <div className="absolute top-1/2 left-5 w-8 h-8 border-2 border-[#b8860b] border-opacity-15 pointer-events-none hidden lg:block" style={{ imageRendering: 'pixelated' }}></div>
-      
+      <div className="skills-bg" aria-hidden="true" />
+      <div className="skills-glow" aria-hidden="true" />
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-[0.025]"
+        style={{
+          backgroundImage: 'repeating-linear-gradient(0deg, transparent 0px, transparent 1px, rgba(255,170,68,0.4) 1px, transparent 2px)',
+        }}
+      />
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 90% 70% at 50% 50%, transparent 0%, rgba(20,12,8,0.3) 50%, rgba(10,6,4,0.85) 100%)',
+        }}
+      />
+
       <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6 }}
-        className="max-w-7xl mx-auto w-full relative z-10 md:pl-[calc(5%+5px)]"
-        style={{ paddingLeft: '5%', paddingRight: '5%' }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: '-100px' }}
+        transition={{ duration: 0.8, ease: [...EASE] }}
+        className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12"
       >
-        {/* Skills & Expertise Section Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-center text-center sm:text-left mb-4 sm:mb-6 md:mb-8 gap-2 sm:gap-3">
-          {/* Mobile: Gradient line above title */}
-              <div className="md:hidden w-full mb-1">
-            <div 
-              className="h-px"
-              style={{
-                background: 'linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.6), transparent)',
-              }}
-            ></div>
-          </div>
-          <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-0 mx-auto sm:mx-0">
-            <span 
-                  className="text-sm sm:text-base font-mono mr-3"
-              style={{ color: '#b8860b' }}
-            >
-              02.
-            </span>
-            <h2 
-                  className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold" 
-              style={{ 
-                    color: '#1a1a1a', 
-                    textShadow: '0 0 10px rgba(184, 134, 11, 0.3)' 
-              }}
-            >
-              Skills & Expertise
-            </h2>
-          </div>
-              <div className="hidden md:block flex-1 ml-4">
-            <div 
-              className="h-px"
-              style={{
-                background: 'linear-gradient(90deg, rgba(184, 134, 11, 0.6), transparent)',
-              }}
-            ></div>
-          </div>
-        </div>
-
-        {/* Subtitle */}
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-xs sm:text-sm max-w-2xl text-center mx-auto mb-4 sm:mb-6 md:mb-8" 
-              style={{ color: '#4a4a4a' }}
-        >
-          Technologies for building modern, scalable applications
-        </motion.p>
-
-        {/* Technology Categories Grid - Enhanced Mobile-Friendly Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-          {technologyCategories.map((category, categoryIndex) => {
-            const color = category.color;
-            
-            return (
-              <motion.div
-                key={category.name}
-                initial={{ opacity: 0, y: 30 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: 0.2 + categoryIndex * 0.1 }}
-                className="group relative p-4 sm:p-5 md:p-6 backdrop-blur-sm transition-all duration-300"
+        <div className="mb-10 md:mb-14">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: [...EASE] }}
+            className="relative inline-block"
+          >
+            <div className="mb-4 font-mono text-xs md:text-sm">
+              <div 
+                className="inline-block px-3 py-1.5 rounded-t-lg border-t border-x"
                 style={{
-                  border: `2px solid ${color.primary}40`,
-                  backgroundColor: 'rgba(255, 255, 255, 0.6)',
-                  boxShadow: `0 0 20px ${color.primary}20, 0 6px 16px rgba(0, 0, 0, 0.1), inset 0 0 20px ${color.primary}08`,
-                  imageRendering: 'pixelated',
-                }}
-                whileHover={{ 
-                  y: -4,
-                  boxShadow: `0 0 30px ${color.primary}50, 0 10px 25px rgba(0, 0, 0, 0.5)`,
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  borderColor: 'rgba(255, 170, 68, 0.3)',
                 }}
               >
-                {/* Category Header */}
-                <h3 
-                  className="text-sm sm:text-base md:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2"
-                  style={{ color: color.primary }}
-                >
-                  <FiChevronRight className="text-base sm:text-lg flex-shrink-0" />
-                  <span>{category.name}</span>
-                </h3>
+                <span style={{ color: 'var(--retro-amber)' }}>$</span>
+                <span style={{ color: 'rgba(255, 204, 119, 0.75)' }}> cd /skills</span>
+                <span 
+                  className="inline-block w-2 h-4 ml-1 align-middle"
+                  style={{
+                    backgroundColor: '#ffaa44',
+                    opacity: Math.floor(time * 2) % 2 === 0 ? 1 : 0,
+                  }}
+                />
+              </div>
+            </div>
 
-                {/* Technology Grid - Extra Large Icons with Names Below */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+              <span 
+                className="font-mono text-lg md:text-xl font-bold"
+                style={{ color: 'var(--retro-amber)' }}
+              >
+                02.
+              </span>
+              <h2 
+                className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight"
+                style={{ 
+                  color: '#ffaa44',
+                  textShadow: '0 0 20px rgba(255, 170, 68, 0.3), 0 0 40px rgba(255, 170, 68, 0.1)',
+                }}
+              >
+                Skills & Expertise
+              </h2>
+            </div>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.25, duration: 0.5 }}
+              className="mt-3 font-mono text-sm md:text-base"
+              style={{ color: 'rgba(255, 204, 119, 0.75)' }}
+            >
+              &gt; Technologies for modern, scalable applications
+            </motion.p>
+          </motion.div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
+          {technologyCategories.map((category, categoryIndex) => (
+            <motion.div
+              key={category.name}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ 
+                duration: 0.6, 
+                delay: categoryIndex * STAGGER, 
+                ease: [...EASE] 
+              }}
+              onHoverStart={() => setHoveredCard(categoryIndex)}
+              onHoverEnd={() => setHoveredCard(null)}
+              className="group relative"
+            >
+              <div 
+                className="relative border rounded-lg p-4 md:p-5 transition-all duration-500"
+                style={{
+                  backgroundColor: hoveredCard === categoryIndex 
+                    ? 'rgba(0, 0, 0, 0.7)' 
+                    : 'rgba(0, 0, 0, 0.5)',
+                  borderColor: hoveredCard === categoryIndex
+                    ? 'rgba(255, 170, 68, 0.5)'
+                    : 'rgba(255, 170, 68, 0.2)',
+                  boxShadow: hoveredCard === categoryIndex
+                    ? '0 0 30px rgba(255, 170, 68, 0.15), inset 0 0 20px rgba(255, 170, 68, 0.05)'
+                    : '0 0 10px rgba(255, 170, 68, 0.05)',
+                }}
+              >
+                <div 
+                  className="absolute top-0 left-0 right-0 h-6 rounded-t-lg border-b flex items-center px-2.5 gap-1"
+                  style={{
+                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                    borderColor: 'rgba(255, 170, 68, 0.2)',
+                  }}
+                >
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#ff6b6b' }} />
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#ffaa44' }} />
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#4caf50' }} />
+                </div>
+
+                <div className="mt-5 mb-3">
+                  <div className="font-mono text-xs mb-2" style={{ color: 'rgba(255, 204, 119, 0.5)' }}>
+                    <span style={{ color: 'var(--retro-amber)' }}>$</span> {category.cmd}
+                  </div>
+                  <h3 
+                    className="text-base md:text-lg font-bold font-mono transition-all duration-300"
+                    style={{ 
+                      color: hoveredCard === categoryIndex ? '#ffaa44' : 'rgba(255, 204, 119, 0.85)',
+                      textShadow: hoveredCard === categoryIndex 
+                        ? '0 0 10px rgba(255, 170, 68, 0.3)' 
+                        : 'none',
+                    }}
+                  >
+                    {category.name}
+                  </h3>
+                </div>
+
+                <div className="space-y-0.5">
                   {category.technologies.map((tech, techIndex) => {
                     const Icon = tech.icon;
                     return (
                       <motion.div
                         key={tech.name}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                        transition={{ 
-                          duration: 0.3, 
-                          delay: 0.2 + categoryIndex * 0.1 + techIndex * 0.05 
+                        initial={{ opacity: 0, x: -8 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{
+                          delay: categoryIndex * STAGGER + techIndex * 0.04,
+                          duration: 0.35,
                         }}
-                        className="flex flex-col items-center justify-center gap-1.5 sm:gap-2 p-2 sm:p-3 transition-all duration-300 cursor-pointer group/item"
+                        className="flex items-center gap-2 py-1.5 px-2 rounded transition-all duration-300"
                         style={{
-                          imageRendering: 'pixelated',
+                          backgroundColor: hoveredCard === categoryIndex 
+                            ? 'rgba(255, 170, 68, 0.06)' 
+                            : 'transparent',
                         }}
-                        whileHover={{ 
-                          scale: 1.08, 
-                          y: -4,
-                        }}
-                        whileTap={{ scale: 0.95 }}
                       >
-                        <Icon 
-                          className="text-base sm:text-lg md:text-xl flex-shrink-0 group-hover/item:scale-110 transition-transform duration-300" 
-                          style={{ color: tech.color }}
-                        />
+                        <div 
+                          className="flex items-center justify-center w-5 h-5 rounded shrink-0 transition-transform duration-300 group-hover:scale-105"
+                          style={{ backgroundColor: 'rgba(255, 170, 68, 0.1)' }}
+                        >
+                          <Icon className="w-3.5 h-3.5" style={{ color: tech.color }} />
+                        </div>
                         <span 
-                          className="text-[10px] sm:text-xs font-medium text-center group-hover/item:text-[#1a1a1a] transition-colors duration-300 mt-0.5"
-                          style={{ color: '#4a4a4a' }}
+                          className="font-mono text-xs md:text-sm flex-1"
+                          style={{ color: 'rgba(255, 204, 119, 0.85)' }}
                         >
                           {tech.name}
+                        </span>
+                        <span 
+                          className="font-mono text-[10px] opacity-0 group-hover:opacity-50 transition-opacity"
+                          style={{ color: '#ffaa44' }}
+                        >
+                          ✓
                         </span>
                       </motion.div>
                     );
                   })}
                 </div>
-                
-                {/* Retro glow effect on hover */}
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                  style={{
-                    background: `linear-gradient(135deg, ${color.primary}10, transparent)`,
-                    boxShadow: `0 0 25px ${color.primary}20`,
-                  }}
-                ></div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </motion.div>
-      
-      {/* Floating Terminal Commands */}
-      <FloatingTerminal maxCommands={1} spawnInterval={9000} />
 
-      <style jsx>{`
-        @keyframes scanline {
-          0% {
-            transform: translateY(-100%);
-          }
-          100% {
-            transform: translateY(100%);
-          }
-        }
-      `}</style>
+                <div 
+                  className="mt-3 pt-2 border-t font-mono text-[10px] md:text-xs flex items-center gap-1.5"
+                  style={{ 
+                    borderColor: 'rgba(255, 170, 68, 0.15)',
+                    color: 'rgba(255, 204, 119, 0.5)',
+                  }}
+                >
+                  <div 
+                    className="w-1 h-1 rounded-full shrink-0"
+                    style={{ backgroundColor: '#4caf50', boxShadow: '0 0 4px #4caf50' }}
+                  />
+                  <span>{category.technologies.length} loaded</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, scaleX: 0 }}
+          whileInView={{ opacity: 1, scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5, duration: 0.8, ease: [...EASE] }}
+          className="mt-12 font-mono text-xs"
+        >
+          <div 
+            className="inline-block px-3 py-1.5 rounded border"
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              borderColor: 'rgba(255, 170, 68, 0.3)',
+              color: 'rgba(255, 204, 119, 0.75)',
+            }}
+          >
+            <span style={{ color: '#4caf50' }}>●</span> All systems operational
+            <span 
+              className="inline-block w-2 h-4 ml-2 align-middle"
+              style={{
+                backgroundColor: '#ffaa44',
+                opacity: Math.floor(time * 2) % 2 === 0 ? 1 : 0,
+              }}
+            />
+          </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

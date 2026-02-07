@@ -103,13 +103,14 @@ export default function RetroEffects({
               animate={{ opacity: 0.2, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.6 }}
               transition={{ duration: 0.4 }}
-              className="absolute font-mono text-[9px] md:text-[10px] text-[#006400]"
+              className="absolute font-mono text-[9px] md:text-[10px]"
               style={{
                 ...cmd.position,
+                color: 'var(--retro-green)',
                 textShadow: '0 0 6px rgba(0, 100, 0, 0.2)',
               }}
             >
-              <span className="text-[#008b8b]">$</span> {cmd.text}
+              <span style={{ color: 'var(--retro-cyan)' }}>$</span> {cmd.text}
             </motion.div>
           ))}
         </AnimatePresence>

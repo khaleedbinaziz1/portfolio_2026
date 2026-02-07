@@ -8,6 +8,7 @@ export const personalInfo = {
   linkedin: 'https://www.linkedin.com/in/khaledbinaziz/',
   intro: "Hi, my name is",
   greeting: "I build things for the web.",
+  whoami: "Full Stack Engineer | TypeScript | Problem Solver",
   bio: "Full-stack developer building scalable web apps with React, Next.js, and Node.js.",
   about: [
     "Passionate full-stack developer creating web experiences. Started with HTML & CSS and grew into modern web development.",

@@ -93,14 +93,15 @@ export default function TerminalSnippets() {
               duration: 0.5,
               delay: snippet.delay,
             }}
-            className="absolute font-mono text-[9px] md:text-[10px] text-[#006400]"
+            className="absolute font-mono text-[9px] md:text-[10px]"
             style={{
               ...snippet.position,
               maxWidth: '200px',
+              color: 'var(--retro-green)',
             }}
           >
             <div className="flex items-start gap-1">
-              <span className="text-[#008b8b]">$</span>
+              <span style={{ color: 'var(--retro-cyan)' }}>$</span>
               <div>
                 <div>{snippet.command}</div>
                 {snippet.output && (
@@ -108,7 +109,8 @@ export default function TerminalSnippets() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 0.6 }}
                     transition={{ delay: 0.3 }}
-                    className="text-[#008b8b] mt-0.5 text-[8px]"
+                    className="mt-0.5 text-[8px]"
+                    style={{ color: 'var(--retro-cyan)' }}
                   >
                     {snippet.output}
                   </motion.div>

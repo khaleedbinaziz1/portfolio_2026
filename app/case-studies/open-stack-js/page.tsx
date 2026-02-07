@@ -1,43 +1,39 @@
 'use client';
 
-import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
-import { 
-  FaBook, 
-  FaCode, 
+import {
+  FaBook,
+  FaCode,
   FaPalette,
   FaExternalLinkAlt,
-  FaDesktop,
-  FaRocket,
   FaCheckCircle,
   FaArrowLeft,
   FaGithub,
   FaEye,
-  FaMobile,
   FaSearch,
   FaUniversalAccess,
   FaChartLine,
-  FaLayerGroup
-} from "react-icons/fa";
-import { 
-  SiTailwindcss, 
-  SiNextdotjs, 
+  FaRocket,
+} from 'react-icons/fa';
+import {
+  SiTailwindcss,
+  SiNextdotjs,
   SiTypescript,
   SiVercel,
-  SiReact
-} from "react-icons/si";
+  SiReact,
+} from 'react-icons/si';
 import openstack from '../../../public/images/openstack.png';
 
 const primaryColor = '#9333ea';
 
-const OpenStackJSCaseStudy = () => {
+export default function OpenStackJSCaseStudy() {
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
-      
+
       {/* Hero Section */}
       <section className="pt-28 pb-16 md:pt-36 md:pb-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -47,7 +43,7 @@ const OpenStackJSCaseStudy = () => {
             transition={{ duration: 0.6 }}
             className="mb-6"
           >
-            <Link 
+            <Link
               href="/#projects"
               className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
             >
@@ -63,16 +59,20 @@ const OpenStackJSCaseStudy = () => {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="mb-6 flex flex-wrap gap-3"
             >
-              <span className="inline-block text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded-full" 
-                style={{ color: primaryColor, backgroundColor: `${primaryColor}08` }}>
+              <span
+                className="inline-block text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded-full"
+                style={{ color: primaryColor, backgroundColor: `${primaryColor}08` }}
+              >
                 Visual Learning Platform
               </span>
-              <span className="inline-block text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded-full" 
-                style={{ color: primaryColor, backgroundColor: `${primaryColor}08` }}>
+              <span
+                className="inline-block text-xs font-semibold uppercase tracking-wider px-4 py-2 rounded-full"
+                style={{ color: primaryColor, backgroundColor: `${primaryColor}08` }}
+              >
                 Open Source
               </span>
             </motion.div>
-            
+
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -81,7 +81,7 @@ const OpenStackJSCaseStudy = () => {
             >
               Open Stack JS
             </motion.h1>
-            
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -90,25 +90,25 @@ const OpenStackJSCaseStudy = () => {
             >
               Master production-ready development with visual guides, interactive examples, and hands-on learning paths for fullstack web development.
             </motion.p>
-            
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
               className="flex flex-wrap gap-4"
             >
-              <Link 
-                href="https://opentackjs.vercel.app/" 
-                target="_blank" 
+              <Link
+                href="https://opentackjs.vercel.app/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-lg font-semibold transition-all duration-300 hover:scale-105 text-white shadow-lg hover:shadow-xl"
                 style={{ backgroundColor: primaryColor }}
               >
                 Visit Website <FaExternalLinkAlt className="text-sm" />
               </Link>
-              <Link 
-                href="https://github.com/khaleedbinaziz1/openstackjs" 
-                target="_blank" 
+              <Link
+                href="https://github.com/khaleedbinaziz1/openstackjs"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-lg font-semibold transition-all duration-300 hover:scale-105 border-2"
                 style={{ borderColor: primaryColor, color: primaryColor }}
@@ -131,12 +131,12 @@ const OpenStackJSCaseStudy = () => {
             className="rounded-2xl overflow-hidden shadow-2xl"
           >
             <div className="relative w-full aspect-video">
-              <Image 
-                src={openstack} 
-                alt="Open Stack JS Visual Learning Platform" 
+              <Image
+                src={openstack}
+                alt="Open Stack JS Visual Learning Platform"
                 fill
                 className="object-cover"
-                priority 
+                priority
                 sizes="100vw"
               />
             </div>
@@ -146,17 +146,16 @@ const OpenStackJSCaseStudy = () => {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-        
         {/* Project Overview */}
         <section className="mb-20 md:mb-28">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Project Overview</h2>
-            <div className="h-1 w-16 mb-8 rounded-full" style={{ backgroundColor: primaryColor }}></div>
+            <div className="h-1 w-16 mb-8 rounded-full" style={{ backgroundColor: primaryColor }} />
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-12">
               Open Stack JS is an open-source visual learning platform designed to help developers master fullstack web development through interactive guides, visual explanations, and comprehensive documentation. The platform covers frontend, backend, databases, authentication, testing, and DevOps technologies with production-ready examples.
             </p>
@@ -172,7 +171,7 @@ const OpenStackJSCaseStudy = () => {
                   key={idx}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
+                  viewport={{ once: true, margin: '-50px' }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
                   className="text-center p-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-shadow"
                 >
@@ -189,11 +188,11 @@ const OpenStackJSCaseStudy = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">The Problem</h2>
-            <div className="h-1 w-16 mb-8 rounded-full" style={{ backgroundColor: primaryColor }}></div>
+            <div className="h-1 w-16 mb-8 rounded-full" style={{ backgroundColor: primaryColor }} />
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8">
               Learning fullstack web development can be overwhelming. Developers often struggle with:
             </p>
@@ -203,7 +202,7 @@ const OpenStackJSCaseStudy = () => {
                 'Finding reliable, comprehensive documentation',
                 'Visualizing complex concepts like routing, state management, and API design',
                 'Choosing compatible technology stacks',
-                'Learning through text-heavy, static documentation'
+                'Learning through text-heavy, static documentation',
               ].map((item, idx) => (
                 <div key={idx} className="flex items-start gap-3 p-5 rounded-xl bg-gray-50 border border-gray-100">
                   <FaCheckCircle className="text-xl mt-0.5 flex-shrink-0" style={{ color: primaryColor }} />
@@ -219,42 +218,27 @@ const OpenStackJSCaseStudy = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Our Solution</h2>
-            <div className="h-1 w-16 mb-8 rounded-full" style={{ backgroundColor: primaryColor }}></div>
+            <div className="h-1 w-16 mb-8 rounded-full" style={{ backgroundColor: primaryColor }} />
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8">
               Open Stack JS provides a comprehensive, visual learning platform that:
             </p>
             <div className="space-y-6">
               {[
-                { 
-                  title: 'Visual Learning', 
-                  desc: 'Interactive flow diagrams, concept cards, and code examples help developers understand complex concepts quickly' 
-                },
-                { 
-                  title: 'Stack Builder', 
-                  desc: 'Interactive tool to combine technologies and analyze compatibility scores' 
-                },
-                { 
-                  title: 'Comprehensive Coverage', 
-                  desc: 'Guides for frontend, backend, databases, authentication, testing, and DevOps' 
-                },
-                { 
-                  title: 'Production-Ready Examples', 
-                  desc: 'Real-world code examples and best practices' 
-                },
-                { 
-                  title: 'Open Source', 
-                  desc: 'Community-driven improvements and contributions' 
-                },
+                { title: 'Visual Learning', desc: 'Interactive flow diagrams, concept cards, and code examples help developers understand complex concepts quickly' },
+                { title: 'Stack Builder', desc: 'Interactive tool to combine technologies and analyze compatibility scores' },
+                { title: 'Comprehensive Coverage', desc: 'Guides for frontend, backend, databases, authentication, testing, and DevOps' },
+                { title: 'Production-Ready Examples', desc: 'Real-world code examples and best practices' },
+                { title: 'Open Source', desc: 'Community-driven improvements and contributions' },
               ].map((item, idx) => (
                 <motion.div
                   key={idx}
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
+                  viewport={{ once: true, margin: '-50px' }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
                   className="p-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-shadow"
                 >
@@ -271,43 +255,19 @@ const OpenStackJSCaseStudy = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Key Features</h2>
-            <div className="h-1 w-16 mb-12 rounded-full" style={{ backgroundColor: primaryColor }}></div>
+            <div className="h-1 w-16 mb-12 rounded-full" style={{ backgroundColor: primaryColor }} />
             <div className="grid sm:grid-cols-2 gap-8">
               {[
-                { 
-                  icon: FaEye, 
-                  title: 'Visual Learning', 
-                  desc: 'Interactive flow diagrams and visual explanations for complex concepts like Next.js routing, React component trees, Node.js event loop, and TypeScript type relationships.' 
-                },
-                { 
-                  icon: FaCode, 
-                  title: 'Stack Builder', 
-                  desc: 'Interactive tool that allows developers to select technologies, view compatibility scores, see benefits and conflicts, and generate installation commands.' 
-                },
-                { 
-                  icon: FaBook, 
-                  title: 'Comprehensive Guides', 
-                  desc: 'In-depth guides covering 40+ individual technologies with core concepts, fundamentals, code examples, best practices, and real-world use cases.' 
-                },
-                { 
-                  icon: FaPalette, 
-                  title: 'Modern UI/UX', 
-                  desc: 'Professional design with glassmorphism effects, responsive layouts, dark theme optimization, smooth animations, and accessibility features.' 
-                },
-                { 
-                  icon: FaSearch, 
-                  title: 'SEO Optimized', 
-                  desc: 'Built for discoverability with dynamic metadata generation, Open Graph tags, Twitter cards, and semantic HTML.' 
-                },
-                { 
-                  icon: FaUniversalAccess, 
-                  title: 'Accessible', 
-                  desc: 'WCAG compliance features including skip links, ARIA labels, keyboard navigation, focus states, and reduced motion support.' 
-                },
+                { icon: FaEye, title: 'Visual Learning', desc: 'Interactive flow diagrams and visual explanations for complex concepts like Next.js routing, React component trees, Node.js event loop, and TypeScript type relationships.' },
+                { icon: FaCode, title: 'Stack Builder', desc: 'Interactive tool that allows developers to select technologies, view compatibility scores, see benefits and conflicts, and generate installation commands.' },
+                { icon: FaBook, title: 'Comprehensive Guides', desc: 'In-depth guides covering 40+ individual technologies with core concepts, fundamentals, code examples, best practices, and real-world use cases.' },
+                { icon: FaPalette, title: 'Modern UI/UX', desc: 'Professional design with glassmorphism effects, responsive layouts, dark theme optimization, smooth animations, and accessibility features.' },
+                { icon: FaSearch, title: 'SEO Optimized', desc: 'Built for discoverability with dynamic metadata generation, Open Graph tags, Twitter cards, and semantic HTML.' },
+                { icon: FaUniversalAccess, title: 'Accessible', desc: 'WCAG compliance features including skip links, ARIA labels, keyboard navigation, focus states, and reduced motion support.' },
               ].map((item, idx) => {
                 const Icon = item.icon;
                 return (
@@ -315,7 +275,7 @@ const OpenStackJSCaseStudy = () => {
                     key={idx}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-50px" }}
+                    viewport={{ once: true, margin: '-50px' }}
                     transition={{ duration: 0.5, delay: idx * 0.1 }}
                     className="p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-300 hover:shadow-lg bg-white"
                   >
@@ -340,12 +300,12 @@ const OpenStackJSCaseStudy = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Technology Stack</h2>
-            <div className="h-1 w-16 mb-12 rounded-full" style={{ backgroundColor: primaryColor }}></div>
-            
+            <div className="h-1 w-16 mb-12 rounded-full" style={{ backgroundColor: primaryColor }} />
+
             <div className="space-y-8 mb-12">
               <div>
                 <h3 className="text-2xl font-bold mb-4 text-gray-900">Frontend Framework</h3>
@@ -361,7 +321,7 @@ const OpenStackJSCaseStudy = () => {
                         key={idx}
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true, margin: "-50px" }}
+                        viewport={{ once: true, margin: '-50px' }}
                         transition={{ duration: 0.3, delay: idx * 0.1 }}
                         className="flex flex-col items-center p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-300 hover:shadow-lg bg-white"
                       >
@@ -387,7 +347,7 @@ const OpenStackJSCaseStudy = () => {
                         key={idx}
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true, margin: "-50px" }}
+                        viewport={{ once: true, margin: '-50px' }}
                         transition={{ duration: 0.3, delay: idx * 0.1 }}
                         className="flex flex-col items-center p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-300 hover:shadow-lg bg-white"
                       >
@@ -408,56 +368,38 @@ const OpenStackJSCaseStudy = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Categories Covered</h2>
-            <div className="h-1 w-16 mb-12 rounded-full" style={{ backgroundColor: primaryColor }}></div>
+            <div className="h-1 w-16 mb-12 rounded-full" style={{ backgroundColor: primaryColor }} />
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
               {[
-                { 
-                  title: 'Frontend Development', 
-                  techs: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Redux', 'Framer Motion'] 
-                },
-                { 
-                  title: 'Backend Development', 
-                  techs: ['Node.js', 'Express.js', 'FastAPI', 'GraphQL', 'Socket.io', 'Prisma'] 
-                },
-                { 
-                  title: 'Databases', 
-                  techs: ['PostgreSQL', 'MongoDB', 'MySQL', 'Firestore'] 
-                },
-                { 
-                  title: 'Authentication', 
-                  techs: ['Clerk', 'Firebase Auth', 'Stripe'] 
-                },
-                { 
-                  title: 'Testing', 
-                  techs: ['Jest', 'Cypress', 'React Testing Library'] 
-                },
-                { 
-                  title: 'DevOps', 
-                  techs: ['Docker', 'AWS', 'Vercel', 'Nginx', 'Git'] 
-                },
+                { title: 'Frontend Development', techs: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Redux', 'Framer Motion'] },
+                { title: 'Backend Development', techs: ['Node.js', 'Express.js', 'FastAPI', 'GraphQL', 'Socket.io', 'Prisma'] },
+                { title: 'Databases', techs: ['PostgreSQL', 'MongoDB', 'MySQL', 'Firestore'] },
+                { title: 'Authentication', techs: ['Clerk', 'Firebase Auth', 'Stripe'] },
+                { title: 'Testing', techs: ['Jest', 'Cypress', 'React Testing Library'] },
+                { title: 'DevOps', techs: ['Docker', 'AWS', 'Vercel', 'Nginx', 'Git'] },
               ].map((category, idx) => (
                 <motion.div
                   key={idx}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
+                  viewport={{ once: true, margin: '-50px' }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
                   className="p-6 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-shadow"
                 >
                   <h3 className="font-semibold text-lg mb-4 text-gray-900" style={{ color: primaryColor }}>{category.title}</h3>
                   <div className="flex flex-wrap gap-2">
                     {category.techs.map((tech, techIdx) => (
-                      <span 
+                      <span
                         key={techIdx}
                         className="text-xs px-3 py-1 rounded-full border"
-                        style={{ 
-                          borderColor: `${primaryColor}30`, 
+                        style={{
+                          borderColor: `${primaryColor}30`,
                           backgroundColor: `${primaryColor}08`,
-                          color: primaryColor
+                          color: primaryColor,
                         }}
                       >
                         {tech}
@@ -475,11 +417,11 @@ const OpenStackJSCaseStudy = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Performance Metrics</h2>
-            <div className="h-1 w-16 mb-12 rounded-full" style={{ backgroundColor: primaryColor }}></div>
+            <div className="h-1 w-16 mb-12 rounded-full" style={{ backgroundColor: primaryColor }} />
             <div className="grid sm:grid-cols-3 gap-8">
               {[
                 { value: '105-141 KB', title: 'First Load JS', desc: 'Optimized bundle sizes' },
@@ -490,7 +432,7 @@ const OpenStackJSCaseStudy = () => {
                   key={idx}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
+                  viewport={{ once: true, margin: '-50px' }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
                   className="text-center p-8 rounded-xl border border-gray-200 bg-white hover:shadow-lg transition-shadow"
                 >
@@ -508,19 +450,19 @@ const OpenStackJSCaseStudy = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Open Source</h2>
-            <div className="h-1 w-16 mb-8 rounded-full" style={{ backgroundColor: primaryColor }}></div>
+            <div className="h-1 w-16 mb-8 rounded-full" style={{ backgroundColor: primaryColor }} />
             <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-8">
               Open Stack JS is fully open source under the MIT License. The project welcomes contributions from the community.
             </p>
             <div className="space-y-4 mb-8">
               {[
                 { icon: FaGithub, text: 'GitHub: github.com/khaleedbinaziz1/openstackjs', href: 'https://github.com/khaleedbinaziz1/openstackjs' },
-                { icon: FaCode, text: 'License: MIT', href: null },
-                { icon: FaRocket, text: 'Contributing: See CONTRIBUTING.md', href: null },
+                { icon: FaCode, text: 'License: MIT', href: null as string | null },
+                { icon: FaRocket, text: 'Contributing: See CONTRIBUTING.md', href: null as string | null },
               ].map((item, idx) => {
                 const Icon = item.icon;
                 const content = item.href ? (
@@ -546,22 +488,22 @@ const OpenStackJSCaseStudy = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Future Roadmap</h2>
-            <div className="h-1 w-16 mb-8 rounded-full" style={{ backgroundColor: primaryColor }}></div>
+            <div className="h-1 w-16 mb-8 rounded-full" style={{ backgroundColor: primaryColor }} />
             <div className="grid sm:grid-cols-2 gap-4">
               {[
-                { status: 'completed', text: 'Core platform and visual learning features' },
-                { status: 'completed', text: 'Stack builder with compatibility analysis' },
-                { status: 'completed', text: '40+ technology guides' },
-                { status: 'in-progress', text: 'More technology guides (ongoing)' },
-                { status: 'planned', text: 'Interactive code playground' },
-                { status: 'planned', text: 'Multi-language support' },
-                { status: 'planned', text: 'Mobile app version' },
-                { status: 'planned', text: 'Video tutorials integration' },
-                { status: 'planned', text: 'Community forum' },
+                { status: 'completed' as const, text: 'Core platform and visual learning features' },
+                { status: 'completed' as const, text: 'Stack builder with compatibility analysis' },
+                { status: 'completed' as const, text: '40+ technology guides' },
+                { status: 'in-progress' as const, text: 'More technology guides (ongoing)' },
+                { status: 'planned' as const, text: 'Interactive code playground' },
+                { status: 'planned' as const, text: 'Multi-language support' },
+                { status: 'planned' as const, text: 'Mobile app version' },
+                { status: 'planned' as const, text: 'Video tutorials integration' },
+                { status: 'planned' as const, text: 'Community forum' },
               ].map((item, idx) => (
                 <div key={idx} className="flex items-start gap-3 p-4 rounded-xl bg-gray-50 border border-gray-100">
                   {item.status === 'completed' ? (
@@ -569,7 +511,7 @@ const OpenStackJSCaseStudy = () => {
                   ) : item.status === 'in-progress' ? (
                     <FaChartLine className="text-xl mt-0.5 flex-shrink-0" style={{ color: '#f59e0b' }} />
                   ) : (
-                    <div className="w-5 h-5 mt-0.5 flex-shrink-0 rounded-full border-2" style={{ borderColor: '#9ca3af' }}></div>
+                    <div className="w-5 h-5 mt-0.5 flex-shrink-0 rounded-full border-2" style={{ borderColor: '#9ca3af' }} />
                   )}
                   <span className="text-gray-700 leading-relaxed">{item.text}</span>
                 </div>
@@ -582,9 +524,9 @@ const OpenStackJSCaseStudy = () => {
       {/* Footer */}
       <footer className="py-16 border-t border-gray-200 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Link 
-            href="https://opentackjs.vercel.app/" 
-            target="_blank" 
+          <Link
+            href="https://opentackjs.vercel.app/"
+            target="_blank"
             rel="noopener noreferrer"
             className="text-2xl md:text-3xl font-bold mb-4 inline-block transition-colors hover:opacity-80"
             style={{ color: primaryColor }}
@@ -595,9 +537,9 @@ const OpenStackJSCaseStudy = () => {
             Master fullstack web development with visual guides, interactive examples, and comprehensive documentation. Learn how technologies work together.
           </p>
           <div className="mt-6 flex justify-center gap-4">
-            <Link 
-              href="https://github.com/khaleedbinaziz1/openstackjs" 
-              target="_blank" 
+            <Link
+              href="https://github.com/khaleedbinaziz1/openstackjs"
+              target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105 border-2"
               style={{ borderColor: primaryColor, color: primaryColor }}
@@ -610,6 +552,4 @@ const OpenStackJSCaseStudy = () => {
       </footer>
     </div>
   );
-};
-
-export default OpenStackJSCaseStudy;
+}

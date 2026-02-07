@@ -1,0 +1,1353 @@
+'use client';
+
+import { useRef, useState, useEffect } from 'react';
+import { personalInfo } from '@/data/personal';
+import {
+  playTyping,
+  resumeAudioForTyping,
+  playGameStart,
+  playGameEat,
+  playGameBounce,
+  playGameBreak,
+  playGameOver,
+} from '@/lib/retroSound';
+import type * as THREE from 'three';
+
+function valMap(x: number, from: [number, number], to: [number, number]): number {
+  const y = ((x - from[0]) / (from[1] - from[0])) * (to[1] - to[0]) + to[0];
+  if (to[0] < to[1]) {
+    if (y < to[0]) return to[0];
+    if (y > to[1]) return to[1];
+  } else {
+    if (y > to[0]) return to[0];
+    if (y < to[1]) return to[1];
+  }
+  return y;
+}
+
+function easeOutCubic(t: number): number {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+// Enhanced Bayer matrix for superior dithering
+const BAYER_4 = [
+  [0, 8, 2, 10],
+  [12, 4, 14, 6],
+  [3, 11, 1, 9],
+  [15, 7, 13, 5],
+];
+
+function luminance(r: number, g: number, b: number): number {
+  return 0.299 * r + 0.587 * g + 0.114 * b;
+}
+
+const MONITOR_TYPE: 'commodore' | 'blocky' = 'commodore';
+
+type ScreenTextureResult = {
+  texture: import('three').CanvasTexture;
+  baseCanvas: HTMLCanvasElement;
+  displayCanvas: HTMLCanvasElement;
+  W: number;
+  H: number;
+  drawTypedHero: (ctx: CanvasRenderingContext2D, nameLen: number, greetingLen: number, showCursor: boolean) => void;
+};
+
+type ScreenTextureParams = {
+  name: string;
+  title: string;
+  greeting: string;
+  intro: string;
+  whoami: string;
+  stack?: string;
+  statusLine?: string;
+};
+
+function createScreenTexture(
+  THREE: typeof import('three'),
+  imageUrl: string,
+  params: ScreenTextureParams
+): Promise<ScreenTextureResult> {
+  const W = 640;
+  const H = 480;
+  // CRT phosphor-style base: warm dark amber/brown (background of texts = CRT)
+  const colorDark = 'rgb(45, 30, 22)';
+  const colorDarkPanel = 'rgba(42, 26, 18, 0.92)';
+  const colorDarkStatus = 'rgba(38, 24, 16, 0.95)';
+  const colorBright = '#ffaa44';
+  const colorAccent = '#ffcc77';
+  const colorMuted = 'rgba(255, 204, 119, 0.75)';
+
+  const gridW = 280;
+  const gridH = 210;
+  const imageLeft = 16;
+  const imageTop = 32;
+  const lineHeight = 18;
+  const lineHeightSmall = 14;
+  const fontMono = '16px "Courier New", monospace';
+  const fontMonoSmall = '13px "Courier New", monospace';
+  const fontBold = 'bold 24px "Courier New", monospace';
+  const heroIntroFont = '15px "Courier New", monospace';
+  const heroNameFont = 'bold 32px "Courier New", monospace';
+  const heroGreetingFont = 'bold 24px "Courier New", monospace';
+  const heroGreetingLineHeight = 28;
+  const rightPanelX = 308;
+  const rightPanelW = W - rightPanelX - 12;
+  const maxTextWidth = rightPanelW - 12;
+  const statusBarH = 24;
+
+  const baseCanvas = document.createElement('canvas');
+  baseCanvas.width = W;
+  baseCanvas.height = H;
+  const displayCanvas = document.createElement('canvas');
+  displayCanvas.width = W;
+  displayCanvas.height = H;
+  const baseCtx = baseCanvas.getContext('2d');
+  if (!baseCtx) return Promise.reject(new Error('No 2d context'));
+
+  const {
+    name,
+    title,
+    greeting,
+    intro,
+    whoami,
+    stack = 'React · Next.js · Node · TypeScript',
+    statusLine = '● Ready',
+  } = params;
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const ctx = baseCtx;
+      ctx.fillStyle = colorDark;
+      ctx.fillRect(0, 0, W, H);
+
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+      const srcCanvas = document.createElement('canvas');
+      srcCanvas.width = gridW;
+      srcCanvas.height = gridH;
+      const sctx = srcCanvas.getContext('2d');
+      if (!sctx) {
+        reject(new Error('No 2d context'));
+        return;
+      }
+      sctx.drawImage(img, 0, 0, iw, ih, 0, 0, gridW, gridH);
+      const id = sctx.getImageData(0, 0, gridW, gridH);
+      const data = id.data;
+
+      for (let gy = 0; gy < gridH; gy++) {
+        for (let gx = 0; gx < gridW; gx++) {
+          const i = (gy * gridW + gx) * 4;
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const a = data[i + 3];
+          const lum = a < 30 ? 0 : luminance(r, g, b);
+          const threshold = (BAYER_4[gy % 4][gx % 4] + 0.5) / 16;
+          const useBright = lum / 255 > threshold;
+          ctx.fillStyle = useBright ? colorBright : colorDark;
+          ctx.fillRect(imageLeft + gx, imageTop + gy, 1, 1);
+        }
+      }
+
+      const grad = ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, 'rgba(0,0,0,0)');
+      grad.addColorStop(0.4, 'rgba(50, 30, 18, 0.05)');
+      grad.addColorStop(0.75, 'rgba(40, 24, 14, 0.2)');
+      grad.addColorStop(1, 'rgba(35, 20, 10, 0.45)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.font = fontMono;
+      function wrapText(measureCtx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
+        const words = text.split(' ');
+        const lines: string[] = [];
+        let line = '';
+        for (const w of words) {
+          const test = line ? line + ' ' + w : w;
+          const m = measureCtx.measureText(test);
+          if (m.width > maxW && line) {
+            lines.push(line);
+            line = w;
+          } else {
+            line = test;
+          }
+        }
+        if (line) lines.push(line);
+        return lines;
+      }
+
+      // ─── Hero block left: only intro on base (name + greeting drawn with typing in tick) ───
+      const heroX = imageLeft;
+      const heroYStart = imageTop + gridH + 16;
+      // Intro is 15px; name is 32px (extends above baseline). Keep name baseline below intro.
+      const heroYName = heroYStart + 28;
+      const heroYGreeting = heroYName + 42;
+      ctx.font = heroIntroFont;
+      ctx.fillStyle = colorMuted;
+      ctx.fillText(intro, heroX, heroYStart);
+
+      function drawTypedHero(
+        drawCtx: CanvasRenderingContext2D,
+        nameLen: number,
+        greetingLen: number,
+        showCursor: boolean
+      ) {
+        drawCtx.font = heroNameFont;
+        drawCtx.fillStyle = colorBright;
+        drawCtx.shadowColor = colorBright;
+        drawCtx.shadowBlur = 16;
+        drawCtx.fillText(name.substring(0, nameLen), heroX, heroYName);
+        drawCtx.shadowBlur = 0;
+        const visibleGreeting = greeting.substring(0, greetingLen);
+        if (visibleGreeting) {
+          drawCtx.font = heroGreetingFont;
+          drawCtx.fillStyle = colorBright;
+          drawCtx.shadowColor = '#ffcc77';
+          drawCtx.shadowBlur = 20;
+          let gy = heroYGreeting;
+          const gLines = wrapText(drawCtx, visibleGreeting, gridW);
+          gLines.forEach((line) => {
+            drawCtx.fillText(line, heroX, gy);
+            gy += heroGreetingLineHeight;
+          });
+          drawCtx.shadowBlur = 0;
+          if (showCursor && greetingLen === greeting.length) {
+            const lastLine = gLines[gLines.length - 1] ?? '';
+            const cursorX = heroX + drawCtx.measureText(lastLine).width + 4;
+            drawCtx.fillStyle = colorBright;
+            drawCtx.fillRect(cursorX, gy - heroGreetingLineHeight - 22, 4, 24);
+          }
+        }
+      }
+
+      // ─── Right panel: CRT-tinted background (same as text background = CRT) ───
+      const panelY = imageTop;
+      const panelH = 140;
+      ctx.fillStyle = colorDarkPanel;
+      ctx.fillRect(rightPanelX, panelY, rightPanelW, panelH);
+      ctx.strokeStyle = 'rgba(255, 170, 68, 0.45)';
+      ctx.strokeRect(rightPanelX, panelY, rightPanelW, panelH);
+      ctx.font = fontMonoSmall;
+      ctx.fillStyle = 'rgba(255, 204, 119, 0.85)';
+      ctx.fillText('$ whoami', rightPanelX + 10, panelY + 20);
+      ctx.fillStyle = colorAccent;
+      const whoamiLines = wrapText(ctx, whoami, maxTextWidth);
+      whoamiLines.slice(0, 3).forEach((line, i) => {
+        ctx.fillText(line, rightPanelX + 10, panelY + 38 + i * (lineHeightSmall + 2));
+      });
+      ctx.fillStyle = colorMuted;
+      ctx.fillText('stack:', rightPanelX + 10, panelY + 88);
+      ctx.fillStyle = colorAccent;
+      ctx.fillText(stack, rightPanelX + 10, panelY + 102);
+      ctx.fillStyle = colorMuted;
+      ctx.fillText('↓ scroll to explore', rightPanelX + 10, panelY + 128);
+
+      // ─── Play games: smaller retro block ~150px below panel ───
+      const playGameGap = 12 + 150;
+      const playGameBoxH = 28;
+      const playGameBoxW = 260;
+      const playGameBoxY = panelY + panelH + playGameGap;
+      const px = rightPanelX + (rightPanelW - playGameBoxW) / 2;
+      const pw = playGameBoxW;
+      ctx.fillStyle = 'rgba(30, 18, 12, 0.95)';
+      ctx.fillRect(px, playGameBoxY, pw, playGameBoxH);
+      ctx.strokeStyle = 'rgba(255, 170, 68, 0.9)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(px, playGameBoxY, pw, playGameBoxH);
+      ctx.strokeStyle = 'rgba(255, 200, 100, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(px + 2, playGameBoxY + 2, pw - 4, playGameBoxH - 4);
+      ctx.lineWidth = 1;
+      ctx.font = 'bold 14px "Courier New", monospace';
+      ctx.fillStyle = '#ffaa44';
+      ctx.shadowColor = 'rgba(255, 170, 68, 0.8)';
+      ctx.shadowBlur = 4;
+      ctx.fillText('▶  P L A Y   G A M E S  ◀', px + (pw - ctx.measureText('▶  P L A Y   G A M E S  ◀').width) / 2, playGameBoxY + playGameBoxH / 2 + 5);
+      ctx.shadowBlur = 0;
+
+      // ─── Status bar: CRT-tinted ───
+      const statusY = H - statusBarH - 2;
+      ctx.fillStyle = colorDarkStatus;
+      ctx.fillRect(0, statusY, W, statusBarH + 2);
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(255, 170, 68, 0.35)';
+      ctx.moveTo(0, statusY);
+      ctx.lineTo(W, statusY);
+      ctx.stroke();
+      ctx.font = fontMonoSmall;
+      ctx.fillStyle = 'rgba(0, 255, 120, 0.8)';
+      ctx.fillText('●', 12, statusY + 15);
+      ctx.fillStyle = colorMuted;
+      ctx.fillText(' Ready', 24, statusY + 15);
+      ctx.fillStyle = 'rgba(255, 170, 68, 0.55)';
+      ctx.fillText('Scroll down', W - 92, statusY + 15);
+
+      const tex = new THREE.CanvasTexture(displayCanvas);
+      tex.flipY = true;
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.minFilter = THREE.LinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      const dctx = displayCanvas.getContext('2d');
+      if (dctx) {
+        dctx.drawImage(baseCanvas, 0, 0);
+        drawTypedHero(dctx, 0, 0, false);
+      }
+      resolve({ texture: tex, baseCanvas, displayCanvas, W, H, drawTypedHero });
+    };
+    img.onerror = reject;
+    img.src = imageUrl;
+  });
+}
+
+type Hero3DProps = {
+  experienceStarted: boolean;
+  onLoaded?: () => void;
+};
+
+export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [canvasOpacity, setCanvasOpacity] = useState(1);
+  const [loadProgress, setLoadProgress] = useState(0);
+  const scrollRef = useRef(0);
+  const lastOpacityRef = useRef(1);
+  const timeRef = useRef(0);
+  const typingStartTimeRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const cleanupRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (!mounted || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    let animationId: number;
+
+    (async () => {
+      const THREE = await import('three');
+      setLoadProgress(0.1);
+      
+      const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+      const { TextureLoader } = await import('three');
+      const { EffectComposer } = await import('three/examples/jsm/postprocessing/EffectComposer.js');
+      const { RenderPass } = await import('three/examples/jsm/postprocessing/RenderPass.js');
+      const { UnrealBloomPass } = await import('three/examples/jsm/postprocessing/UnrealBloomPass.js');
+      const { ShaderPass } = await import('three/examples/jsm/postprocessing/ShaderPass.js');
+      setLoadProgress(0.3);
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a0a0a);
+      
+      // Brighter, more glowing lighting
+      const ambientLight = new THREE.AmbientLight(0xffeedd, 0.55);
+      scene.add(ambientLight);
+      
+      const keyLight = new THREE.DirectionalLight(0xff9933, 1.6);
+      keyLight.position.set(2, 3, 2);
+      scene.add(keyLight);
+      
+      const rimLight = new THREE.DirectionalLight(0x88bbff, 0.9);
+      rimLight.position.set(-2, 1, -2);
+      scene.add(rimLight);
+      
+      const fillLight = new THREE.PointLight(0xff8833, 1.2, 12);
+      fillLight.position.set(1, 0.5, 1);
+      scene.add(fillLight);
+
+      const aspect = window.innerWidth / window.innerHeight;
+      const camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 100);
+      camera.position.set(0, 0, -2.5);
+      camera.rotation.set(-Math.PI, 0, Math.PI);
+      scene.add(camera);
+
+      const renderer = new THREE.WebGLRenderer({ 
+        canvas, 
+        antialias: true, 
+        alpha: false,
+        powerPreference: 'high-performance'
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.5;
+
+      // Post-processing: moderate bloom so screen text/image don't glow excessively
+      const composer = new EffectComposer(renderer);
+      const renderPass = new RenderPass(scene, camera);
+      composer.addPass(renderPass);
+
+      const bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        0.5,  // strength — reduced so image/text don't glow too much
+        0.5,  // radius
+        0.38  // threshold — higher so only brightest parts bloom
+      );
+      composer.addPass(bloomPass);
+
+      // Vignette: slightly lighter so center glows more
+      const VignetteShader = {
+        uniforms: {
+          tDiffuse: { value: null },
+          offset: { value: 0.5 },
+          darkness: { value: 0.95 }
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform sampler2D tDiffuse;
+          uniform float offset;
+          uniform float darkness;
+          varying vec2 vUv;
+          void main() {
+            vec4 texel = texture2D(tDiffuse, vUv);
+            vec2 uv = (vUv - vec2(0.5)) * vec2(offset);
+            float vignette = 1.0 - dot(uv, uv);
+            texel.rgb *= pow(vignette, darkness);
+            gl_FragColor = texel;
+          }
+        `
+      };
+
+      const vignettePass = new ShaderPass(VignetteShader);
+      composer.addPass(vignettePass);
+
+      const computerHeight = 1.5;
+      const computerAngle = Math.PI * 0.2;
+      const computerHorizontal = 0.5;
+
+      const textureLoader = new TextureLoader();
+
+      const screenTextureResult = await createScreenTexture(THREE, '/khaled_bin_aziz.jpg', {
+        name: personalInfo.name,
+        title: personalInfo.title,
+        greeting: personalInfo.greeting,
+        intro: personalInfo.intro,
+        whoami: personalInfo.whoami,
+        stack: 'React · Next.js · Node · TypeScript',
+        statusLine: '● Ready',
+      });
+      setLoadProgress(0.5);
+
+      const contentTexture = screenTextureResult.texture;
+      const { baseCanvas, displayCanvas, W: screenW, H: screenH, drawTypedHero } = screenTextureResult;
+
+      // CRT effect: shader pass (ref noise.frag) – less noise, finer scanlines, dark orange glow
+      const CRT_NOISE_FRAG = `
+        #define PI 3.1415926538
+        #define LINE_SIZE 520.0
+        #define LINE_STRENGTH 0.018
+        #define LINE_OFFSET 2.0
+        #define NOISE_STRENGTH 0.06
+        uniform sampler2D uDiffuse;
+        uniform float uTime;
+        varying vec2 vUv;
+        float rand(vec2 co){
+          return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+        }
+        float squareWave(float x){
+          return (
+            (4.0/PI * sin(PI*LINE_SIZE*x))
+            +(4.0/PI * 1.0/3.0 * sin(3.0*PI*LINE_SIZE*x))
+            +(4.0/PI * 1.0/5.0 * sin(5.0*PI*LINE_SIZE*x))
+            - LINE_OFFSET
+          )*LINE_STRENGTH;
+        }
+        void main() {
+          vec4 color = texture2D(uDiffuse, vUv);
+          color.rgb *= 1.12;
+          color.rgb += vec3(0.03, 0.02, 0.01);
+          float r = rand(vUv*uTime);
+          gl_FragColor = color + (vec4(r,r,r,0) * NOISE_STRENGTH) + squareWave(vUv.y);
+          float dist = length(vUv - 0.5);
+          float glow = 1.0 - smoothstep(0.25, 0.75, dist);
+          vec3 darkOrange = vec3(0.035, 0.018, 0.008);
+          gl_FragColor.rgb += darkOrange * glow;
+        }
+      `;
+      const CRT_VERT = `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `;
+      const crtRenderTarget = new THREE.WebGLRenderTarget(screenW, screenH, { format: THREE.RGBAFormat });
+      crtRenderTarget.texture.colorSpace = THREE.SRGBColorSpace;
+      const crtMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          uDiffuse: { value: contentTexture },
+          uTime: { value: 0 },
+        },
+        vertexShader: CRT_VERT,
+        fragmentShader: CRT_NOISE_FRAG,
+      });
+      const crtAspect = screenW / screenH;
+      const crtCamera = new THREE.OrthographicCamera(-0.5 * crtAspect, 0.5 * crtAspect, 0.5, -0.5, 1, 3);
+      crtCamera.position.set(0, 0, 1);
+      const crtScene = new THREE.Scene();
+      crtScene.add(crtCamera);
+      const crtPlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(1 * crtAspect, 1, 1, 1),
+        crtMaterial
+      );
+      crtScene.add(crtPlane);
+      const nameStr = personalInfo.name;
+      const greetingStr = personalInfo.greeting;
+      const NAME_TYPING_SPEED = 22;
+      const GREETING_TYPING_SPEED = 28;
+      const GREETING_START_DELAY = 0.2;
+
+      const computerColor = new THREE.Color(0xffffff);
+      const floorMaterial = new THREE.MeshStandardMaterial({
+        color: 0x000000,
+        roughness: 0.9,
+        metalness: 0.1
+      });
+
+      const screenMaterial = new THREE.MeshBasicMaterial({
+        map: crtRenderTarget.texture,
+        side: THREE.DoubleSide
+      });
+
+      let bakeTexture: THREE.Texture | null = null;
+      let screenMeshForPick: THREE.Mesh | null = null;
+      const computerGroup = new THREE.Group();
+      computerGroup.position.set(computerHorizontal, computerHeight, 0);
+      computerGroup.rotation.y = computerAngle;
+
+      // Galaxy-like starfield behind the computer: very slow, night-sky vibe
+      const galaxyRadius = 14;
+      const galaxyDepth = 12;
+      const particleSpeeds = new Float32Array(520);
+
+      // Particles only behind computer: z well in front of camera, behind monitor
+      const zMin = 1.2;
+      const zMax = galaxyDepth * 0.5;
+      function fillGalaxyPositions(positions: Float32Array, count: number) {
+        for (let i = 0; i < count; i++) {
+          const r = Math.pow(Math.random(), 0.65) * galaxyRadius;
+          const angle = Math.random() * Math.PI * 2;
+          positions[i * 3] = Math.cos(angle) * r + (Math.random() - 0.5) * 2;
+          positions[i * 3 + 1] = Math.sin(angle) * r * 0.35 + (Math.random() - 0.5) * 1.2;
+          positions[i * 3 + 2] = zMin + Math.random() * (zMax - zMin);
+          particleSpeeds[i] = 0.0003 + Math.random() * 0.0007;
+        }
+      }
+
+      const posSmall = new Float32Array(420 * 3);
+      fillGalaxyPositions(posSmall, 420);
+      const geoSmall = new THREE.BufferGeometry();
+      geoSmall.setAttribute('position', new THREE.BufferAttribute(posSmall, 3));
+      const matSmall = new THREE.PointsMaterial({
+        color: 0xffdd99,
+        size: 0.018,
+        transparent: true,
+        opacity: 0.55,
+        blending: THREE.AdditiveBlending,
+        sizeAttenuation: true,
+      });
+      const starsSmall = new THREE.Points(geoSmall, matSmall);
+      starsSmall.rotation.x = 0.06;
+      scene.add(starsSmall);
+
+      const posBig = new Float32Array(100 * 3);
+      for (let i = 0; i < 100; i++) {
+        const r = Math.pow(Math.random(), 0.5) * galaxyRadius * 0.8;
+        const angle = Math.random() * Math.PI * 2;
+        posBig[i * 3] = Math.cos(angle) * r + (Math.random() - 0.5);
+        posBig[i * 3 + 1] = Math.sin(angle) * r * 0.35;
+        posBig[i * 3 + 2] = zMin + Math.random() * (zMax * 0.8 - zMin);
+        particleSpeeds[420 + i] = 0.0002 + Math.random() * 0.0005;
+      }
+      const geoBig = new THREE.BufferGeometry();
+      geoBig.setAttribute('position', new THREE.BufferAttribute(posBig, 3));
+      const matBig = new THREE.PointsMaterial({
+        color: 0xffcc77,
+        size: 0.042,
+        transparent: true,
+        opacity: 0.82,
+        blending: THREE.AdditiveBlending,
+        sizeAttenuation: true,
+      });
+      const starsBig = new THREE.Points(geoBig, matBig);
+      starsBig.rotation.x = 0.06;
+      scene.add(starsBig);
+
+      if (MONITOR_TYPE === 'blocky') {
+        const bodyMat = new THREE.MeshStandardMaterial({
+          color: computerColor,
+          roughness: 0.4,
+          metalness: 0.6
+        });
+        const screenAspect = 640 / 480;
+        const screenWid = 0.72;
+        const screenHei = screenWid / screenAspect;
+        const screenGeo = new THREE.PlaneGeometry(screenWid, screenHei);
+        const screenPlane = new THREE.Mesh(screenGeo, screenMaterial);
+        screenPlane.position.set(0, 0, 0.06);
+        screenPlane.rotation.x = -0.02;
+        const crtGeo = new THREE.BoxGeometry(screenWid + 0.08, screenHei + 0.08, 0.14);
+        const crtMesh = new THREE.Mesh(crtGeo, bodyMat);
+        crtMesh.position.set(0, 0, -0.03);
+        const keyGeo = new THREE.BoxGeometry(0.55, 0.04, 0.18);
+        const keyMesh = new THREE.Mesh(keyGeo, bodyMat);
+        keyMesh.position.set(0, -screenHei / 2 - 0.08, 0.08);
+        computerGroup.add(crtMesh);
+        computerGroup.add(screenPlane);
+        screenMeshForPick = screenPlane;
+        computerGroup.add(keyMesh);
+        const floorPlane = new THREE.Mesh(
+          new THREE.PlaneGeometry(4, 4),
+          floorMaterial
+        );
+        floorPlane.rotation.x = -Math.PI / 2;
+        floorPlane.position.set(0, 0, 0);
+        scene.add(floorPlane);
+      } else {
+        const [bakeTex, gltfScene] = await Promise.all([
+          new Promise<THREE.Texture>((res, rej) => {
+            textureLoader.load('/textures/bake-quality-5.jpg', res, undefined, rej);
+          }).then((tex) => {
+            setLoadProgress(0.75);
+            return tex;
+          }),
+          new Promise<THREE.Group>((res, rej) => {
+            const loader = new GLTFLoader();
+            loader.load('/models/Commodore710_33.5.glb', (g) => res(g.scene), undefined, rej);
+          }).then((scene) => {
+            setLoadProgress(0.9);
+            return scene;
+          }),
+        ]);
+        bakeTexture = bakeTex;
+        bakeTexture.flipY = false;
+        bakeTexture.colorSpace = THREE.SRGBColorSpace;
+
+        const clone = gltfScene.clone();
+        const screenMesh = clone.children.find((c) => (c as THREE.Mesh).name === 'Screen') as THREE.Mesh | undefined;
+        const computerMesh = clone.children.find((c) => (c as THREE.Mesh).name === 'Computer') as THREE.Mesh | undefined;
+        const crtMesh = clone.children.find((c) => (c as THREE.Mesh).name === 'CRT') as THREE.Mesh | undefined;
+        const keyboardMesh = clone.children.find((c) => (c as THREE.Mesh).name === 'Keyboard') as THREE.Mesh | undefined;
+        const shadowPlaneMesh = clone.children.find((c) => (c as THREE.Mesh).name === 'ShadowPlane') as THREE.Mesh | undefined;
+        
+        const computerMaterial = new THREE.MeshStandardMaterial({
+          map: bakeTexture,
+          color: computerColor,
+          roughness: 0.5,
+          metalness: 0.3
+        });
+        
+        if (screenMesh) screenMesh.material = screenMaterial;
+        if (computerMesh) computerMesh.material = computerMaterial;
+        if (crtMesh) crtMesh.material = computerMaterial;
+        if (keyboardMesh) keyboardMesh.material = computerMaterial;
+        if (shadowPlaneMesh) shadowPlaneMesh.material = floorMaterial;
+        computerGroup.add(clone);
+        screenMeshForPick = screenMesh ?? null;
+      }
+
+      scene.add(computerGroup);
+      setLoadProgress(1);
+      setLoaded(true);
+      onLoaded?.();
+
+      const portraitOffset = () =>
+        valMap(window.innerHeight / window.innerWidth, [0.75, 1.75], [0, 2]);
+
+      const PLAY_GAME_RECT = { x: 338, y: 334, w: 260, h: 28 };
+      const GAME_COLS = 32;
+      const GAME_ROWS = 24;
+      const GAME_CELL = 20;
+      type GameMode = 'desktop' | 'menu' | 'snake' | 'pong' | 'breakout' | 'dodge';
+      let gameMode: GameMode = 'desktop';
+      let menuSelectedIndex = 0;
+      let snake: { x: number; y: number }[] = [];
+      let snakeDir: 'up' | 'down' | 'left' | 'right' | null = null;
+      let nextSnakeDir: 'up' | 'down' | 'left' | 'right' | null = null;
+      let food: { x: number; y: number } = { x: 0, y: 0 };
+      let gameTicks = 0;
+      let gameOver = false;
+
+      function spawnFood() {
+        const occupied = new Set(snake.map((s) => `${s.x},${s.y}`));
+        let x: number, y: number;
+        do {
+          x = Math.floor(Math.random() * GAME_COLS);
+          y = Math.floor(Math.random() * GAME_ROWS);
+        } while (occupied.has(`${x},${y}`));
+        food = { x, y };
+      }
+
+      function initSnakeGame() {
+        snake = [{ x: 16, y: 12 }, { x: 15, y: 12 }, { x: 14, y: 12 }];
+        snakeDir = 'right';
+        nextSnakeDir = 'right';
+        gameOver = false;
+        gameTicks = 0;
+        spawnFood();
+        playGameStart();
+      }
+
+      const MENU_ITEMS = [
+        { id: 'snake' as const, label: '1. Snake', rect: { x: 220, y: 178, w: 200, h: 24 } },
+        { id: 'pong' as const, label: '2. Pong', rect: { x: 220, y: 204, w: 200, h: 24 } },
+        { id: 'breakout' as const, label: '3. Breakout', rect: { x: 220, y: 230, w: 200, h: 24 } },
+        { id: 'dodge' as const, label: '4. Dodge', rect: { x: 220, y: 256, w: 200, h: 24 } },
+      ];
+
+      function drawMenuScreen(ctx: CanvasRenderingContext2D, selectedIndex: number, time: number) {
+        const W = screenW;
+        const H = screenH;
+        ctx.fillStyle = 'rgb(45, 30, 22)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.font = 'bold 18px "Courier New", monospace';
+        ctx.fillStyle = '#ffaa44';
+        ctx.fillText('Select game', 220, 158);
+        ctx.font = '16px "Courier New", monospace';
+        const pulse = 0.5 + 0.5 * Math.sin(time * 4);
+        MENU_ITEMS.forEach((item, i) => {
+          const r = item.rect;
+          const isSelected = i === selectedIndex;
+          if (isSelected) {
+            ctx.fillStyle = `rgba(255, 170, 68, ${0.2 + 0.15 * pulse})`;
+            ctx.fillRect(r.x - 8, r.y - 2, r.w + 16, r.h + 6);
+            ctx.strokeStyle = `rgba(255, 170, 68, ${0.6 + 0.35 * pulse})`;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(r.x - 8, r.y - 2, r.w + 16, r.h + 6);
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#ffcc66';
+            ctx.fillText('►', r.x - 18, r.y + 20);
+          }
+          ctx.fillStyle = isSelected ? '#ffcc66' : '#ffcc77';
+          ctx.fillText(item.label, r.x, r.y + 20);
+        });
+        ctx.font = '13px "Courier New", monospace';
+        ctx.fillStyle = 'rgba(255, 204, 119, 0.65)';
+        ctx.fillText('↑↓ select   Enter start   B back   X close', 220, 298);
+      }
+
+      function drawGameScreen(ctx: CanvasRenderingContext2D) {
+        const W = screenW;
+        const H = screenH;
+        ctx.fillStyle = 'rgb(45, 30, 22)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.font = '14px "Courier New", monospace';
+        if (gameOver) {
+          ctx.fillStyle = '#ffaa44';
+          ctx.fillText('Game Over', W / 2 - 40, H / 2 - 20);
+          ctx.fillStyle = 'rgba(255, 204, 119, 0.8)';
+          ctx.fillText('Esc: back to menu', W / 2 - 55, H / 2 + 10);
+          return;
+        }
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        for (let c = 0; c <= GAME_COLS; c++) ctx.fillRect(c * GAME_CELL, 0, 1, H);
+        for (let r = 0; r <= GAME_ROWS; r++) ctx.fillRect(0, r * GAME_CELL, W, 1);
+        ctx.fillStyle = 'rgba(0, 255, 120, 0.9)';
+        ctx.fillRect(food.x * GAME_CELL + 2, food.y * GAME_CELL + 2, GAME_CELL - 4, GAME_CELL - 4);
+        ctx.fillStyle = '#ffaa44';
+        ctx.shadowColor = '#ffaa44';
+        ctx.shadowBlur = 8;
+        snake.forEach((seg, i) => {
+          const pad = i === 0 ? 1 : 2;
+          ctx.fillRect(seg.x * GAME_CELL + pad, seg.y * GAME_CELL + pad, GAME_CELL - pad * 2, GAME_CELL - pad * 2);
+        });
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(255, 170, 68, 0.6)';
+        ctx.fillText('Esc: back to menu', 10, H - 8);
+      }
+
+      let pongPaddleY = 0.5;
+      let pongBall = { x: 0.5, y: 0.5, vx: 0.012, vy: 0.008 };
+      let pongGameOver = false;
+      const PONG_PADDLE_W = 12;
+      const PONG_PADDLE_H = 80;
+      const PONG_BALL_R = 6;
+
+      function initPongGame() {
+        pongPaddleY = 0.5;
+        pongBall = { x: 0.12, y: 0.5, vx: 0.012, vy: 0.008 };
+        pongGameOver = false;
+        playGameStart();
+      }
+
+      function drawPongScreen(ctx: CanvasRenderingContext2D) {
+        const W = screenW;
+        const H = screenH;
+        ctx.fillStyle = 'rgb(45, 30, 22)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.font = '14px "Courier New", monospace';
+        if (pongGameOver) {
+          ctx.fillStyle = '#ffaa44';
+          ctx.fillText('Game Over', W / 2 - 40, H / 2 - 20);
+          ctx.fillStyle = 'rgba(255, 204, 119, 0.8)';
+          ctx.fillText('Esc: back to menu', W / 2 - 55, H / 2 + 10);
+          return;
+        }
+        const paddleX = 24;
+        const py = pongPaddleY * H;
+        ctx.fillStyle = '#ffaa44';
+        ctx.fillRect(paddleX, py - PONG_PADDLE_H / 2, PONG_PADDLE_W, PONG_PADDLE_H);
+        const bx = pongBall.x * W;
+        const by = pongBall.y * H;
+        ctx.beginPath();
+        ctx.arc(bx, by, PONG_BALL_R, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 170, 68, 0.6)';
+        ctx.fillText('Esc: back to menu', 10, H - 8);
+      }
+
+      // Breakout
+      const BRICK_COLS = 10;
+      const BRICK_ROWS = 4;
+      let breakoutPaddleX = 0.5;
+      let breakoutBall = { x: 0.5, y: 0.85, vx: 0.008, vy: -0.01 };
+      let breakoutBricks: { x: number; y: number }[] = [];
+      let breakoutGameOver = false;
+      const BRICK_W = 58;
+      const BRICK_H = 18;
+      const BREAKOUT_PADDLE_W = 70;
+      const BREAKOUT_PADDLE_H = 12;
+      const BREAKOUT_BALL_R = 5;
+
+      function initBreakoutGame() {
+        breakoutPaddleX = 0.5;
+        breakoutBall = { x: 0.5, y: 0.85, vx: 0.008, vy: -0.01 };
+        breakoutBricks = [];
+        for (let row = 0; row < BRICK_ROWS; row++) {
+          for (let col = 0; col < BRICK_COLS; col++) {
+            breakoutBricks.push({
+              x: (col / BRICK_COLS) * (screenW - BRICK_W - 20) + 10 + BRICK_W / 2,
+              y: 50 + row * (BRICK_H + 4),
+            });
+          }
+        }
+        breakoutGameOver = false;
+        playGameStart();
+      }
+
+      function drawBreakoutScreen(ctx: CanvasRenderingContext2D) {
+        const W = screenW;
+        const H = screenH;
+        ctx.fillStyle = 'rgb(45, 30, 22)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.font = '14px "Courier New", monospace';
+        if (breakoutGameOver) {
+          ctx.fillStyle = '#ffaa44';
+          ctx.fillText('Game Over', W / 2 - 40, H / 2 - 20);
+          ctx.fillStyle = 'rgba(255, 204, 119, 0.8)';
+          ctx.fillText('Esc: back to menu', W / 2 - 55, H / 2 + 10);
+          return;
+        }
+        ctx.fillStyle = '#ffaa44';
+        breakoutBricks.forEach((b) => {
+          ctx.fillRect(b.x - BRICK_W / 2, b.y - BRICK_H / 2, BRICK_W, BRICK_H);
+        });
+        const paddleLeft = breakoutPaddleX * W - BREAKOUT_PADDLE_W / 2;
+        ctx.fillRect(paddleLeft, H - 30, BREAKOUT_PADDLE_W, BREAKOUT_PADDLE_H);
+        ctx.beginPath();
+        ctx.arc(breakoutBall.x * W, breakoutBall.y * H, BREAKOUT_BALL_R, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 170, 68, 0.6)';
+        ctx.fillText('Esc: back to menu', 10, H - 8);
+      }
+
+      // Dodge
+      let dodgePlayerX = 0.5;
+      let dodgeObstacles: { x: number; y: number }[] = [];
+      let dodgeGameOver = false;
+      let dodgeSpawnTicks = 0;
+      const DODGE_PLAYER_W = 40;
+      const DODGE_OBSTACLE_W = 36;
+      const DODGE_OBSTACLE_H = 24;
+
+      function initDodgeGame() {
+        dodgePlayerX = 0.5;
+        dodgeObstacles = [];
+        dodgeSpawnTicks = 0;
+        dodgeGameOver = false;
+        playGameStart();
+      }
+
+      function drawDodgeScreen(ctx: CanvasRenderingContext2D) {
+        const W = screenW;
+        const H = screenH;
+        ctx.fillStyle = 'rgb(45, 30, 22)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.font = '14px "Courier New", monospace';
+        if (dodgeGameOver) {
+          ctx.fillStyle = '#ffaa44';
+          ctx.fillText('Game Over', W / 2 - 40, H / 2 - 20);
+          ctx.fillStyle = 'rgba(255, 204, 119, 0.8)';
+          ctx.fillText('Esc: back to menu', W / 2 - 55, H / 2 + 10);
+          return;
+        }
+        ctx.fillStyle = '#ffaa44';
+        const px = dodgePlayerX * W - DODGE_PLAYER_W / 2;
+        ctx.fillRect(px, H - 50, DODGE_PLAYER_W, 24);
+        ctx.fillStyle = '#ff6644';
+        dodgeObstacles.forEach((o) => {
+          ctx.fillRect(o.x - DODGE_OBSTACLE_W / 2, o.y - DODGE_OBSTACLE_H / 2, DODGE_OBSTACLE_W, DODGE_OBSTACLE_H);
+        });
+        ctx.fillStyle = 'rgba(255, 170, 68, 0.6)';
+        ctx.fillText('Esc: back to menu', 10, H - 8);
+      }
+
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      let playGameHovered = false;
+      const onPointerMove = (e: PointerEvent) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        if (!screenMeshForPick) return;
+        const hits = raycaster.intersectObject(screenMeshForPick);
+        if (hits.length === 0) { playGameHovered = false; return; }
+        const uv = hits[0].uv;
+        if (!uv) { playGameHovered = false; return; }
+        const px = uv.x * screenW;
+        const py = (1 - uv.y) * screenH;
+        const r = PLAY_GAME_RECT;
+        playGameHovered = gameMode === 'desktop' && px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h;
+      };
+      const onPointerDown = (e: PointerEvent) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        if (!screenMeshForPick) return;
+        const hits = raycaster.intersectObject(screenMeshForPick);
+        if (hits.length === 0) return;
+        const uv = hits[0].uv;
+        if (!uv) return;
+        const px = uv.x * screenW;
+        const py = (1 - uv.y) * screenH;
+        if (gameMode === 'desktop') {
+          const r = PLAY_GAME_RECT;
+          if (px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h) {
+            gameMode = 'menu';
+            menuSelectedIndex = 0;
+          }
+        } else if (gameMode === 'menu') {
+          for (const item of MENU_ITEMS) {
+            const r = item.rect;
+            if (px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h) {
+              gameMode = item.id;
+              if (item.id === 'snake') initSnakeGame();
+              else if (item.id === 'pong') initPongGame();
+              else if (item.id === 'breakout') initBreakoutGame();
+              else if (item.id === 'dodge') initDodgeGame();
+              break;
+            }
+          }
+        }
+      };
+      const onKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          if (gameMode === 'menu') gameMode = 'desktop';
+          else if (['snake', 'pong', 'breakout', 'dodge'].includes(gameMode)) gameMode = 'menu';
+          return;
+        }
+        if (gameMode === 'menu') {
+          if (e.key === 'ArrowDown') {
+            menuSelectedIndex = (menuSelectedIndex + 1) % MENU_ITEMS.length;
+            e.preventDefault();
+          } else if (e.key === 'ArrowUp') {
+            menuSelectedIndex = (menuSelectedIndex - 1 + MENU_ITEMS.length) % MENU_ITEMS.length;
+            e.preventDefault();
+          } else if (e.key === 'Enter') {
+            const item = MENU_ITEMS[menuSelectedIndex];
+            gameMode = item.id;
+            if (item.id === 'snake') initSnakeGame();
+            else if (item.id === 'pong') initPongGame();
+            else if (item.id === 'breakout') initBreakoutGame();
+            else if (item.id === 'dodge') initDodgeGame();
+            e.preventDefault();
+          } else if (e.key === 'b' || e.key === 'B') {
+            gameMode = 'desktop';
+            e.preventDefault();
+          } else if (e.key === 'x' || e.key === 'X') {
+            gameMode = 'desktop';
+            e.preventDefault();
+          } else if (e.key === '1') { gameMode = 'snake'; initSnakeGame(); e.preventDefault(); }
+          else if (e.key === '2') { gameMode = 'pong'; initPongGame(); e.preventDefault(); }
+          else if (e.key === '3') { gameMode = 'breakout'; initBreakoutGame(); e.preventDefault(); }
+          else if (e.key === '4') { gameMode = 'dodge'; initDodgeGame(); e.preventDefault(); }
+          return;
+        }
+        if (gameMode === 'snake' && !gameOver) {
+          if (e.key === 'ArrowUp') { nextSnakeDir = 'up'; e.preventDefault(); }
+          else if (e.key === 'ArrowDown') { nextSnakeDir = 'down'; e.preventDefault(); }
+          else if (e.key === 'ArrowLeft') { nextSnakeDir = 'left'; e.preventDefault(); }
+          else if (e.key === 'ArrowRight') { nextSnakeDir = 'right'; e.preventDefault(); }
+        }
+        if (gameMode === 'pong' && !pongGameOver) {
+          if (e.key === 'ArrowUp') { pongPaddleY = Math.max(0.15, pongPaddleY - 0.02); e.preventDefault(); }
+          else if (e.key === 'ArrowDown') { pongPaddleY = Math.min(0.85, pongPaddleY + 0.02); e.preventDefault(); }
+        }
+        if (gameMode === 'breakout' && !breakoutGameOver) {
+          if (e.key === 'ArrowLeft') { breakoutPaddleX = Math.max(0.08, breakoutPaddleX - 0.03); e.preventDefault(); }
+          else if (e.key === 'ArrowRight') { breakoutPaddleX = Math.min(0.92, breakoutPaddleX + 0.03); e.preventDefault(); }
+        }
+        if (gameMode === 'dodge' && !dodgeGameOver) {
+          if (e.key === 'ArrowLeft') { dodgePlayerX = Math.max(0.1, dodgePlayerX - 0.04); e.preventDefault(); }
+          else if (e.key === 'ArrowRight') { dodgePlayerX = Math.min(0.9, dodgePlayerX + 0.04); e.preventDefault(); }
+        }
+      };
+      const onPointerLeave = () => { playGameHovered = false; };
+      canvas.addEventListener('pointerdown', onPointerDown);
+      canvas.addEventListener('pointermove', onPointerMove);
+      canvas.addEventListener('pointerleave', onPointerLeave);
+      window.addEventListener('keydown', onKeyDown);
+
+      let time = 0;
+      let lastTypingNameLen = -1;
+      let lastTypingGreetingLen = -1;
+
+      const ROTATION_CAP = 0.08;
+      function tick() {
+        time += 0.016;
+        timeRef.current = time;
+        const rawTypingTime = typingStartTimeRef.current === null ? 0 : time - typingStartTimeRef.current;
+        const TYPING_DELAY = 0.3;
+        const typingTime = Math.max(0, rawTypingTime - TYPING_DELAY);
+        const scroll = scrollRef.current;
+        const easedScroll = easeInOutCubic(Math.min(1, scroll));
+        const anim = easedScroll * ROTATION_CAP;
+        
+        // Smooth camera movement with easing (only up to 8% of full journey)
+        camera.position.z = valMap(anim, [0, ROTATION_CAP], [-2.5 - portraitOffset(), -10 - portraitOffset()]);
+        camera.lookAt(0, 0, 0);
+        
+        // Computer group animations with easing (only up to 8% rotation/zoom)
+        computerGroup.position.x = computerHorizontal * anim;
+        computerGroup.position.y = valMap(anim, [0, ROTATION_CAP], [0, computerHeight]);
+        computerGroup.rotation.y = computerAngle * anim;
+        
+        // Subtle floating animation
+        computerGroup.position.y += Math.sin(time * 0.5) * 0.01;
+        computerGroup.rotation.z = Math.sin(time * 0.3) * 0.005;
+
+        // Galaxy: very slow upward drift + gentle rotation
+        const posS = geoSmall.attributes.position.array as Float32Array;
+        for (let i = 0; i < 420; i++) {
+          posS[i * 3 + 1] -= particleSpeeds[i];
+          if (posS[i * 3 + 1] < -6) posS[i * 3 + 1] = 5;
+        }
+        geoSmall.attributes.position.needsUpdate = true;
+        const posB = geoBig.attributes.position.array as Float32Array;
+        for (let i = 0; i < 100; i++) {
+          posB[i * 3 + 1] -= particleSpeeds[420 + i];
+          if (posB[i * 3 + 1] < -6) posB[i * 3 + 1] = 5;
+        }
+        geoBig.attributes.position.needsUpdate = true;
+        starsSmall.rotation.y += 0.00006;
+        starsBig.rotation.y += 0.00006;
+
+        // Dynamic lighting — brighter pulse
+        fillLight.intensity = 1.1 + Math.sin(time * 2) * 0.3;
+        fillLight.position.x = Math.cos(time * 0.5) * 1.5;
+        fillLight.position.z = Math.sin(time * 0.5) * 1.5;
+
+        // Update screen texture: menu / game / desktop
+        const dispCtx = displayCanvas.getContext('2d');
+        if (dispCtx) {
+          if (gameMode === 'menu') {
+            drawMenuScreen(dispCtx, menuSelectedIndex, time);
+          } else if (gameMode === 'snake') {
+            if (!gameOver) {
+              gameTicks++;
+              if (nextSnakeDir && (gameTicks % 8 === 0)) {
+                const opp: Record<string, string> = { up: 'down', down: 'up', left: 'right', right: 'left' };
+                if (opp[nextSnakeDir] !== snakeDir) snakeDir = nextSnakeDir;
+                const head = snake[0];
+                let nx = head.x; let ny = head.y;
+                if (snakeDir === 'up') ny--; else if (snakeDir === 'down') ny++; else if (snakeDir === 'left') nx--; else nx++;
+                if (nx < 0 || nx >= GAME_COLS || ny < 0 || ny >= GAME_ROWS || snake.some((s) => s.x === nx && s.y === ny)) {
+                  gameOver = true;
+                  playGameOver();
+                } else {
+                  snake.unshift({ x: nx, y: ny });
+                  if (nx === food.x && ny === food.y) {
+                    spawnFood();
+                    playGameEat();
+                  } else snake.pop();
+                }
+              }
+            }
+            drawGameScreen(dispCtx);
+          } else if (gameMode === 'pong') {
+            if (!pongGameOver) {
+              pongBall.x += pongBall.vx;
+              pongBall.y += pongBall.vy;
+              if (pongBall.y <= 0 || pongBall.y >= 1) {
+                pongBall.vy *= -1;
+                playGameBounce();
+              }
+              const paddleLeft = 24 / screenW;
+              const paddleTop = (pongPaddleY * screenH - PONG_PADDLE_H / 2) / screenH;
+              const paddleBottom = (pongPaddleY * screenH + PONG_PADDLE_H / 2) / screenH;
+              if (pongBall.x <= paddleLeft + (PONG_PADDLE_W + PONG_BALL_R * 2) / screenW && pongBall.x >= paddleLeft - 0.02) {
+                if (pongBall.y >= paddleTop && pongBall.y <= paddleBottom) {
+                  pongBall.vx *= -1;
+                  pongBall.x = paddleLeft + (PONG_PADDLE_W + PONG_BALL_R) / screenW;
+                  playGameBounce();
+                }
+              }
+              if (pongBall.x >= 1) {
+                pongBall.vx *= -1;
+                playGameBounce();
+              }
+              if (pongBall.x < -0.05) {
+                pongGameOver = true;
+                playGameOver();
+              }
+            }
+            drawPongScreen(dispCtx);
+          } else if (gameMode === 'breakout') {
+            if (!breakoutGameOver) {
+              breakoutBall.x += breakoutBall.vx;
+              breakoutBall.y += breakoutBall.vy;
+              const bx = breakoutBall.x * screenW;
+              const by = breakoutBall.y * screenH;
+              if (breakoutBall.x <= 0.02 || breakoutBall.x >= 0.98) {
+                breakoutBall.vx *= -1;
+                playGameBounce();
+              }
+              if (breakoutBall.y <= 0.04) {
+                breakoutBall.vy *= -1;
+                playGameBounce();
+              }
+              const paddleLeft = breakoutPaddleX * screenW - BREAKOUT_PADDLE_W / 2;
+              const paddleRight = breakoutPaddleX * screenW + BREAKOUT_PADDLE_W / 2;
+              if (breakoutBall.y * screenH >= screenH - 35 && breakoutBall.vy > 0) {
+                if (bx >= paddleLeft - BREAKOUT_BALL_R && bx <= paddleRight + BREAKOUT_BALL_R) {
+                  breakoutBall.vy *= -1;
+                  breakoutBall.y = (screenH - 35) / screenH;
+                  playGameBounce();
+                }
+              }
+              if (breakoutBall.y > 1.1) {
+                breakoutGameOver = true;
+                playGameOver();
+              }
+              breakoutBricks = breakoutBricks.filter((b) => {
+                const hit = Math.abs(bx - b.x) < BRICK_W / 2 + BREAKOUT_BALL_R && Math.abs(by - b.y) < BRICK_H / 2 + BREAKOUT_BALL_R;
+                if (hit) playGameBreak();
+                return !hit;
+              });
+            }
+            drawBreakoutScreen(dispCtx);
+          } else if (gameMode === 'dodge') {
+            if (!dodgeGameOver) {
+              dodgeObstacles.forEach((o) => { o.y += 2.2; });
+              dodgeObstacles = dodgeObstacles.filter((o) => o.y - DODGE_OBSTACLE_H / 2 < screenH);
+              dodgeSpawnTicks++;
+              if (dodgeSpawnTicks >= 28) {
+                dodgeSpawnTicks = 0;
+                dodgeObstacles.push({
+                  x: 80 + Math.random() * (screenW - 160),
+                  y: -DODGE_OBSTACLE_H,
+                });
+              }
+              const px = dodgePlayerX * screenW;
+              const py = screenH - 38;
+              for (const o of dodgeObstacles) {
+                if (Math.abs(px - o.x) < DODGE_PLAYER_W / 2 + DODGE_OBSTACLE_W / 2 && Math.abs(py - o.y) < 12 + DODGE_OBSTACLE_H / 2) {
+                  dodgeGameOver = true;
+                  playGameOver();
+                  break;
+                }
+              }
+            }
+            drawDodgeScreen(dispCtx);
+          } else {
+          dispCtx.drawImage(baseCanvas, 0, 0);
+            const nameLen = Math.min(nameStr.length, Math.floor(typingTime * NAME_TYPING_SPEED));
+            const greetingStartTime = nameStr.length / NAME_TYPING_SPEED + GREETING_START_DELAY;
+            const greetingLen = typingTime < greetingStartTime
+              ? 0
+              : Math.min(greetingStr.length, Math.floor((typingTime - greetingStartTime) * GREETING_TYPING_SPEED));
+            if (nameLen > lastTypingNameLen) {
+              lastTypingNameLen = nameLen;
+              playTyping();
+            }
+            if (greetingLen > lastTypingGreetingLen) {
+              lastTypingGreetingLen = greetingLen;
+              playTyping();
+            }
+            const cursorOn = Math.floor(time * 2) % 2 === 0;
+            drawTypedHero(dispCtx, nameLen, greetingLen, cursorOn);
+          const pulse = 0.5 + 0.5 * Math.sin(time * 1.8);
+          dispCtx.fillStyle = `rgba(255, 153, 51, ${0.06 * pulse})`;
+          dispCtx.fillRect(8, 2, screenW - 16, 22);
+          if (cursorOn) {
+            dispCtx.fillStyle = '#ffaa44';
+            dispCtx.fillRect(52, screenH - 19, 2, 10);
+          }
+            // Play games button: auto glow + hover glare/animation
+            const r = PLAY_GAME_RECT;
+            const playPulse = 0.5 + 0.5 * Math.sin(time * 3);
+            const glarePhase = (time * 0.8) % 1;
+            const outerPad = playGameHovered ? 14 : 10;
+            dispCtx.save();
+            dispCtx.globalCompositeOperation = 'lighter';
+            const glowIntensity = playGameHovered ? 0.35 + 0.25 * playPulse : 0.2 + 0.18 * playPulse;
+            dispCtx.shadowColor = 'rgba(255, 180, 80, 0.9)';
+            dispCtx.shadowBlur = playGameHovered ? 20 + 6 * playPulse : 14 + 4 * playPulse;
+            dispCtx.strokeStyle = `rgba(255, 170, 68, ${glowIntensity})`;
+            dispCtx.lineWidth = playGameHovered ? 3 : 2;
+            dispCtx.strokeRect(r.x - outerPad, r.y - outerPad, r.w + outerPad * 2, r.h + outerPad * 2);
+            dispCtx.shadowBlur = 0;
+            dispCtx.globalCompositeOperation = 'source-over';
+            dispCtx.strokeStyle = `rgba(255, 170, 68, ${0.35 + 0.5 * playPulse})`;
+            dispCtx.lineWidth = 2;
+            dispCtx.strokeRect(r.x, r.y, r.w, r.h);
+            // Glare sweep: always on (not only on hover)
+            const sweepW = 50;
+            const sweepX = r.x - sweepW + glarePhase * (r.w + sweepW * 2);
+            const grad = dispCtx.createLinearGradient(sweepX, 0, sweepX + sweepW, 0);
+            grad.addColorStop(0, 'rgba(255, 220, 150, 0)');
+            grad.addColorStop(0.35, 'rgba(255, 220, 150, 0.4)');
+            grad.addColorStop(0.5, 'rgba(255, 245, 210, 0.55)');
+            grad.addColorStop(0.65, 'rgba(255, 220, 150, 0.4)');
+            grad.addColorStop(1, 'rgba(255, 220, 150, 0)');
+            dispCtx.save();
+            dispCtx.beginPath();
+            dispCtx.rect(r.x, r.y, r.w, r.h);
+            dispCtx.clip();
+            dispCtx.globalCompositeOperation = 'lighter';
+            dispCtx.fillStyle = grad;
+            dispCtx.fillRect(r.x - sweepW, r.y, r.w + sweepW * 2, r.h);
+            dispCtx.restore();
+            dispCtx.restore();
+            dispCtx.lineWidth = 1;
+          }
+          contentTexture.needsUpdate = true;
+        }
+
+        // CRT pass – scanlines + noise + dark orange glow
+        crtMaterial.uniforms.uTime.value = time;
+        renderer.setRenderTarget(crtRenderTarget);
+        renderer.clear();
+        renderer.render(crtScene, crtCamera);
+        renderer.setRenderTarget(null);
+
+        composer.render();
+        animationId = requestAnimationFrame(tick);
+      }
+      animationId = requestAnimationFrame(tick);
+
+      const onResize = () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        composer.setSize(window.innerWidth, window.innerHeight);
+      };
+      window.addEventListener('resize', onResize);
+
+      cleanupRef.current = () => {
+        canvas.removeEventListener('pointerdown', onPointerDown);
+        canvas.removeEventListener('pointermove', onPointerMove);
+        canvas.removeEventListener('pointerleave', onPointerLeave);
+        window.removeEventListener('keydown', onKeyDown);
+        window.removeEventListener('resize', onResize);
+        cancelAnimationFrame(animationId);
+        composer.dispose();
+        renderer.dispose();
+        contentTexture.dispose();
+        crtRenderTarget.dispose();
+        crtMaterial.dispose();
+        bakeTexture?.dispose();
+        geoSmall.dispose();
+        geoBig.dispose();
+        matSmall.dispose();
+        matBig.dispose();
+      };
+    })().catch((err) => {
+      console.error('Hero3D init error:', err);
+    });
+
+    return () => {
+      cleanupRef.current?.();
+      cleanupRef.current = null;
+    };
+  }, [mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    const OPACITY_EPS = 0.02;
+    const onScroll = () => {
+      const vh = window.innerHeight;
+      scrollRef.current = window.scrollY / vh;
+      const fadeStart = 1.25;
+      const fadeDuration = 0.5;
+      const opacity = easeOutCubic(Math.min(1, Math.max(0, 1 - (window.scrollY / vh - fadeStart) / fadeDuration)));
+      if (Math.abs(opacity - lastOpacityRef.current) > OPACITY_EPS) {
+        lastOpacityRef.current = opacity;
+        setCanvasOpacity(opacity);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [mounted]);
+
+  useEffect(() => {
+    if (experienceStarted) {
+      typingStartTimeRef.current = timeRef.current;
+      resumeAudioForTyping();
+    }
+  }, [experienceStarted]);
+
+  return (
+    <section id="hero" className="hero3d-section">
+      {mounted && (
+        <div 
+          className={`hero3d-canvas-wrap ${loaded ? 'hero3d-canvas-loaded' : ''} ${experienceStarted ? 'hero3d-reveal' : ''}`}
+          style={{ opacity: canvasOpacity }}
+        >
+          <div className="hero3d-canvas-chromatic" aria-hidden />
+          <div className="hero3d-canvas-vignette" aria-hidden />
+          <canvas ref={canvasRef} className="hero3d-canvas" />
+        </div>
+      )}
+
+      <div  className="hero3d-backup" aria-hidden>
+        <p className="hero3d-backup-label">{personalInfo.intro}</p>
+        <h1 className="hero3d-backup-name">{personalInfo.name}</h1>
+        <p className="hero3d-backup-tagline">{personalInfo.whoami}</p>
+      </div>
+
+      <div
+        className="hero3d-bridge"
+        aria-hidden
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: '60vh',
+          background: 'linear-gradient(180deg, transparent 0%, rgba(255, 102, 0, 0.1) 20%, rgba(13, 10, 8, 0.4) 40%, rgba(13, 10, 8, 0.7) 60%, rgba(13, 10, 8, 0.9) 80%, #0d0a08 100%)',
+          pointerEvents: 'none',
+          zIndex: 2,
+        }}
+      />
+      
+    </section>
+  );
+}
