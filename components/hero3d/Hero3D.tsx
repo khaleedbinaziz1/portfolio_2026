@@ -190,7 +190,10 @@ function createScreenTexture(
       const heroYGreeting = heroYName + 42;
       ctx.font = heroIntroFont;
       ctx.fillStyle = colorMuted;
+      ctx.shadowColor = 'rgba(255, 204, 119, 0.5)';
+      ctx.shadowBlur = 6;
       ctx.fillText(intro, heroX, heroYStart);
+      ctx.shadowBlur = 0;
 
       function drawTypedHero(
         drawCtx: CanvasRenderingContext2D,
@@ -201,22 +204,36 @@ function createScreenTexture(
         drawCtx.font = heroNameFont;
         drawCtx.fillStyle = colorBright;
         drawCtx.shadowColor = colorBright;
-        drawCtx.shadowBlur = 16;
+        drawCtx.shadowBlur = 24;
+        drawCtx.fillText(name.substring(0, nameLen), heroX, heroYName);
+        drawCtx.shadowBlur = 10;
         drawCtx.fillText(name.substring(0, nameLen), heroX, heroYName);
         drawCtx.shadowBlur = 0;
+        drawCtx.fillText(name.substring(0, nameLen), heroX, heroYName);
         const visibleGreeting = greeting.substring(0, greetingLen);
         if (visibleGreeting) {
           drawCtx.font = heroGreetingFont;
           drawCtx.fillStyle = colorBright;
           drawCtx.shadowColor = '#ffcc77';
-          drawCtx.shadowBlur = 20;
+          drawCtx.shadowBlur = 22;
           let gy = heroYGreeting;
           const gLines = wrapText(drawCtx, visibleGreeting, gridW);
           gLines.forEach((line) => {
             drawCtx.fillText(line, heroX, gy);
             gy += heroGreetingLineHeight;
           });
+          drawCtx.shadowBlur = 10;
+          gy = heroYGreeting;
+          gLines.forEach((line) => {
+            drawCtx.fillText(line, heroX, gy);
+            gy += heroGreetingLineHeight;
+          });
           drawCtx.shadowBlur = 0;
+          gy = heroYGreeting;
+          gLines.forEach((line) => {
+            drawCtx.fillText(line, heroX, gy);
+            gy += heroGreetingLineHeight;
+          });
           if (showCursor && greetingLen === greeting.length) {
             const lastLine = gLines[gLines.length - 1] ?? '';
             const cursorX = heroX + drawCtx.measureText(lastLine).width + 4;
@@ -235,6 +252,8 @@ function createScreenTexture(
       ctx.strokeRect(rightPanelX, panelY, rightPanelW, panelH);
       ctx.font = fontMonoSmall;
       ctx.fillStyle = 'rgba(255, 204, 119, 0.85)';
+      ctx.shadowColor = 'rgba(255, 170, 68, 0.4)';
+      ctx.shadowBlur = 4;
       ctx.fillText('$ whoami', rightPanelX + 10, panelY + 20);
       ctx.fillStyle = colorAccent;
       const whoamiLines = wrapText(ctx, whoami, maxTextWidth);
@@ -247,6 +266,7 @@ function createScreenTexture(
       ctx.fillText(stack, rightPanelX + 10, panelY + 102);
       ctx.fillStyle = colorMuted;
       ctx.fillText('↓ scroll to explore', rightPanelX + 10, panelY + 128);
+      ctx.shadowBlur = 0;
 
       // ─── Play games: smaller retro block ~150px below panel ───
       const playGameGap = 12 + 150;
@@ -267,7 +287,7 @@ function createScreenTexture(
       ctx.font = 'bold 14px "Courier New", monospace';
       ctx.fillStyle = '#ffaa44';
       ctx.shadowColor = 'rgba(255, 170, 68, 0.8)';
-      ctx.shadowBlur = 4;
+      ctx.shadowBlur = 8;
       ctx.fillText('▶  P L A Y   G A M E S  ◀', px + (pw - ctx.measureText('▶  P L A Y   G A M E S  ◀').width) / 2, playGameBoxY + playGameBoxH / 2 + 5);
       ctx.shadowBlur = 0;
 
@@ -282,11 +302,14 @@ function createScreenTexture(
       ctx.stroke();
       ctx.font = fontMonoSmall;
       ctx.fillStyle = 'rgba(0, 255, 120, 0.8)';
+      ctx.shadowColor = 'rgba(0, 255, 120, 0.5)';
+      ctx.shadowBlur = 3;
       ctx.fillText('●', 12, statusY + 15);
       ctx.fillStyle = colorMuted;
       ctx.fillText(' Ready', 24, statusY + 15);
       ctx.fillStyle = 'rgba(255, 170, 68, 0.55)';
       ctx.fillText('Scroll down', W - 92, statusY + 15);
+      ctx.shadowBlur = 0;
 
       const tex = new THREE.CanvasTexture(displayCanvas);
       tex.flipY = true;
@@ -383,16 +406,16 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.5;
 
-      // Post-processing: moderate bloom so screen text/image don't glow excessively
+      // Post-processing: stronger bloom for CRT phosphor glow (text and image glow more)
       const composer = new EffectComposer(renderer);
       const renderPass = new RenderPass(scene, camera);
       composer.addPass(renderPass);
 
       const bloomPass = new UnrealBloomPass(
         new THREE.Vector2(window.innerWidth, window.innerHeight),
-        0.5,  // strength — reduced so image/text don't glow too much
-        0.5,  // radius
-        0.38  // threshold — higher so only brightest parts bloom
+        0.52,  // strength — moderate glow
+        0.5,   // radius
+        0.32   // threshold
       );
       composer.addPass(bloomPass);
 
@@ -448,18 +471,22 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       const contentTexture = screenTextureResult.texture;
       const { baseCanvas, displayCanvas, W: screenW, H: screenH, drawTypedHero } = screenTextureResult;
 
-      // CRT effect: shader pass (ref noise.frag) – less noise, finer scanlines, dark orange glow
+      // CRT effect: heavier noise, visible scanlines, phosphor glow – real CRT look
       const CRT_NOISE_FRAG = `
         #define PI 3.1415926538
-        #define LINE_SIZE 520.0
-        #define LINE_STRENGTH 0.018
-        #define LINE_OFFSET 2.0
-        #define NOISE_STRENGTH 0.06
+        #define LINE_SIZE 480.0
+        #define LINE_STRENGTH 0.038
+        #define LINE_OFFSET 1.6
+        #define NOISE_STRENGTH 0.14
+        #define NOISE_FINE 0.06
         uniform sampler2D uDiffuse;
         uniform float uTime;
         varying vec2 vUv;
         float rand(vec2 co){
           return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+        }
+        float rand2(vec2 co){
+          return fract(sin(dot(co, vec2(39.17, 91.43))) * 21838.12);
         }
         float squareWave(float x){
           return (
@@ -471,13 +498,15 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         }
         void main() {
           vec4 color = texture2D(uDiffuse, vUv);
-          color.rgb *= 1.12;
+          color.rgb *= 1.1;
           color.rgb += vec3(0.03, 0.02, 0.01);
-          float r = rand(vUv*uTime);
-          gl_FragColor = color + (vec4(r,r,r,0) * NOISE_STRENGTH) + squareWave(vUv.y);
+          float r = rand(vUv * (uTime * 0.1 + 1.0));
+          float r2 = rand2(vUv * 4.0 + uTime * 0.05);
+          gl_FragColor = color + (vec4(r,r,r,0) * NOISE_STRENGTH) + (vec4(r2,r2,r2,0) * NOISE_FINE);
+          gl_FragColor.rgb += squareWave(vUv.y);
           float dist = length(vUv - 0.5);
-          float glow = 1.0 - smoothstep(0.25, 0.75, dist);
-          vec3 darkOrange = vec3(0.035, 0.018, 0.008);
+          float glow = 1.0 - smoothstep(0.2, 0.7, dist);
+          vec3 darkOrange = vec3(0.045, 0.022, 0.01);
           gl_FragColor.rgb += darkOrange * glow;
         }
       `;
@@ -1241,7 +1270,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
             dispCtx.globalCompositeOperation = 'lighter';
             const glowIntensity = playGameHovered ? 0.35 + 0.25 * playPulse : 0.2 + 0.18 * playPulse;
             dispCtx.shadowColor = 'rgba(255, 180, 80, 0.9)';
-            dispCtx.shadowBlur = playGameHovered ? 20 + 6 * playPulse : 14 + 4 * playPulse;
+            dispCtx.shadowBlur = playGameHovered ? 14 + 4 * playPulse : 10 + 3 * playPulse;
             dispCtx.strokeStyle = `rgba(255, 170, 68, ${glowIntensity})`;
             dispCtx.lineWidth = playGameHovered ? 3 : 2;
             dispCtx.strokeRect(r.x - outerPad, r.y - outerPad, r.w + outerPad * 2, r.h + outerPad * 2);
