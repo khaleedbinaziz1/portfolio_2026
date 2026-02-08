@@ -28,7 +28,7 @@ export default function About() {
             <span className="about-num">01.</span>
             <h2 className="about-title">About Me</h2>
           </div>
-          <p className="about-subtitle">The person behind the screen</p>
+          <p className="about-subtitle">// the person behind the screen</p>
           <div className="about-header-line hidden md:block" />
         </div>
 
@@ -87,6 +87,16 @@ export default function About() {
               {line}
             </motion.p>
           ))}
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: aboutLines.length * STAGGER, ease: EASE }}
+            className="about-eof"
+            aria-hidden
+          >
+            — end of about.txt —
+          </motion.p>
         </div>
       </motion.div>
     </section>

@@ -64,6 +64,9 @@ type ScreenTextureParams = {
   whoami: string;
   stack?: string;
   statusLine?: string;
+  email?: string;
+  bio?: string;
+  role?: string;
 };
 
 function createScreenTexture(
@@ -73,31 +76,39 @@ function createScreenTexture(
 ): Promise<ScreenTextureResult> {
   const W = 640;
   const H = 480;
-  // CRT phosphor-style base: warm dark amber/brown (background of texts = CRT)
-  const colorDark = 'rgb(45, 30, 22)';
-  const colorDarkPanel = 'rgba(42, 26, 18, 0.92)';
-  const colorDarkStatus = 'rgba(38, 24, 16, 0.95)';
-  const colorBright = '#ffaa44';
-  const colorAccent = '#ffcc77';
-  const colorMuted = 'rgba(255, 204, 119, 0.75)';
+  // Unified palette: base, panel, status, primary (magenta), accent (teal), label (amber), dim
+  const colorDark = 'rgb(26, 22, 32)';
+  const colorDarkPanel = 'rgba(22, 18, 28, 0.96)';
+  const colorDarkStatus = 'rgba(18, 15, 24, 0.98)';
+  const colorBright = '#f59e0b';
+  const colorAccent = '#2dd4bf';
+  const colorMagenta = '#c084fc';
+  const colorLabel = 'rgba(251, 191, 36, 0.8)';
+  const colorMuted = 'rgba(200, 180, 220, 0.7)';
+  const colorDim = 'rgba(160, 150, 180, 0.5)';
+  const colorBorder = 'rgba(245, 158, 11, 0.4)';
 
   const gridW = 280;
   const gridH = 210;
-  const imageLeft = 16;
-  const imageTop = 32;
+  const imageLeft = 20;
+  const imageTop = 36;
   const lineHeight = 18;
-  const lineHeightSmall = 14;
+  const lineHeightSmall = 13;
   const fontMono = '16px "Courier New", monospace';
-  const fontMonoSmall = '13px "Courier New", monospace';
+  const fontMonoSmall = '12px "Courier New", monospace';
   const fontBold = 'bold 24px "Courier New", monospace';
   const heroIntroFont = '15px "Courier New", monospace';
   const heroNameFont = 'bold 32px "Courier New", monospace';
   const heroGreetingFont = 'bold 24px "Courier New", monospace';
   const heroGreetingLineHeight = 28;
   const rightPanelX = 308;
-  const rightPanelW = W - rightPanelX - 12;
-  const maxTextWidth = rightPanelW - 12;
-  const statusBarH = 24;
+  const rightPanelW = W - rightPanelX - 16;
+  const maxTextWidth = rightPanelW - 24;
+  const statusBarH = 28;
+  const lineH = 17;
+  const space = 8;      // base unit
+  const pad = 16;      // panel inner padding
+  const labelW = 42;   // fixed width for labels (role, email, stack)
 
   const baseCanvas = document.createElement('canvas');
   baseCanvas.width = W;
@@ -116,6 +127,9 @@ function createScreenTexture(
     whoami,
     stack = 'React · Next.js · Node · TypeScript',
     statusLine = '● Ready',
+    email = '',
+    bio = 'Building scalable web apps. MSc CSE @ East Delta University.',
+    role = 'Full-Stack Developer',
   } = params;
 
   return new Promise((resolve, reject) => {
@@ -157,11 +171,23 @@ function createScreenTexture(
 
       const grad = ctx.createLinearGradient(0, 0, 0, H);
       grad.addColorStop(0, 'rgba(0,0,0,0)');
-      grad.addColorStop(0.4, 'rgba(50, 30, 18, 0.05)');
-      grad.addColorStop(0.75, 'rgba(40, 24, 14, 0.2)');
-      grad.addColorStop(1, 'rgba(35, 20, 10, 0.45)');
+      grad.addColorStop(0.35, 'rgba(40, 28, 48, 0.04)');
+      grad.addColorStop(0.7, 'rgba(24, 18, 32, 0.15)');
+      grad.addColorStop(1, 'rgba(18, 14, 24, 0.35)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, W, H);
+
+      // Title bar
+      ctx.font = '11px "Courier New", monospace';
+      ctx.fillStyle = colorLabel;
+      ctx.fillText('khaledbinaziz.dev', pad, 15);
+      ctx.fillStyle = colorDim;
+      ctx.fillText('portfolio', W - pad - ctx.measureText('portfolio').width, 15);
+
+      // Subtitle under photo: role + stack shorthand
+      ctx.font = '11px "Courier New", monospace';
+      ctx.fillStyle = colorAccent;
+      ctx.fillText(`${role} · ${stack.split(' · ').slice(0, 3).join(' · ')}`, imageLeft, imageTop + gridH + 10);
 
       ctx.font = fontMono;
       function wrapText(measureCtx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
@@ -182,16 +208,16 @@ function createScreenTexture(
         return lines;
       }
 
-      // ─── Hero block left: only intro on base (name + greeting drawn with typing in tick) ───
+      // ─── Hero block left ───
       const heroX = imageLeft;
-      const heroYStart = imageTop + gridH + 16;
+      const heroYStart = imageTop + gridH + 24;
       // Intro is 15px; name is 32px (extends above baseline). Keep name baseline below intro.
       const heroYName = heroYStart + 28;
       const heroYGreeting = heroYName + 42;
       ctx.font = heroIntroFont;
-      ctx.fillStyle = colorMuted;
-      ctx.shadowColor = 'rgba(255, 204, 119, 0.5)';
-      ctx.shadowBlur = 6;
+      ctx.fillStyle = colorLabel;
+      ctx.shadowColor = 'rgba(251, 191, 36, 0.35)';
+      ctx.shadowBlur = 4;
       ctx.fillText(intro, heroX, heroYStart);
       ctx.shadowBlur = 0;
 
@@ -213,8 +239,8 @@ function createScreenTexture(
         const visibleGreeting = greeting.substring(0, greetingLen);
         if (visibleGreeting) {
           drawCtx.font = heroGreetingFont;
-          drawCtx.fillStyle = colorBright;
-          drawCtx.shadowColor = '#ffcc77';
+          drawCtx.fillStyle = colorMagenta;
+          drawCtx.shadowColor = colorMagenta;
           drawCtx.shadowBlur = 22;
           let gy = heroYGreeting;
           const gLines = wrapText(drawCtx, visibleGreeting, gridW);
@@ -237,79 +263,131 @@ function createScreenTexture(
           if (showCursor && greetingLen === greeting.length) {
             const lastLine = gLines[gLines.length - 1] ?? '';
             const cursorX = heroX + drawCtx.measureText(lastLine).width + 4;
-            drawCtx.fillStyle = colorBright;
+            drawCtx.fillStyle = colorMagenta;
             drawCtx.fillRect(cursorX, gy - heroGreetingLineHeight - 22, 4, 24);
           }
         }
       }
 
-      // ─── Right panel: CRT-tinted background (same as text background = CRT) ───
+      // ─── Right panel: info card ───
       const panelY = imageTop;
-      const panelH = 140;
+      const panelH = 208;
+      const sectionGap = space * 1.5;  // 12
+
       ctx.fillStyle = colorDarkPanel;
       ctx.fillRect(rightPanelX, panelY, rightPanelW, panelH);
-      ctx.strokeStyle = 'rgba(255, 170, 68, 0.45)';
+      ctx.strokeStyle = colorBorder;
+      ctx.lineWidth = 1;
       ctx.strokeRect(rightPanelX, panelY, rightPanelW, panelH);
+      // Left accent (magenta hint)
+      ctx.fillStyle = 'rgba(192, 132, 252, 0.35)';
+      ctx.fillRect(rightPanelX, panelY, 3, panelH);
+
+      let py = panelY + pad;
+      ctx.font = 'bold 11px "Courier New", monospace';
+      ctx.fillStyle = colorMagenta;
+      ctx.fillText('INFO', rightPanelX + pad, py);
+      py += 2;
+      ctx.strokeStyle = colorBorder;
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(rightPanelX + pad, py);
+      ctx.lineTo(rightPanelX + rightPanelW - pad, py);
+      ctx.stroke();
+      py += space + 2;
+
+      const valueX = rightPanelX + pad + labelW;
       ctx.font = fontMonoSmall;
-      ctx.fillStyle = 'rgba(255, 204, 119, 0.85)';
-      ctx.shadowColor = 'rgba(255, 170, 68, 0.4)';
-      ctx.shadowBlur = 4;
-      ctx.fillText('$ whoami', rightPanelX + 10, panelY + 20);
+      ctx.fillStyle = colorMagenta;
+      ctx.fillText('role', rightPanelX + pad, py);
       ctx.fillStyle = colorAccent;
-      const whoamiLines = wrapText(ctx, whoami, maxTextWidth);
-      whoamiLines.slice(0, 3).forEach((line, i) => {
-        ctx.fillText(line, rightPanelX + 10, panelY + 38 + i * (lineHeightSmall + 2));
+      ctx.fillText(role, valueX, py);
+      py += lineH;
+
+      ctx.fillStyle = colorMagenta;
+      ctx.fillText('email', rightPanelX + pad, py);
+      ctx.fillStyle = colorAccent;
+      const emailShort = email.length > 28 ? email.slice(0, 25) + '…' : email;
+      ctx.fillText(emailShort, valueX, py);
+      py += lineH + sectionGap;
+
+      ctx.fillStyle = colorMagenta;
+      ctx.fillText('stack', rightPanelX + pad, py);
+      py += lineH;
+      ctx.fillStyle = colorAccent;
+      const stackLines = wrapText(ctx, stack, maxTextWidth);
+      stackLines.slice(0, 2).forEach((line) => {
+        ctx.fillText(line, rightPanelX + pad, py);
+        py += lineHeightSmall + 2;
       });
-      ctx.fillStyle = colorMuted;
-      ctx.fillText('stack:', rightPanelX + 10, panelY + 88);
-      ctx.fillStyle = colorAccent;
-      ctx.fillText(stack, rightPanelX + 10, panelY + 102);
-      ctx.fillStyle = colorMuted;
-      ctx.fillText('↓ scroll to explore', rightPanelX + 10, panelY + 128);
+      py += sectionGap;
+
+      ctx.fillStyle = colorBright;
+      ctx.font = '11px "Courier New", monospace';
+      const bioLines = wrapText(ctx, bio, maxTextWidth);
+      bioLines.slice(0, 2).forEach((line) => {
+        ctx.fillText(line, rightPanelX + pad, py);
+        py += lineHeightSmall + 1;
+      });
+      py += space;
+
+      ctx.strokeStyle = colorBorder;
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(rightPanelX + pad, py);
+      ctx.lineTo(rightPanelX + rightPanelW - pad, py);
+      ctx.stroke();
+      py += space + 2;
+
+      ctx.fillStyle = colorMagenta;
+      ctx.fillText('↓ scroll to explore', rightPanelX + pad, py);
       ctx.shadowBlur = 0;
 
-      // ─── Play games: smaller retro block ~150px below panel ───
-      const playGameGap = 12 + 150;
+      // ─── Play games ───
+      const playGameGap = space * 2;
       const playGameBoxH = 28;
       const playGameBoxW = 260;
       const playGameBoxY = panelY + panelH + playGameGap;
       const px = rightPanelX + (rightPanelW - playGameBoxW) / 2;
       const pw = playGameBoxW;
-      ctx.fillStyle = 'rgba(30, 18, 12, 0.95)';
+      ctx.fillStyle = 'rgba(22, 18, 28, 0.98)';
       ctx.fillRect(px, playGameBoxY, pw, playGameBoxH);
-      ctx.strokeStyle = 'rgba(255, 170, 68, 0.9)';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = colorBorder;
+      ctx.lineWidth = 1.5;
       ctx.strokeRect(px, playGameBoxY, pw, playGameBoxH);
-      ctx.strokeStyle = 'rgba(255, 200, 100, 0.5)';
       ctx.lineWidth = 1;
-      ctx.strokeRect(px + 2, playGameBoxY + 2, pw - 4, playGameBoxH - 4);
-      ctx.lineWidth = 1;
-      ctx.font = 'bold 14px "Courier New", monospace';
-      ctx.fillStyle = '#ffaa44';
-      ctx.shadowColor = 'rgba(255, 170, 68, 0.8)';
+      ctx.font = 'bold 13px "Courier New", monospace';
+      ctx.fillStyle = colorMagenta;
+      ctx.shadowColor = 'rgba(192, 132, 252, 0.5)';
       ctx.shadowBlur = 8;
-      ctx.fillText('▶  P L A Y   G A M E S  ◀', px + (pw - ctx.measureText('▶  P L A Y   G A M E S  ◀').width) / 2, playGameBoxY + playGameBoxH / 2 + 5);
+      ctx.fillText('▶  P L A Y   G A M E S  ◀', px + (pw - ctx.measureText('▶  P L A Y   G A M E S  ◀').width) / 2, playGameBoxY + playGameBoxH / 2 + 4);
       ctx.shadowBlur = 0;
 
-      // ─── Status bar: CRT-tinted ───
+      // ─── Status bar ───
       const statusY = H - statusBarH - 2;
       ctx.fillStyle = colorDarkStatus;
       ctx.fillRect(0, statusY, W, statusBarH + 2);
+      ctx.strokeStyle = colorBorder;
+      ctx.lineWidth = 0.5;
       ctx.beginPath();
-      ctx.strokeStyle = 'rgba(255, 170, 68, 0.35)';
       ctx.moveTo(0, statusY);
       ctx.lineTo(W, statusY);
       ctx.stroke();
-      ctx.font = fontMonoSmall;
-      ctx.fillStyle = 'rgba(0, 255, 120, 0.8)';
-      ctx.shadowColor = 'rgba(0, 255, 120, 0.5)';
-      ctx.shadowBlur = 3;
-      ctx.fillText('●', 12, statusY + 15);
-      ctx.fillStyle = colorMuted;
-      ctx.fillText(' Ready', 24, statusY + 15);
-      ctx.fillStyle = 'rgba(255, 170, 68, 0.55)';
-      ctx.fillText('Scroll down', W - 92, statusY + 15);
-      ctx.shadowBlur = 0;
+      const statusMid = statusY + Math.floor(statusBarH / 2) + 5;
+      ctx.font = '11px "Courier New", monospace';
+      ctx.fillStyle = colorMagenta;
+      ctx.fillText('●', pad, statusMid);
+      ctx.fillStyle = colorMagenta;
+      ctx.fillText(' Ready', pad + 12, statusMid);
+      ctx.fillStyle = colorDim;
+      ctx.fillText('·', pad + 58, statusMid);
+      ctx.fillStyle = colorMagenta;
+      ctx.fillText('portfolio', pad + 66, statusMid);
+      ctx.fillStyle = colorLabel;
+      const whoamiW = ctx.measureText(whoami).width;
+      ctx.fillText(whoami, (W - whoamiW) / 2, statusMid);
+      ctx.fillStyle = colorDim;
+      ctx.fillText('Scroll ↓', W - pad - ctx.measureText('Scroll ↓').width, statusMid);
 
       const tex = new THREE.CanvasTexture(displayCanvas);
       tex.flipY = true;
@@ -371,21 +449,21 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       setLoadProgress(0.3);
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x0a0a0a);
+      scene.background = new THREE.Color(0x0d0a14);
       
-      // Brighter, more glowing lighting
-      const ambientLight = new THREE.AmbientLight(0xffeedd, 0.55);
+      // Balanced lighting: warm key, cool rim, soft fill with a hint of magenta
+      const ambientLight = new THREE.AmbientLight(0xe8e0f0, 0.5);
       scene.add(ambientLight);
       
-      const keyLight = new THREE.DirectionalLight(0xff9933, 1.6);
+      const keyLight = new THREE.DirectionalLight(0xffd4a8, 1.4);
       keyLight.position.set(2, 3, 2);
       scene.add(keyLight);
       
-      const rimLight = new THREE.DirectionalLight(0x88bbff, 0.9);
+      const rimLight = new THREE.DirectionalLight(0xb8a8e0, 0.85);
       rimLight.position.set(-2, 1, -2);
       scene.add(rimLight);
       
-      const fillLight = new THREE.PointLight(0xff8833, 1.2, 12);
+      const fillLight = new THREE.PointLight(0xc084fc, 0.45, 12);
       fillLight.position.set(1, 0.5, 1);
       scene.add(fillLight);
 
@@ -413,18 +491,18 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
 
       const bloomPass = new UnrealBloomPass(
         new THREE.Vector2(window.innerWidth, window.innerHeight),
-        0.52,  // strength — moderate glow
-        0.5,   // radius
-        0.32   // threshold
+        0.45,  // strength — softer glow
+        0.45,  // radius
+        0.38   // threshold — slightly higher for cleaner highlights
       );
       composer.addPass(bloomPass);
 
-      // Vignette: slightly lighter so center glows more
+      // Vignette: softer edges, center stays bright
       const VignetteShader = {
         uniforms: {
           tDiffuse: { value: null },
-          offset: { value: 0.5 },
-          darkness: { value: 0.95 }
+          offset: { value: 0.55 },
+          darkness: { value: 0.88 }
         },
         vertexShader: `
           varying vec2 vUv;
@@ -465,20 +543,23 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         whoami: personalInfo.whoami,
         stack: 'React · Next.js · Node · TypeScript',
         statusLine: '● Ready',
+        email: personalInfo.email,
+        bio: personalInfo.bio,
+        role: personalInfo.title,
       });
       setLoadProgress(0.5);
 
       const contentTexture = screenTextureResult.texture;
       const { baseCanvas, displayCanvas, W: screenW, H: screenH, drawTypedHero } = screenTextureResult;
 
-      // CRT effect: heavier noise, visible scanlines, phosphor glow – real CRT look
+      // CRT effect: subtle noise, soft scanlines, gentle edge tint
       const CRT_NOISE_FRAG = `
         #define PI 3.1415926538
         #define LINE_SIZE 480.0
-        #define LINE_STRENGTH 0.038
+        #define LINE_STRENGTH 0.025
         #define LINE_OFFSET 1.6
-        #define NOISE_STRENGTH 0.14
-        #define NOISE_FINE 0.06
+        #define NOISE_STRENGTH 0.06
+        #define NOISE_FINE 0.03
         uniform sampler2D uDiffuse;
         uniform float uTime;
         varying vec2 vUv;
@@ -498,16 +579,16 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         }
         void main() {
           vec4 color = texture2D(uDiffuse, vUv);
-          color.rgb *= 1.1;
-          color.rgb += vec3(0.03, 0.02, 0.01);
-          float r = rand(vUv * (uTime * 0.1 + 1.0));
-          float r2 = rand2(vUv * 4.0 + uTime * 0.05);
+          color.rgb *= 1.06;
+          color.rgb += vec3(0.015, 0.012, 0.02);
+          float r = rand(vUv * (uTime * 0.08 + 1.0));
+          float r2 = rand2(vUv * 3.0 + uTime * 0.04);
           gl_FragColor = color + (vec4(r,r,r,0) * NOISE_STRENGTH) + (vec4(r2,r2,r2,0) * NOISE_FINE);
           gl_FragColor.rgb += squareWave(vUv.y);
           float dist = length(vUv - 0.5);
-          float glow = 1.0 - smoothstep(0.2, 0.7, dist);
-          vec3 darkOrange = vec3(0.045, 0.022, 0.01);
-          gl_FragColor.rgb += darkOrange * glow;
+          float glow = 1.0 - smoothstep(0.25, 0.72, dist);
+          vec3 edgeTint = vec3(0.02, 0.015, 0.028);
+          gl_FragColor.rgb += edgeTint * glow;
         }
       `;
       const CRT_VERT = `
@@ -585,10 +666,10 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       const geoSmall = new THREE.BufferGeometry();
       geoSmall.setAttribute('position', new THREE.BufferAttribute(posSmall, 3));
       const matSmall = new THREE.PointsMaterial({
-        color: 0xffdd99,
+        color: 0xe8d4b8,
         size: 0.018,
         transparent: true,
-        opacity: 0.55,
+        opacity: 0.5,
         blending: THREE.AdditiveBlending,
         sizeAttenuation: true,
       });
@@ -608,10 +689,10 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       const geoBig = new THREE.BufferGeometry();
       geoBig.setAttribute('position', new THREE.BufferAttribute(posBig, 3));
       const matBig = new THREE.PointsMaterial({
-        color: 0xffcc77,
+        color: 0xf0c878,
         size: 0.042,
         transparent: true,
-        opacity: 0.82,
+        opacity: 0.72,
         blending: THREE.AdditiveBlending,
         sizeAttenuation: true,
       });
@@ -700,8 +781,8 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       const portraitOffset = () =>
         valMap(window.innerHeight / window.innerWidth, [0.75, 1.75], [0, 2]);
 
-      const PLAY_GAME_RECT = { x: 338, y: 334, w: 260, h: 28 };
-      const BACK_BUTTON_RECT = { x: 10, y: 8, w: 72, h: 22 };
+      const PLAY_GAME_RECT = { x: 338, y: 260, w: 260, h: 28 };
+      const BACK_BUTTON_RECT = { x: 60, y: 58, w: 72, h: 22 };
       const GAME_COLS = 32;
       const GAME_ROWS = 24;
       const GAME_CELL = 20;
@@ -746,27 +827,32 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         { id: 'dodge' as const, label: '4. Dodge', rect: { x: 220, y: 256, w: 200, h: 24 } },
       ];
 
+      const GAME_BG = 'rgb(28, 22, 32)';
+      const GAME_PRIMARY = '#f59e0b';
+      const GAME_ACCENT = '#2dd4bf';
+      const GAME_MUTED = 'rgba(251, 191, 36, 0.75)';
+
       function drawBackButton(ctx: CanvasRenderingContext2D, time: number) {
         const r = BACK_BUTTON_RECT;
         const pulse = 0.5 + 0.5 * Math.sin(time * 3);
-        ctx.fillStyle = `rgba(30, 18, 12, ${0.85 + 0.1 * pulse})`;
+        ctx.fillStyle = `rgba(24, 18, 30, ${0.88 + 0.08 * pulse})`;
         ctx.fillRect(r.x, r.y, r.w, r.h);
-        ctx.strokeStyle = `rgba(255, 170, 68, ${0.6 + 0.3 * pulse})`;
+        ctx.strokeStyle = `rgba(245, 158, 11, ${0.5 + 0.25 * pulse})`;
         ctx.lineWidth = 2;
         ctx.strokeRect(r.x, r.y, r.w, r.h);
         ctx.font = 'bold 13px "Courier New", monospace';
-        ctx.fillStyle = '#ffaa44';
+        ctx.fillStyle = GAME_PRIMARY;
         ctx.fillText('← Back', r.x + 8, r.y + 16);
       }
 
       function drawMenuScreen(ctx: CanvasRenderingContext2D, selectedIndex: number, time: number) {
         const W = screenW;
         const H = screenH;
-        ctx.fillStyle = 'rgb(45, 30, 22)';
+        ctx.fillStyle = GAME_BG;
         ctx.fillRect(0, 0, W, H);
         drawBackButton(ctx, time);
         ctx.font = 'bold 18px "Courier New", monospace';
-        ctx.fillStyle = '#ffaa44';
+        ctx.fillStyle = '#c084fc';
         ctx.fillText('Select game', 220, 158);
         ctx.font = '16px "Courier New", monospace';
         const pulse = 0.5 + 0.5 * Math.sin(time * 4);
@@ -774,51 +860,51 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
           const r = item.rect;
           const isSelected = i === selectedIndex;
           if (isSelected) {
-            ctx.fillStyle = `rgba(255, 170, 68, ${0.2 + 0.15 * pulse})`;
+            ctx.fillStyle = `rgba(245, 158, 11, ${0.18 + 0.12 * pulse})`;
             ctx.fillRect(r.x - 8, r.y - 2, r.w + 16, r.h + 6);
-            ctx.strokeStyle = `rgba(255, 170, 68, ${0.6 + 0.35 * pulse})`;
+            ctx.strokeStyle = `rgba(245, 158, 11, ${0.55 + 0.3 * pulse})`;
             ctx.lineWidth = 2;
             ctx.strokeRect(r.x - 8, r.y - 2, r.w + 16, r.h + 6);
             ctx.lineWidth = 1;
-            ctx.fillStyle = '#ffcc66';
+            ctx.fillStyle = '#fcd34d';
             ctx.fillText('►', r.x - 18, r.y + 20);
           }
-          ctx.fillStyle = isSelected ? '#ffcc66' : '#ffcc77';
+          ctx.fillStyle = isSelected ? '#fcd34d' : GAME_ACCENT;
           ctx.fillText(item.label, r.x, r.y + 20);
         });
         ctx.font = '13px "Courier New", monospace';
-        ctx.fillStyle = 'rgba(255, 204, 119, 0.65)';
+        ctx.fillStyle = GAME_MUTED;
         ctx.fillText('↑↓ select   Enter start   B back   X close', 220, 298);
       }
 
       function drawGameScreen(ctx: CanvasRenderingContext2D) {
         const W = screenW;
         const H = screenH;
-        ctx.fillStyle = 'rgb(45, 30, 22)';
+        ctx.fillStyle = GAME_BG;
         ctx.fillRect(0, 0, W, H);
         drawBackButton(ctx, time);
         ctx.font = '14px "Courier New", monospace';
         if (gameOver) {
-          ctx.fillStyle = '#ffaa44';
+          ctx.fillStyle = GAME_PRIMARY;
           ctx.fillText('Game Over', W / 2 - 40, H / 2 - 20);
-          ctx.fillStyle = 'rgba(255, 204, 119, 0.8)';
+          ctx.fillStyle = GAME_MUTED;
           ctx.fillText('Esc: back to menu', W / 2 - 55, H / 2 + 10);
           return;
         }
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
         for (let c = 0; c <= GAME_COLS; c++) ctx.fillRect(c * GAME_CELL, 0, 1, H);
         for (let r = 0; r <= GAME_ROWS; r++) ctx.fillRect(0, r * GAME_CELL, W, 1);
-        ctx.fillStyle = 'rgba(0, 255, 120, 0.9)';
+        ctx.fillStyle = 'rgba(45, 212, 191, 0.9)';
         ctx.fillRect(food.x * GAME_CELL + 2, food.y * GAME_CELL + 2, GAME_CELL - 4, GAME_CELL - 4);
-        ctx.fillStyle = '#ffaa44';
-        ctx.shadowColor = '#ffaa44';
+        ctx.fillStyle = GAME_PRIMARY;
+        ctx.shadowColor = GAME_PRIMARY;
         ctx.shadowBlur = 8;
         snake.forEach((seg, i) => {
           const pad = i === 0 ? 1 : 2;
           ctx.fillRect(seg.x * GAME_CELL + pad, seg.y * GAME_CELL + pad, GAME_CELL - pad * 2, GAME_CELL - pad * 2);
         });
         ctx.shadowBlur = 0;
-        ctx.fillStyle = 'rgba(255, 170, 68, 0.6)';
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.7)';
         ctx.fillText('Esc: back to menu', 10, H - 8);
       }
 
@@ -839,27 +925,27 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       function drawPongScreen(ctx: CanvasRenderingContext2D) {
         const W = screenW;
         const H = screenH;
-        ctx.fillStyle = 'rgb(45, 30, 22)';
+        ctx.fillStyle = GAME_BG;
         ctx.fillRect(0, 0, W, H);
         drawBackButton(ctx, time);
         ctx.font = '14px "Courier New", monospace';
         if (pongGameOver) {
-          ctx.fillStyle = '#ffaa44';
+          ctx.fillStyle = GAME_PRIMARY;
           ctx.fillText('Game Over', W / 2 - 40, H / 2 - 20);
-          ctx.fillStyle = 'rgba(255, 204, 119, 0.8)';
+          ctx.fillStyle = GAME_MUTED;
           ctx.fillText('Esc: back to menu', W / 2 - 55, H / 2 + 10);
           return;
         }
         const paddleX = 24;
         const py = pongPaddleY * H;
-        ctx.fillStyle = '#ffaa44';
+        ctx.fillStyle = GAME_PRIMARY;
         ctx.fillRect(paddleX, py - PONG_PADDLE_H / 2, PONG_PADDLE_W, PONG_PADDLE_H);
         const bx = pongBall.x * W;
         const by = pongBall.y * H;
         ctx.beginPath();
         ctx.arc(bx, by, PONG_BALL_R, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = 'rgba(255, 170, 68, 0.6)';
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.7)';
         ctx.fillText('Esc: back to menu', 10, H - 8);
       }
 
@@ -895,18 +981,18 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       function drawBreakoutScreen(ctx: CanvasRenderingContext2D) {
         const W = screenW;
         const H = screenH;
-        ctx.fillStyle = 'rgb(45, 30, 22)';
+        ctx.fillStyle = GAME_BG;
         ctx.fillRect(0, 0, W, H);
         drawBackButton(ctx, time);
         ctx.font = '14px "Courier New", monospace';
         if (breakoutGameOver) {
-          ctx.fillStyle = '#ffaa44';
+          ctx.fillStyle = GAME_PRIMARY;
           ctx.fillText('Game Over', W / 2 - 40, H / 2 - 20);
-          ctx.fillStyle = 'rgba(255, 204, 119, 0.8)';
+          ctx.fillStyle = GAME_MUTED;
           ctx.fillText('Esc: back to menu', W / 2 - 55, H / 2 + 10);
           return;
         }
-        ctx.fillStyle = '#ffaa44';
+        ctx.fillStyle = GAME_PRIMARY;
         breakoutBricks.forEach((b) => {
           ctx.fillRect(b.x - BRICK_W / 2, b.y - BRICK_H / 2, BRICK_W, BRICK_H);
         });
@@ -915,7 +1001,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         ctx.beginPath();
         ctx.arc(breakoutBall.x * W, breakoutBall.y * H, BREAKOUT_BALL_R, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = 'rgba(255, 170, 68, 0.6)';
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.7)';
         ctx.fillText('Esc: back to menu', 10, H - 8);
       }
 
@@ -939,25 +1025,25 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       function drawDodgeScreen(ctx: CanvasRenderingContext2D) {
         const W = screenW;
         const H = screenH;
-        ctx.fillStyle = 'rgb(45, 30, 22)';
+        ctx.fillStyle = GAME_BG;
         ctx.fillRect(0, 0, W, H);
         drawBackButton(ctx, time);
         ctx.font = '14px "Courier New", monospace';
         if (dodgeGameOver) {
-          ctx.fillStyle = '#ffaa44';
+          ctx.fillStyle = GAME_PRIMARY;
           ctx.fillText('Game Over', W / 2 - 40, H / 2 - 20);
-          ctx.fillStyle = 'rgba(255, 204, 119, 0.8)';
+          ctx.fillStyle = GAME_MUTED;
           ctx.fillText('Esc: back to menu', W / 2 - 55, H / 2 + 10);
           return;
         }
-        ctx.fillStyle = '#ffaa44';
+        ctx.fillStyle = GAME_PRIMARY;
         const px = dodgePlayerX * W - DODGE_PLAYER_W / 2;
         ctx.fillRect(px, H - 50, DODGE_PLAYER_W, 24);
-        ctx.fillStyle = '#ff6644';
+        ctx.fillStyle = '#f97316';
         dodgeObstacles.forEach((o) => {
           ctx.fillRect(o.x - DODGE_OBSTACLE_W / 2, o.y - DODGE_OBSTACLE_H / 2, DODGE_OBSTACLE_W, DODGE_OBSTACLE_H);
         });
-        ctx.fillStyle = 'rgba(255, 170, 68, 0.6)';
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.7)';
         ctx.fillText('Esc: back to menu', 10, H - 8);
       }
 
@@ -1120,8 +1206,8 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         starsSmall.rotation.y += 0.00006;
         starsBig.rotation.y += 0.00006;
 
-        // Dynamic lighting — brighter pulse
-        fillLight.intensity = 1.1 + Math.sin(time * 2) * 0.3;
+        // Dynamic lighting — soft pulse
+        fillLight.intensity = 0.45 + Math.sin(time * 1.8) * 0.12;
         fillLight.position.x = Math.cos(time * 0.5) * 1.5;
         fillLight.position.z = Math.sin(time * 0.5) * 1.5;
 
@@ -1255,10 +1341,12 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
             const cursorOn = Math.floor(time * 2) % 2 === 0;
             drawTypedHero(dispCtx, nameLen, greetingLen, cursorOn);
           const pulse = 0.5 + 0.5 * Math.sin(time * 1.8);
-          dispCtx.fillStyle = `rgba(255, 153, 51, ${0.06 * pulse})`;
+          dispCtx.fillStyle = `rgba(245, 158, 11, ${0.05 * pulse})`;
+          dispCtx.fillRect(8, 2, screenW - 16, 22);
+          dispCtx.fillStyle = `rgba(192, 132, 252, ${0.03 * pulse})`;
           dispCtx.fillRect(8, 2, screenW - 16, 22);
           if (cursorOn) {
-            dispCtx.fillStyle = '#ffaa44';
+            dispCtx.fillStyle = '#f59e0b';
             dispCtx.fillRect(52, screenH - 19, 2, 10);
           }
             // Play games button: auto glow + hover glare/animation
@@ -1268,26 +1356,31 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
             const outerPad = playGameHovered ? 14 : 10;
             dispCtx.save();
             dispCtx.globalCompositeOperation = 'lighter';
-            const glowIntensity = playGameHovered ? 0.35 + 0.25 * playPulse : 0.2 + 0.18 * playPulse;
-            dispCtx.shadowColor = 'rgba(255, 180, 80, 0.9)';
-            dispCtx.shadowBlur = playGameHovered ? 14 + 4 * playPulse : 10 + 3 * playPulse;
-            dispCtx.strokeStyle = `rgba(255, 170, 68, ${glowIntensity})`;
+            const glowIntensity = playGameHovered ? 0.3 + 0.2 * playPulse : 0.18 + 0.14 * playPulse;
+            dispCtx.shadowColor = 'rgba(251, 191, 36, 0.7)';
+            dispCtx.shadowBlur = playGameHovered ? 12 + 3 * playPulse : 8 + 2 * playPulse;
+            dispCtx.strokeStyle = `rgba(245, 158, 11, ${glowIntensity})`;
             dispCtx.lineWidth = playGameHovered ? 3 : 2;
             dispCtx.strokeRect(r.x - outerPad, r.y - outerPad, r.w + outerPad * 2, r.h + outerPad * 2);
             dispCtx.shadowBlur = 0;
             dispCtx.globalCompositeOperation = 'source-over';
-            dispCtx.strokeStyle = `rgba(255, 170, 68, ${0.35 + 0.5 * playPulse})`;
+            dispCtx.strokeStyle = `rgba(245, 158, 11, ${0.45 + 0.4 * playPulse})`;
             dispCtx.lineWidth = 2;
             dispCtx.strokeRect(r.x, r.y, r.w, r.h);
-            // Glare sweep: always on (not only on hover)
+            // Magenta inner accent
+            dispCtx.strokeStyle = `rgba(192, 132, 252, ${0.25 + 0.15 * playPulse})`;
+            dispCtx.lineWidth = 1;
+            dispCtx.strokeRect(r.x + 2, r.y + 2, r.w - 4, r.h - 4);
+            dispCtx.lineWidth = 2;
+            // Glare sweep
             const sweepW = 50;
             const sweepX = r.x - sweepW + glarePhase * (r.w + sweepW * 2);
             const grad = dispCtx.createLinearGradient(sweepX, 0, sweepX + sweepW, 0);
-            grad.addColorStop(0, 'rgba(255, 220, 150, 0)');
-            grad.addColorStop(0.35, 'rgba(255, 220, 150, 0.4)');
-            grad.addColorStop(0.5, 'rgba(255, 245, 210, 0.55)');
-            grad.addColorStop(0.65, 'rgba(255, 220, 150, 0.4)');
-            grad.addColorStop(1, 'rgba(255, 220, 150, 0)');
+            grad.addColorStop(0, 'rgba(255, 230, 180, 0)');
+            grad.addColorStop(0.35, 'rgba(255, 230, 180, 0.35)');
+            grad.addColorStop(0.5, 'rgba(255, 248, 220, 0.48)');
+            grad.addColorStop(0.65, 'rgba(255, 230, 180, 0.35)');
+            grad.addColorStop(1, 'rgba(255, 230, 180, 0)');
             dispCtx.save();
             dispCtx.beginPath();
             dispCtx.rect(r.x, r.y, r.w, r.h);
@@ -1410,7 +1503,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
           right: 0,
           bottom: 0,
           height: '60vh',
-          background: 'linear-gradient(180deg, transparent 0%, rgba(255, 102, 0, 0.1) 20%, rgba(13, 10, 8, 0.4) 40%, rgba(13, 10, 8, 0.7) 60%, rgba(13, 10, 8, 0.9) 80%, #0d0a08 100%)',
+          background: 'linear-gradient(180deg, transparent 0%, rgba(13, 10, 20, 0.3) 25%, rgba(10, 8, 18, 0.6) 50%, rgba(8, 6, 14, 0.85) 75%, #06040a 100%)',
           pointerEvents: 'none',
           zIndex: 2,
         }}

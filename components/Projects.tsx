@@ -24,6 +24,9 @@ export default function Projects() {
           <span className="proj-prompt">$ cat projects</span>
           <h2 className="proj-title">Some Things I&apos;ve Built</h2>
           <div className="proj-header-line" />
+          <p className="proj-count" aria-hidden>
+            ls — {projects.length} project{projects.length !== 1 ? 's' : ''} found
+          </p>
         </header>
 
         <div className="proj-grid">

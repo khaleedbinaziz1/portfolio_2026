@@ -21,7 +21,7 @@ const SOCIAL_LINKS = [
 export default function Contact() {
   return (
     <section id="contact" className="contact-section">
-      <div className="contact-bg" aria-hidden />
+      <div className="contact-gif-bg" aria-hidden />
       <div className="contact-scanline" aria-hidden />
 
       <motion.div
@@ -32,9 +32,9 @@ export default function Contact() {
         transition={{ duration: 0.5, ease: EASE }}
       >
         <header className="contact-header">
-          <span className="contact-prompt">$ cat contact</span>
           <h2 className="contact-title">Get In Touch</h2>
           <div className="contact-header-line" />
+          <p className="contact-status" aria-hidden>&gt; connection open</p>
         </header>
 
         <motion.div

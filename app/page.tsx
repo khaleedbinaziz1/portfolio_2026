@@ -13,6 +13,10 @@ import TerminalSnippets from '@/components/TerminalSnippets';
 import RetroEffects from '@/components/RetroEffects';
 import RetroSoundHandler from '@/components/RetroSoundHandler';
 import ExploreGate from '@/components/ExploreGate';
+import RetroCornerLabel from '@/components/RetroCornerLabel';
+import RetroRobot from '@/components/RetroRobot';
+import TerminalPet from '@/components/TerminalPet';
+import RetroGifs from '@/components/RetroGifs';
 
 export default function Home() {
   const [exploreStarted, setExploreStarted] = useState(false);
@@ -37,6 +41,9 @@ export default function Home() {
           pointerEvents: exploreStarted ? 'auto' : 'none',
         }}
       >
+        <div className="bg-pixel-blocks" aria-hidden />
+        <div className="pixel-dots-overlay" aria-hidden />
+        <div className="pixel-grid-overlay" aria-hidden />
         <RetroSoundHandler />
         <div className="bg-layer-1"></div>
         <div className="bg-layer-2"></div>
@@ -53,8 +60,7 @@ export default function Home() {
         <ScrollProgress />
         <RetroEffects type="terminal" intensity="medium" />
         <TerminalSnippets />
-        <div className="relative z-10">
-          <Navigation contentVisible={exploreStarted} />
+        <div className="page-main-content">
           <Hero3D
             experienceStarted={exploreStarted}
             onLoaded={() => setHeroLoaded(true)}
@@ -64,6 +70,17 @@ export default function Home() {
           <Projects />
           <Contact />
           <Footer />
+        </div>
+        <div className="page-fixed-ui">
+          <div className="page-nav-wrap">
+            <Navigation contentVisible={exploreStarted} />
+          </div>
+          <div className="retro-corner-group">
+            <RetroCornerLabel />
+            <TerminalPet />
+          </div>
+          <RetroRobot />
+          <RetroGifs />
         </div>
       </div>
     </main>

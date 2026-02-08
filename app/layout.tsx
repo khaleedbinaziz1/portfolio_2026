@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono } from "next/font/google";
+import { JetBrains_Mono, Pixelify_Sans } from "next/font/google";
 import "./globals.css";
 import StructuredData from "@/components/StructuredData";
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+  weight: ["400", "500", "600", "700"],
+});
+
+const pixelifySans = Pixelify_Sans({
+  subsets: ["latin"],
+  variable: "--font-pixel",
   weight: ["400", "500", "600", "700"],
 });
 
@@ -98,7 +104,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${jetbrainsMono.variable} font-mono`}>
+      <body className={`${jetbrainsMono.variable} ${pixelifySans.variable} font-pixel`}>
         <StructuredData />
         {children}
       </body>

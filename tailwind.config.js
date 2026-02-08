@@ -16,6 +16,7 @@ module.exports = {
       },
       fontFamily: {
         mono: ['var(--font-mono)', 'Courier New', 'Monaco', 'Menlo', 'monospace'],
+        pixel: ['var(--font-pixel)', 'var(--font-mono)', 'Courier New', 'monospace'],
       },
     },
   },

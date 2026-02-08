@@ -36,23 +36,23 @@ const technologyCategories = [
     name: 'Frontend Development',
     cmd: 'ls -la /skills/frontend',
     technologies: [
-      { name: 'TypeScript', icon: SiTypescript, color: '#ffaa44' },
-      { name: 'React 18', icon: SiReact, color: '#ffcc77' },
+      { name: 'TypeScript', icon: SiTypescript, color: '#e040fb' },
+      { name: 'React 18', icon: SiReact, color: '#00ffcc' },
       { name: 'Next.js 14', icon: SiNextdotjs, color: '#ffffff' },
       { name: 'Tailwind CSS', icon: SiTailwindcss, color: '#ffdd99' },
       { name: 'Redux Toolkit', icon: SiRedux, color: 'var(--retro-amber)' },
-      { name: 'Framer Motion', icon: TbBrandFramerMotion, color: '#ffaa44' },
+      { name: 'Framer Motion', icon: TbBrandFramerMotion, color: '#e040fb' },
     ],
   },
   {
     name: 'Backend & APIs',
     cmd: 'cat /skills/backend/*',
     technologies: [
-      { name: 'Node.js 20', icon: SiNodedotjs, color: '#ffaa44' },
+      { name: 'Node.js 20', icon: SiNodedotjs, color: '#e040fb' },
       { name: 'Express.js', icon: SiExpress, color: '#ffffff' },
       { name: 'PHP', icon: SiPhp, color: 'var(--retro-amber)' },
-      { name: 'GraphQL', icon: SiGraphql, color: '#ffcc77' },
-      { name: 'Socket.io', icon: SiSocketdotio, color: '#ffaa44' },
+      { name: 'GraphQL', icon: SiGraphql, color: '#00ffcc' },
+      { name: 'Socket.io', icon: SiSocketdotio, color: '#e040fb' },
       { name: 'Prisma ORM', icon: SiPrisma, color: '#ffffff' },
       { name: 'FastAPI', icon: SiFastapi, color: '#ffdd99' },
     ],
@@ -61,8 +61,8 @@ const technologyCategories = [
     name: 'Database & Storage',
     cmd: 'show databases',
     technologies: [
-      { name: 'PostgreSQL', icon: SiPostgresql, color: '#ffaa44' },
-      { name: 'MongoDB', icon: SiMongodb, color: '#ffcc77' },
+      { name: 'PostgreSQL', icon: SiPostgresql, color: '#e040fb' },
+      { name: 'MongoDB', icon: SiMongodb, color: '#00ffcc' },
       { name: 'Firestore', icon: SiFirebase, color: '#ffdd99' },
       { name: 'MySQL', icon: SiMysql, color: 'var(--retro-amber)' },
     ],
@@ -71,19 +71,19 @@ const technologyCategories = [
     name: 'Testing & Quality',
     cmd: 'npm run test',
     technologies: [
-      { name: 'Jest', icon: SiJest, color: '#ffaa44' },
+      { name: 'Jest', icon: SiJest, color: '#e040fb' },
       { name: 'Cypress', icon: SiCypress, color: '#ffffff' },
-      { name: 'React Testing Library', icon: SiReact, color: '#ffcc77' },
+      { name: 'React Testing Library', icon: SiReact, color: '#00ffcc' },
     ],
   },
   {
     name: 'DevOps & Cloud',
     cmd: 'kubectl get deployments',
     technologies: [
-      { name: 'Docker', icon: SiDocker, color: '#ffaa44' },
+      { name: 'Docker', icon: SiDocker, color: '#e040fb' },
       { name: 'AWS', icon: SiAwsamplify, color: 'var(--retro-amber)' },
       { name: 'Vercel', icon: SiVercel, color: '#ffffff' },
-      { name: 'Nginx', icon: SiNginx, color: '#ffcc77' },
+      { name: 'Nginx', icon: SiNginx, color: '#00ffcc' },
       { name: 'Git/GitHub', icon: SiGit, color: '#ffdd99' },
     ],
   },
@@ -91,9 +91,9 @@ const technologyCategories = [
     name: 'Authentication & Payments',
     cmd: 'auth --status',
     technologies: [
-      { name: 'Clerk', icon: SiClerk, color: '#ffaa44' },
+      { name: 'Clerk', icon: SiClerk, color: '#e040fb' },
       { name: 'Firebase Auth', icon: SiFirebase, color: '#ffdd99' },
-      { name: 'Stripe', icon: SiStripe, color: '#ffcc77' },
+      { name: 'Stripe', icon: SiStripe, color: '#00ffcc' },
     ],
   },
 ];
@@ -122,7 +122,7 @@ export default function Skills() {
       <div 
         className="absolute inset-0 pointer-events-none opacity-[0.025]"
         style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, transparent 0px, transparent 1px, rgba(255,170,68,0.4) 1px, transparent 2px)',
+          backgroundImage: 'repeating-linear-gradient(0deg, transparent 0px, transparent 1px, rgba(224,64,251,0.4) 1px, transparent 2px)',
         }}
       />
       <div 
@@ -152,15 +152,15 @@ export default function Skills() {
                 className="inline-block px-3 py-1.5 rounded-t-lg border-t border-x"
                 style={{
                   backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  borderColor: 'rgba(255, 170, 68, 0.3)',
+                  borderColor: 'rgba(224, 64, 251, 0.3)',
                 }}
               >
                 <span style={{ color: 'var(--retro-amber)' }}>$</span>
-                <span style={{ color: 'rgba(255, 204, 119, 0.75)' }}> cd /skills</span>
+                <span style={{ color: 'rgba(167, 139, 250, 0.75)' }}> cd /skills</span>
                 <span 
                   className="inline-block w-2 h-4 ml-1 align-middle"
                   style={{
-                    backgroundColor: '#ffaa44',
+                    backgroundColor: '#e040fb',
                     opacity: Math.floor(time * 2) % 2 === 0 ? 1 : 0,
                   }}
                 />
@@ -177,8 +177,8 @@ export default function Skills() {
               <h2 
                 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight"
                 style={{ 
-                  color: '#ffaa44',
-                  textShadow: '0 0 20px rgba(255, 170, 68, 0.3), 0 0 40px rgba(255, 170, 68, 0.1)',
+                  color: '#e040fb',
+                  textShadow: '0 0 20px rgba(224, 64, 251, 0.3), 0 0 40px rgba(224, 64, 251, 0.1)',
                 }}
               >
                 Skills & Expertise
@@ -191,9 +191,20 @@ export default function Skills() {
               viewport={{ once: true }}
               transition={{ delay: 0.25, duration: 0.5 }}
               className="mt-3 font-mono text-sm md:text-base"
-              style={{ color: 'rgba(255, 204, 119, 0.75)' }}
+              style={{ color: 'rgba(167, 139, 250, 0.75)' }}
             >
               &gt; Technologies for modern, scalable applications
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, duration: 0.4 }}
+              className="mt-1 font-mono text-xs"
+              style={{ color: 'rgba(255, 187, 85, 0.4)' }}
+              aria-hidden
+            >
+              // {technologyCategories.length} categories loaded
             </motion.p>
           </motion.div>
         </div>
@@ -221,35 +232,35 @@ export default function Skills() {
                     ? 'rgba(0, 0, 0, 0.7)' 
                     : 'rgba(0, 0, 0, 0.5)',
                   borderColor: hoveredCard === categoryIndex
-                    ? 'rgba(255, 170, 68, 0.5)'
-                    : 'rgba(255, 170, 68, 0.2)',
+                    ? 'rgba(224, 64, 251, 0.5)'
+                    : 'rgba(224, 64, 251, 0.2)',
                   boxShadow: hoveredCard === categoryIndex
-                    ? '0 0 30px rgba(255, 170, 68, 0.15), inset 0 0 20px rgba(255, 170, 68, 0.05)'
-                    : '0 0 10px rgba(255, 170, 68, 0.05)',
+                    ? '0 0 30px rgba(224, 64, 251, 0.15), inset 0 0 20px rgba(224, 64, 251, 0.05)'
+                    : '0 0 10px rgba(224, 64, 251, 0.05)',
                 }}
               >
                 <div 
                   className="absolute top-0 left-0 right-0 h-6 rounded-t-lg border-b flex items-center px-2.5 gap-1"
                   style={{
                     backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                    borderColor: 'rgba(255, 170, 68, 0.2)',
+                    borderColor: 'rgba(224, 64, 251, 0.2)',
                   }}
                 >
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#ff6b6b' }} />
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#ffaa44' }} />
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#e040fb' }} />
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#4caf50' }} />
                 </div>
 
                 <div className="mt-5 mb-3">
-                  <div className="font-mono text-xs mb-2" style={{ color: 'rgba(255, 204, 119, 0.5)' }}>
+                  <div className="font-mono text-xs mb-2" style={{ color: 'rgba(167, 139, 250, 0.5)' }}>
                     <span style={{ color: 'var(--retro-amber)' }}>$</span> {category.cmd}
                   </div>
                   <h3 
                     className="text-base md:text-lg font-bold font-mono transition-all duration-300"
                     style={{ 
-                      color: hoveredCard === categoryIndex ? '#ffaa44' : 'rgba(255, 204, 119, 0.85)',
+                      color: hoveredCard === categoryIndex ? '#e040fb' : 'rgba(167, 139, 250, 0.85)',
                       textShadow: hoveredCard === categoryIndex 
-                        ? '0 0 10px rgba(255, 170, 68, 0.3)' 
+                        ? '0 0 10px rgba(224, 64, 251, 0.3)' 
                         : 'none',
                     }}
                   >
@@ -273,25 +284,25 @@ export default function Skills() {
                         className="flex items-center gap-2 py-1.5 px-2 rounded transition-all duration-300"
                         style={{
                           backgroundColor: hoveredCard === categoryIndex 
-                            ? 'rgba(255, 170, 68, 0.06)' 
+                            ? 'rgba(224, 64, 251, 0.06)' 
                             : 'transparent',
                         }}
                       >
                         <div 
                           className="flex items-center justify-center w-5 h-5 rounded shrink-0 transition-transform duration-300 group-hover:scale-105"
-                          style={{ backgroundColor: 'rgba(255, 170, 68, 0.1)' }}
+                          style={{ backgroundColor: 'rgba(224, 64, 251, 0.1)' }}
                         >
                           <Icon className="w-3.5 h-3.5" style={{ color: tech.color }} />
                         </div>
                         <span 
                           className="font-mono text-xs md:text-sm flex-1"
-                          style={{ color: 'rgba(255, 204, 119, 0.85)' }}
+                          style={{ color: 'rgba(167, 139, 250, 0.85)' }}
                         >
                           {tech.name}
                         </span>
                         <span 
                           className="font-mono text-[10px] opacity-0 group-hover:opacity-50 transition-opacity"
-                          style={{ color: '#ffaa44' }}
+                          style={{ color: '#e040fb' }}
                         >
                           ✓
                         </span>
@@ -303,8 +314,8 @@ export default function Skills() {
                 <div 
                   className="mt-3 pt-2 border-t font-mono text-[10px] md:text-xs flex items-center gap-1.5"
                   style={{ 
-                    borderColor: 'rgba(255, 170, 68, 0.15)',
-                    color: 'rgba(255, 204, 119, 0.5)',
+                    borderColor: 'rgba(224, 64, 251, 0.15)',
+                    color: 'rgba(167, 139, 250, 0.5)',
                   }}
                 >
                   <div 
@@ -329,15 +340,15 @@ export default function Skills() {
             className="inline-block px-3 py-1.5 rounded border"
             style={{
               backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              borderColor: 'rgba(255, 170, 68, 0.3)',
-              color: 'rgba(255, 204, 119, 0.75)',
+              borderColor: 'rgba(224, 64, 251, 0.3)',
+              color: 'rgba(167, 139, 250, 0.75)',
             }}
           >
             <span style={{ color: '#4caf50' }}>●</span> All systems operational
             <span 
               className="inline-block w-2 h-4 ml-2 align-middle"
               style={{
-                backgroundColor: '#ffaa44',
+                backgroundColor: '#e040fb',
                 opacity: Math.floor(time * 2) % 2 === 0 ? 1 : 0,
               }}
             />
