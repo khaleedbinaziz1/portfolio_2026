@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 
-const LINE_1 = '> run khaledbinaziz.dev';
-const LINE_2 = '> load khaled.core...100%';
-const LINE_3 = 'Ready.';
+const LINE_1 = '$ npm run dev';
+const LINE_2 = 'running on localhost:3000';
+const LINE_3 = '';
 const CHAR_DELAY_MS = 42;
 const LINE_DELAY_MS = 380;
 
@@ -87,12 +87,20 @@ export default function ExploreGate({
     });
   }, [showButton, disabled, onExplore, scrollToLanding]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if ((e.key === 'Enter' || e.key === 'Escape') && showButton && !disabled) {
-      e.preventDefault();
-      handleLaunch();
-    }
-  };
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent | KeyboardEvent) => {
+      if ((e.key === 'Enter' || e.key === 'Escape') && showButton && !disabled) {
+        e.preventDefault();
+        handleLaunch();
+      }
+    },
+    [showButton, disabled, handleLaunch]
+  );
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
   return (
     <div
@@ -126,12 +134,14 @@ export default function ExploreGate({
               <span className="hero3d-explore-cursor" aria-hidden>|</span>
             )}
           </p>
-          <p className="hero3d-explore-line hero3d-explore-line-muted">
-            {LINE_3.slice(0, len3)}
-            {len3 < LINE_3.length && len2 === LINE_2.length && (
-              <span className="hero3d-explore-cursor" aria-hidden>|</span>
-            )}
-          </p>
+          {LINE_3.length > 0 && (
+            <p className="hero3d-explore-line hero3d-explore-line-muted">
+              {LINE_3.slice(0, len3)}
+              {len3 < LINE_3.length && len2 === LINE_2.length && (
+                <span className="hero3d-explore-cursor" aria-hidden>|</span>
+              )}
+            </p>
+          )}
           {showButton && (
             <div
               className={`hero3d-explore-cta ${buttonReady ? 'hero3d-explore-cta-ready' : ''}`}

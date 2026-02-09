@@ -51,6 +51,12 @@ export default function About() {
               </div>
             </div>
             <div className="about-term-body">
+              <p className="about-term-static">
+                <span className="prompt">$</span> whoami
+              </p>
+              <p className="about-term-static output">
+                {personalInfo.name} · {personalInfo.title}
+              </p>
               <TerminalCommand
                 commands={[
                   {
@@ -62,7 +68,7 @@ export default function About() {
                   {
                     prompt: '$',
                     command: 'wc -l ~/about.txt',
-                    output: `${aboutLines.length} lines · the rest is below`,
+                    output: `${aboutLines.length}`,
                     delay: 1400,
                   },
                 ]}

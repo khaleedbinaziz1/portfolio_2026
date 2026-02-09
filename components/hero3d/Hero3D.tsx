@@ -181,8 +181,6 @@ function createScreenTexture(
       ctx.font = '11px "Courier New", monospace';
       ctx.fillStyle = colorLabel;
       ctx.fillText('khaledbinaziz.dev', pad, 15);
-      ctx.fillStyle = colorDim;
-      ctx.fillText('portfolio', W - pad - ctx.measureText('portfolio').width, 15);
 
       // Subtitle under photo: role + stack shorthand
       ctx.font = '11px "Courier New", monospace';
@@ -375,14 +373,6 @@ function createScreenTexture(
       ctx.stroke();
       const statusMid = statusY + Math.floor(statusBarH / 2) + 5;
       ctx.font = '11px "Courier New", monospace';
-      ctx.fillStyle = colorMagenta;
-      ctx.fillText('●', pad, statusMid);
-      ctx.fillStyle = colorMagenta;
-      ctx.fillText(' Ready', pad + 12, statusMid);
-      ctx.fillStyle = colorDim;
-      ctx.fillText('·', pad + 58, statusMid);
-      ctx.fillStyle = colorMagenta;
-      ctx.fillText('portfolio', pad + 66, statusMid);
       ctx.fillStyle = colorLabel;
       const whoamiW = ctx.measureText(whoami).width;
       ctx.fillText(whoami, (W - whoamiW) / 2, statusMid);

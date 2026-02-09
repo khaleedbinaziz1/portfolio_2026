@@ -13,10 +13,6 @@ import TerminalSnippets from '@/components/TerminalSnippets';
 import RetroEffects from '@/components/RetroEffects';
 import RetroSoundHandler from '@/components/RetroSoundHandler';
 import ExploreGate from '@/components/ExploreGate';
-import RetroCornerLabel from '@/components/RetroCornerLabel';
-import RetroRobot from '@/components/RetroRobot';
-import TerminalPet from '@/components/TerminalPet';
-import RetroGifs from '@/components/RetroGifs';
 
 export default function Home() {
   const [exploreStarted, setExploreStarted] = useState(false);
@@ -75,12 +71,6 @@ export default function Home() {
           <div className="page-nav-wrap">
             <Navigation contentVisible={exploreStarted} />
           </div>
-          <div className="retro-corner-group">
-            <RetroCornerLabel />
-            <TerminalPet />
-          </div>
-          <RetroRobot />
-          <RetroGifs />
         </div>
       </div>
     </main>

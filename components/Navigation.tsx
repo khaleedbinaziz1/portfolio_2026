@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { FiUser, FiFolder, FiCode, FiMail, FiMenu, FiX } from 'react-icons/fi';
 import RetroSoundToggle from './RetroSoundToggle';
 
-const NAV_AMBER = '#e040fb';
-const NAV_ACCENT = '#00ffcc';
-const NAV_DARK = '#160c0a';
+const NAV_AMBER = '#f59e0b';
+const NAV_MAGENTA = '#c084fc';
+const NAV_TEAL = '#2dd4bf';
+const NAV_DARK = 'rgba(22, 18, 28, 0.97)';
 const NAV_BG = 'transparent';
 
 const navLinks = [
@@ -56,8 +57,8 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
     let animationId: number;
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      stars.forEach((star) => {
-        ctx.fillStyle = `rgba(0, 255, 204, ${star.opacity})`;
+        stars.forEach((star) => {
+        ctx.fillStyle = `rgba(45, 212, 191, ${star.opacity})`;
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
         ctx.fill();
@@ -105,15 +106,15 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: 'easeOut' }}
-      className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-500 font-mono"
+      className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-500 font-mono nav-retro"
       style={{
-        backgroundColor: NAV_BG,
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: 'none',
-        boxShadow: scrolled 
-          ? '0 4px 30px rgba(0, 0, 0, 0.3), 0 0 40px rgba(224, 64, 251, 0.06)'
-          : '0 2px 20px rgba(0, 0, 0, 0.2), 0 0 30px rgba(224, 64, 251, 0.04)',
+        backgroundColor: scrolled ? NAV_DARK : NAV_BG,
+        backdropFilter: scrolled ? 'blur(10px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(10px)' : 'none',
+        borderBottom: scrolled ? '2px solid rgba(245, 158, 11, 0.35)' : 'none',
+        boxShadow: scrolled
+          ? 'inset 4px 0 0 rgba(192, 132, 252, 0.2), 0 4px 24px rgba(0, 0, 0, 0.35)'
+          : 'none',
       }}
     >
       {/* Starfield canvas background */}
@@ -123,11 +124,11 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
         style={{ mixBlendMode: 'screen' }}
       />
 
-      {/* CRT scan line effect */}
-      <div 
-        className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20"
+      {/* Scan line effect */}
+      <div
+        className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-15"
         style={{
-          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(224, 64, 251, 0.03) 2px, rgba(224, 64, 251, 0.03) 4px)',
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(245, 158, 11, 0.04) 2px, rgba(245, 158, 11, 0.04) 4px)',
         }}
       />
 
@@ -183,7 +184,7 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={{ opacity: 0, width: 0 }}
                   className="overflow-hidden ml-3 text-xs"
-                  style={{ color: NAV_ACCENT }}
+                  style={{ color: NAV_TEAL }}
                 >
                   ~/portfolio
                 </motion.div>
@@ -207,72 +208,40 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
                 >
                   <Link
                     href={link.href}
-                    className="group relative font-mono text-sm font-medium transition-all duration-300 flex items-center gap-2 px-4 py-2.5 rounded"
+                    className="nav-link group relative font-mono text-sm font-medium transition-all duration-200 flex items-center gap-2 px-3 py-2"
                     style={{
-                      color: isActive ? NAV_AMBER : 'rgba(0, 255, 204, 0.6)',
-                      backgroundColor: isActive ? 'rgba(224, 64, 251, 0.08)' : 'transparent',
-                      border: `1px solid ${isActive ? 'rgba(224, 64, 251, 0.3)' : 'transparent'}`,
-                      textShadow: isActive ? `0 0 10px ${NAV_AMBER}60` : 'none',
-                      boxShadow: isActive ? `0 0 20px rgba(224, 64, 251, 0.15)` : 'none',
+                      color: isActive ? NAV_AMBER : `rgba(45, 212, 191, 0.85)`,
+                      backgroundColor: isActive ? 'rgba(22, 18, 28, 0.9)' : 'transparent',
+                      border: `2px solid ${isActive ? 'rgba(245, 158, 11, 0.5)' : 'transparent'}`,
+                      borderRadius: 0,
+                      textShadow: isActive ? `0 0 10px rgba(245, 158, 11, 0.5)` : 'none',
+                      boxShadow: isActive ? 'inset 3px 0 0 rgba(192, 132, 252, 0.3)' : 'none',
                     }}
                     onMouseEnter={() => setHoveredLink(link.href)}
                     onMouseLeave={() => setHoveredLink(null)}
                   >
-                    {/* Icon */}
-                    <Icon 
-                      className="transition-all duration-300"
+                    <Icon
+                      className="transition-all duration-200"
                       style={{
-                        color: isActive ? NAV_AMBER : NAV_ACCENT,
+                        color: isActive ? NAV_AMBER : NAV_TEAL,
                         filter: isActive ? `drop-shadow(0 0 6px ${NAV_AMBER})` : 'none',
                       }}
                       size={16}
                     />
-                    
-                    {/* Number */}
-                    <span 
-                      className="text-xs font-mono"
-                      style={{ 
-                        color: 'rgba(224, 64, 251, 0.5)',
-                      }}
-                    >
+                    <span className="text-xs font-mono opacity-80" style={{ color: NAV_MAGENTA }}>
                       {link.number}
                     </span>
-                    
-                    {/* Name */}
                     <span>{link.name}</span>
-                    
-                    {/* Active indicator */}
-                    {isActive && (
-                      <motion.div
-                        className="absolute inset-0 rounded pointer-events-none"
-                        style={{
-                          border: `1px solid rgba(224, 64, 251, 0.3)`,
-                        }}
-                        animate={{
-                          boxShadow: [
-                            '0 0 10px rgba(224, 64, 251, 0.2)',
-                            '0 0 20px rgba(224, 64, 251, 0.4)',
-                            '0 0 10px rgba(224, 64, 251, 0.2)',
-                          ],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: 'easeInOut',
-                        }}
-                      />
-                    )}
-
-                    {/* Hover glow */}
-                    {isHovered && (
+                    {isHovered && !isActive && (
                       <motion.div
                         layoutId="navHover"
-                        className="absolute inset-0 rounded pointer-events-none"
+                        className="absolute inset-0 pointer-events-none"
                         style={{
-                          backgroundColor: 'rgba(224, 64, 251, 0.05)',
-                          boxShadow: '0 0 15px rgba(224, 64, 251, 0.2)',
+                          backgroundColor: 'rgba(245, 158, 11, 0.06)',
+                          border: '2px solid rgba(245, 158, 11, 0.25)',
+                          borderRadius: 0,
                         }}
-                        transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                        transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
                       />
                     )}
                   </Link>
@@ -286,11 +255,12 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
             
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden focus:outline-none transition-all duration-300 flex items-center justify-center min-w-[44px] min-h-[44px] rounded"
-              style={{ 
+              className="md:hidden focus:outline-none transition-all duration-200 flex items-center justify-center min-w-[44px] min-h-[44px]"
+              style={{
                 color: NAV_AMBER,
-                backgroundColor: isMobileMenuOpen ? 'rgba(224, 64, 251, 0.1)' : 'transparent',
-                border: `1px solid ${isMobileMenuOpen ? 'rgba(224, 64, 251, 0.3)' : 'transparent'}`,
+                backgroundColor: isMobileMenuOpen ? 'rgba(22, 18, 28, 0.95)' : 'transparent',
+                border: `2px solid ${isMobileMenuOpen ? 'rgba(245, 158, 11, 0.5)' : 'transparent'}`,
+                borderRadius: 0,
               }}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle menu"
@@ -300,19 +270,9 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
                 transition={{ duration: 0.3 }}
               >
                 {isMobileMenuOpen ? (
-                  <FiX 
-                    size={24} 
-                    style={{ 
-                      filter: `drop-shadow(0 0 8px ${NAV_AMBER})`,
-                    }} 
-                  />
+                  <FiX size={24} style={{ filter: `drop-shadow(0 0 8px ${NAV_AMBER})` }} />
                 ) : (
-                  <FiMenu 
-                    size={24} 
-                    style={{ 
-                      filter: `drop-shadow(0 0 8px ${NAV_AMBER})`,
-                    }} 
-                  />
+                  <FiMenu size={24} style={{ filter: `drop-shadow(0 0 8px ${NAV_AMBER})` }} />
                 )}
               </motion.div>
             </button>
@@ -330,64 +290,49 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
             transition={{ duration: 0.3 }}
             className="md:hidden relative"
             style={{
-              backgroundColor: 'transparent',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
+              backgroundColor: 'rgba(22, 18, 28, 0.98)',
+              borderTop: '2px solid rgba(245, 158, 11, 0.3)',
+              boxShadow: 'inset 0 4px 0 0 rgba(192, 132, 252, 0.1)',
             }}
           >
-            {/* Mobile starfield effect */}
-            <div 
-              className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20"
-              style={{
-                background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(224, 64, 251, 0.03) 2px, rgba(224, 64, 251, 0.03) 4px)',
-              }}
-            />
-            
-            <div className="relative py-4 px-4">
-              <ul className="flex flex-col space-y-2">
+            <div className="relative py-3 px-4">
+              <ul className="flex flex-col gap-1">
                 {navLinks.map((link, index) => {
                   const isActive = activeSection === link.href.substring(1);
                   const Icon = link.icon;
-                  
                   return (
                     <motion.li
                       key={link.href}
-                      initial={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0, x: -16 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
+                      transition={{ delay: index * 0.06 }}
                     >
                       <Link
                         href={link.href}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-5 py-4 font-mono text-base transition-all duration-300 rounded"
+                        className="nav-link flex items-center gap-3 px-4 py-3 font-mono text-base transition-all duration-200"
                         style={{
-                          color: isActive ? NAV_AMBER : 'rgba(0, 255, 204, 0.7)',
-                          backgroundColor: isActive ? 'rgba(224, 64, 251, 0.1)' : 'transparent',
-                          border: `1px solid ${isActive ? 'rgba(224, 64, 251, 0.3)' : 'transparent'}`,
-                          textShadow: isActive ? `0 0 10px ${NAV_AMBER}60` : 'none',
-                          boxShadow: isActive ? `0 0 20px rgba(224, 64, 251, 0.15)` : 'none',
+                          color: isActive ? NAV_AMBER : NAV_TEAL,
+                          backgroundColor: isActive ? 'rgba(22, 18, 28, 0.95)' : 'transparent',
+                          border: `2px solid ${isActive ? 'rgba(245, 158, 11, 0.5)' : 'transparent'}`,
+                          borderRadius: 0,
+                          textShadow: isActive ? `0 0 10px rgba(245, 158, 11, 0.4)` : 'none',
+                          boxShadow: isActive ? 'inset 3px 0 0 rgba(192, 132, 252, 0.3)' : 'none',
                         }}
                       >
-                        <Icon 
+                        <Icon
                           size={20}
                           style={{
-                            color: isActive ? NAV_AMBER : NAV_ACCENT,
+                            color: isActive ? NAV_AMBER : NAV_TEAL,
                             filter: isActive ? `drop-shadow(0 0 6px ${NAV_AMBER})` : 'none',
                           }}
                         />
-                        <span 
-                          className="text-xs font-mono"
-                          style={{ color: 'rgba(224, 64, 251, 0.5)' }}
-                        >
+                        <span className="text-xs font-mono" style={{ color: NAV_MAGENTA }}>
                           {link.number}
                         </span>
                         <span className="flex-1">{link.name}</span>
                         {isActive && (
-                          <motion.span
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            style={{ color: NAV_AMBER }}
-                          >
+                          <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} style={{ color: NAV_AMBER }}>
                             ▹
                           </motion.span>
                         )}
@@ -397,7 +342,6 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
                 })}
               </ul>
             </div>
-
           </motion.div>
         )}
       </AnimatePresence>

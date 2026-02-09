@@ -24,7 +24,6 @@ export default function ScrollProgress() {
       aria-live="polite"
       aria-label={`Scroll progress: ${percent} percent`}
     >
-      <div className="scroll-progress-accent" aria-hidden />
       <div className="scroll-progress-track">
         <div
           className="scroll-progress-fill"
