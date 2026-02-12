@@ -209,120 +209,64 @@ export default function Skills() {
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
+        <div className="skills-cards-grid">
           {technologyCategories.map((category, categoryIndex) => (
             <motion.div
               key={category.name}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
-              transition={{ 
-                duration: 0.6, 
-                delay: categoryIndex * STAGGER, 
-                ease: [...EASE] 
+              transition={{
+                duration: 0.6,
+                delay: categoryIndex * STAGGER,
+                ease: [...EASE],
               }}
               onHoverStart={() => setHoveredCard(categoryIndex)}
               onHoverEnd={() => setHoveredCard(null)}
-              className="group relative"
+              className="skills-card group"
             >
-              <div 
-                className="relative border rounded-lg p-4 md:p-5 transition-all duration-500"
-                style={{
-                  backgroundColor: hoveredCard === categoryIndex 
-                    ? 'rgba(0, 0, 0, 0.7)' 
-                    : 'rgba(0, 0, 0, 0.5)',
-                  borderColor: hoveredCard === categoryIndex
-                    ? 'rgba(224, 64, 251, 0.5)'
-                    : 'rgba(224, 64, 251, 0.2)',
-                  boxShadow: hoveredCard === categoryIndex
-                    ? '0 0 30px rgba(224, 64, 251, 0.15), inset 0 0 20px rgba(224, 64, 251, 0.05)'
-                    : '0 0 10px rgba(224, 64, 251, 0.05)',
-                }}
-              >
-                <div 
-                  className="absolute top-0 left-0 right-0 h-6 rounded-t-lg border-b flex items-center px-2.5 gap-1"
-                  style={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                    borderColor: 'rgba(224, 64, 251, 0.2)',
-                  }}
-                >
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#ff6b6b' }} />
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#e040fb' }} />
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#4caf50' }} />
+              <div className="skills-card-inner">
+                <div className="skills-card-title-bar">
+                  <span className="skills-card-dot skills-card-dot-r" />
+                  <span className="skills-card-dot skills-card-dot-m" />
+                  <span className="skills-card-dot skills-card-dot-g" />
                 </div>
 
-                <div className="mt-5 mb-3">
-                  <div className="font-mono text-xs mb-2" style={{ color: 'rgba(167, 139, 250, 0.5)' }}>
-                    <span style={{ color: 'var(--retro-amber)' }}>$</span> {category.cmd}
+                <div className="skills-card-body">
+                  <div className="skills-card-cmd">
+                    <span className="skills-card-prompt">$</span> {category.cmd}
                   </div>
-                  <h3 
-                    className="text-base md:text-lg font-bold font-mono transition-all duration-300"
-                    style={{ 
-                      color: hoveredCard === categoryIndex ? '#e040fb' : 'rgba(167, 139, 250, 0.85)',
-                      textShadow: hoveredCard === categoryIndex 
-                        ? '0 0 10px rgba(224, 64, 251, 0.3)' 
-                        : 'none',
-                    }}
-                  >
-                    {category.name}
-                  </h3>
-                </div>
+                  <h3 className="skills-card-heading">{category.name}</h3>
 
-                <div className="space-y-0.5">
-                  {category.technologies.map((tech, techIndex) => {
-                    const Icon = tech.icon;
-                    return (
-                      <motion.div
-                        key={tech.name}
-                        initial={{ opacity: 0, x: -8 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{
-                          delay: categoryIndex * STAGGER + techIndex * 0.04,
-                          duration: 0.35,
-                        }}
-                        className="flex items-center gap-2 py-1.5 px-2 rounded transition-all duration-300"
-                        style={{
-                          backgroundColor: hoveredCard === categoryIndex 
-                            ? 'rgba(224, 64, 251, 0.06)' 
-                            : 'transparent',
-                        }}
-                      >
-                        <div 
-                          className="flex items-center justify-center w-5 h-5 rounded shrink-0 transition-transform duration-300 group-hover:scale-105"
-                          style={{ backgroundColor: 'rgba(224, 64, 251, 0.1)' }}
+                  <ul className="skills-tech-list">
+                    {category.technologies.map((tech, techIndex) => {
+                      const Icon = tech.icon;
+                      return (
+                        <motion.li
+                          key={tech.name}
+                          initial={{ opacity: 0, x: -8 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{
+                            delay: categoryIndex * STAGGER + techIndex * 0.04,
+                            duration: 0.35,
+                          }}
+                          className="skills-tech-row"
                         >
-                          <Icon className="w-3.5 h-3.5" style={{ color: tech.color }} />
-                        </div>
-                        <span 
-                          className="font-mono text-xs md:text-sm flex-1"
-                          style={{ color: 'rgba(167, 139, 250, 0.85)' }}
-                        >
-                          {tech.name}
-                        </span>
-                        <span 
-                          className="font-mono text-[10px] opacity-0 group-hover:opacity-50 transition-opacity"
-                          style={{ color: '#e040fb' }}
-                        >
-                          ✓
-                        </span>
-                      </motion.div>
-                    );
-                  })}
-                </div>
+                          <span className="skills-tech-icon-wrap">
+                            <Icon className="skills-tech-icon-svg" style={{ color: tech.color }} />
+                          </span>
+                          <span className="skills-tech-label">{tech.name}</span>
+                          <span className="skills-tech-check">✓</span>
+                        </motion.li>
+                      );
+                    })}
+                  </ul>
 
-                <div 
-                  className="mt-3 pt-2 border-t font-mono text-[10px] md:text-xs flex items-center gap-1.5"
-                  style={{ 
-                    borderColor: 'rgba(224, 64, 251, 0.15)',
-                    color: 'rgba(167, 139, 250, 0.5)',
-                  }}
-                >
-                  <div 
-                    className="w-1 h-1 rounded-full shrink-0"
-                    style={{ backgroundColor: '#4caf50', boxShadow: '0 0 4px #4caf50' }}
-                  />
-                  <span>{category.technologies.length} loaded</span>
+                  <div className="skills-card-footer">
+                    <span className="skills-card-footer-dot" />
+                    <span>{category.technologies.length} loaded</span>
+                  </div>
                 </div>
               </div>
             </motion.div>

@@ -7,9 +7,10 @@ import { FiUser, FiFolder, FiCode, FiMail, FiMenu, FiX } from 'react-icons/fi';
 import RetroSoundToggle from './RetroSoundToggle';
 
 const NAV_AMBER = '#f59e0b';
+const NAV_RED = '#e6392e';
 const NAV_MAGENTA = '#c084fc';
-const NAV_TEAL = '#2dd4bf';
-const NAV_DARK = 'rgba(22, 18, 28, 0.97)';
+const NAV_TEAL = '#00e5ff';
+const NAV_DARK = 'rgba(13, 10, 20, 0.97)';
 const NAV_BG = 'transparent';
 
 const navLinks = [
@@ -111,9 +112,9 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
         backgroundColor: scrolled ? NAV_DARK : NAV_BG,
         backdropFilter: scrolled ? 'blur(10px)' : 'none',
         WebkitBackdropFilter: scrolled ? 'blur(10px)' : 'none',
-        borderBottom: scrolled ? '2px solid rgba(245, 158, 11, 0.35)' : 'none',
+        borderBottom: scrolled ? '2px solid rgba(230, 57, 46, 0.4)' : 'none',
         boxShadow: scrolled
-          ? 'inset 4px 0 0 rgba(192, 132, 252, 0.2), 0 4px 24px rgba(0, 0, 0, 0.35)'
+          ? 'inset 4px 0 0 rgba(0, 229, 255, 0.15), 0 4px 24px rgba(0, 0, 0, 0.35)'
           : 'none',
       }}
     >
@@ -210,12 +211,12 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
                     href={link.href}
                     className="nav-link group relative font-mono text-sm font-medium transition-all duration-200 flex items-center gap-2 px-3 py-2"
                     style={{
-                      color: isActive ? NAV_AMBER : `rgba(45, 212, 191, 0.85)`,
-                      backgroundColor: isActive ? 'rgba(22, 18, 28, 0.9)' : 'transparent',
-                      border: `2px solid ${isActive ? 'rgba(245, 158, 11, 0.5)' : 'transparent'}`,
+                      color: isActive ? '#fff' : NAV_TEAL,
+                      backgroundColor: isActive ? NAV_RED : 'transparent',
+                      border: `2px solid ${isActive ? NAV_RED : 'transparent'}`,
                       borderRadius: 0,
-                      textShadow: isActive ? `0 0 10px rgba(245, 158, 11, 0.5)` : 'none',
-                      boxShadow: isActive ? 'inset 3px 0 0 rgba(192, 132, 252, 0.3)' : 'none',
+                      textShadow: isActive ? '0 1px 0 rgba(0,0,0,0.3)' : 'none',
+                      boxShadow: isActive ? 'inset 2px 2px 0 rgba(255,255,255,0.15), 2px 2px 0 rgba(0,0,0,0.2)' : 'none',
                     }}
                     onMouseEnter={() => setHoveredLink(link.href)}
                     onMouseLeave={() => setHoveredLink(null)}
@@ -237,8 +238,8 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
                         layoutId="navHover"
                         className="absolute inset-0 pointer-events-none"
                         style={{
-                          backgroundColor: 'rgba(245, 158, 11, 0.06)',
-                          border: '2px solid rgba(245, 158, 11, 0.25)',
+                          backgroundColor: 'rgba(230, 57, 46, 0.12)',
+                          border: '2px solid rgba(230, 57, 46, 0.5)',
                           borderRadius: 0,
                         }}
                         transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
@@ -312,12 +313,12 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="nav-link flex items-center gap-3 px-4 py-3 font-mono text-base transition-all duration-200"
                         style={{
-                          color: isActive ? NAV_AMBER : NAV_TEAL,
-                          backgroundColor: isActive ? 'rgba(22, 18, 28, 0.95)' : 'transparent',
-                          border: `2px solid ${isActive ? 'rgba(245, 158, 11, 0.5)' : 'transparent'}`,
+                          color: isActive ? '#fff' : NAV_TEAL,
+                          backgroundColor: isActive ? NAV_RED : 'transparent',
+                          border: `2px solid ${isActive ? NAV_RED : 'transparent'}`,
                           borderRadius: 0,
-                          textShadow: isActive ? `0 0 10px rgba(245, 158, 11, 0.4)` : 'none',
-                          boxShadow: isActive ? 'inset 3px 0 0 rgba(192, 132, 252, 0.3)' : 'none',
+                          textShadow: isActive ? '0 1px 0 rgba(0,0,0,0.3)' : 'none',
+                          boxShadow: isActive ? 'inset 2px 2px 0 rgba(255,255,255,0.15)' : 'none',
                         }}
                       >
                         <Icon
