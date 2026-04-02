@@ -54,6 +54,9 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  verification: {
+    google: "googled276d36e0a80a7d5",
+  },
   icons: {
     icon: [
       { url: "/icon.png", sizes: "32x32", type: "image/png" },
