@@ -4980,6 +4980,19 @@ html::-webkit-scrollbar {
   .terminal-pet-svg .pet-eye-r { animation: none; }
 }
 
+@media (max-width: 768px) {
+  .bg-layer-1,
+  .bg-layer-2,
+  .bg-noise,
+  .bg-corners,
+  .bg-shapes,
+  .shape,
+  .pixel-grid-overlay,
+  .pixel-dots-overlay {
+    animation: none !important;
+  }
+}
+
 /* Corner group: label + pet together */
 .retro-corner-group {
   position: fixed;

@@ -429,6 +429,10 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
     (async () => {
       const THREE = await import('three');
       setLoadProgress(0.1);
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const isSmallScreen = window.innerWidth <= 768;
+      const isLikelyMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+      const isLowPowerDevice = prefersReducedMotion || isSmallScreen || isLikelyMobile;
       
       const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
       const { TextureLoader } = await import('three');
@@ -465,12 +469,12 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
 
       const renderer = new THREE.WebGLRenderer({ 
         canvas, 
-        antialias: true, 
+        antialias: !isLowPowerDevice, 
         alpha: false,
-        powerPreference: 'high-performance'
+        powerPreference: isLowPowerDevice ? 'default' : 'high-performance'
       });
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+      renderer.setPixelRatio(Math.min(isLowPowerDevice ? 1.1 : 1.6, window.devicePixelRatio));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.5;
 
@@ -481,9 +485,9 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
 
       const bloomPass = new UnrealBloomPass(
         new THREE.Vector2(window.innerWidth, window.innerHeight),
-        0.45,  // strength — softer glow
-        0.45,  // radius
-        0.38   // threshold — slightly higher for cleaner highlights
+        isLowPowerDevice ? 0.28 : 0.45,  // strength — softer glow
+        isLowPowerDevice ? 0.32 : 0.45,  // radius
+        isLowPowerDevice ? 0.45 : 0.38   // threshold — slightly higher for cleaner highlights
       );
       composer.addPass(bloomPass);
 
@@ -541,6 +545,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
 
       const contentTexture = screenTextureResult.texture;
       const { baseCanvas, displayCanvas, W: screenW, H: screenH, drawTypedHero } = screenTextureResult;
+      const displayCtx = displayCanvas.getContext('2d');
 
       // CRT effect: subtle noise, soft scanlines, gentle edge tint
       const CRT_NOISE_FRAG = `
@@ -635,7 +640,9 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       // Galaxy-like starfield behind the computer: very slow, night-sky vibe
       const galaxyRadius = 14;
       const galaxyDepth = 12;
-      const particleSpeeds = new Float32Array(520);
+      const smallStarCount = isLowPowerDevice ? 220 : 420;
+      const bigStarCount = isLowPowerDevice ? 40 : 100;
+      const particleSpeeds = new Float32Array(smallStarCount + bigStarCount);
 
       // Particles only behind computer: z well in front of camera, behind monitor
       const zMin = 1.2;
@@ -651,8 +658,8 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         }
       }
 
-      const posSmall = new Float32Array(420 * 3);
-      fillGalaxyPositions(posSmall, 420);
+      const posSmall = new Float32Array(smallStarCount * 3);
+      fillGalaxyPositions(posSmall, smallStarCount);
       const geoSmall = new THREE.BufferGeometry();
       geoSmall.setAttribute('position', new THREE.BufferAttribute(posSmall, 3));
       const matSmall = new THREE.PointsMaterial({
@@ -667,14 +674,14 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       starsSmall.rotation.x = 0.06;
       scene.add(starsSmall);
 
-      const posBig = new Float32Array(100 * 3);
-      for (let i = 0; i < 100; i++) {
+      const posBig = new Float32Array(bigStarCount * 3);
+      for (let i = 0; i < bigStarCount; i++) {
         const r = Math.pow(Math.random(), 0.5) * galaxyRadius * 0.8;
         const angle = Math.random() * Math.PI * 2;
         posBig[i * 3] = Math.cos(angle) * r + (Math.random() - 0.5);
         posBig[i * 3 + 1] = Math.sin(angle) * r * 0.35;
         posBig[i * 3 + 2] = zMin + Math.random() * (zMax * 0.8 - zMin);
-        particleSpeeds[420 + i] = 0.0002 + Math.random() * 0.0005;
+        particleSpeeds[smallStarCount + i] = 0.0002 + Math.random() * 0.0005;
       }
       const geoBig = new THREE.BufferGeometry();
       geoBig.setAttribute('position', new THREE.BufferAttribute(posBig, 3));
@@ -1041,6 +1048,10 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       const mouse = new THREE.Vector2();
       let playGameHovered = false;
       const onPointerMove = (e: PointerEvent) => {
+        if (gameMode !== 'desktop') {
+          playGameHovered = false;
+          return;
+        }
         const rect = canvas.getBoundingClientRect();
         mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
         mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
@@ -1155,9 +1166,22 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       let time = 0;
       let lastTypingNameLen = -1;
       let lastTypingGreetingLen = -1;
+      let frameSkipCounter = 0;
+      const snakeOpposite: Record<'up' | 'down' | 'left' | 'right', 'up' | 'down' | 'left' | 'right'> = {
+        up: 'down',
+        down: 'up',
+        left: 'right',
+        right: 'left',
+      };
 
       const ROTATION_CAP = 0.08;
       function tick() {
+        animationId = requestAnimationFrame(tick);
+        if (document.hidden) return;
+        if (isLowPowerDevice) {
+          frameSkipCounter = (frameSkipCounter + 1) % 2;
+          if (frameSkipCounter !== 0) return;
+        }
         time += 0.016;
         timeRef.current = time;
         const rawTypingTime = typingStartTimeRef.current === null ? 0 : time - typingStartTimeRef.current;
@@ -1182,14 +1206,14 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
 
         // Galaxy: very slow upward drift + gentle rotation
         const posS = geoSmall.attributes.position.array as Float32Array;
-        for (let i = 0; i < 420; i++) {
+        for (let i = 0; i < smallStarCount; i++) {
           posS[i * 3 + 1] -= particleSpeeds[i];
           if (posS[i * 3 + 1] < -6) posS[i * 3 + 1] = 5;
         }
         geoSmall.attributes.position.needsUpdate = true;
         const posB = geoBig.attributes.position.array as Float32Array;
-        for (let i = 0; i < 100; i++) {
-          posB[i * 3 + 1] -= particleSpeeds[420 + i];
+        for (let i = 0; i < bigStarCount; i++) {
+          posB[i * 3 + 1] -= particleSpeeds[smallStarCount + i];
           if (posB[i * 3 + 1] < -6) posB[i * 3 + 1] = 5;
         }
         geoBig.attributes.position.needsUpdate = true;
@@ -1202,16 +1226,14 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         fillLight.position.z = Math.sin(time * 0.5) * 1.5;
 
         // Update screen texture: menu / game / desktop
-        const dispCtx = displayCanvas.getContext('2d');
-        if (dispCtx) {
+        if (displayCtx) {
           if (gameMode === 'menu') {
-            drawMenuScreen(dispCtx, menuSelectedIndex, time);
+            drawMenuScreen(displayCtx, menuSelectedIndex, time);
           } else if (gameMode === 'snake') {
             if (!gameOver) {
               gameTicks++;
               if (nextSnakeDir && (gameTicks % 8 === 0)) {
-                const opp: Record<string, string> = { up: 'down', down: 'up', left: 'right', right: 'left' };
-                if (opp[nextSnakeDir] !== snakeDir) snakeDir = nextSnakeDir;
+                if (snakeOpposite[nextSnakeDir] !== snakeDir) snakeDir = nextSnakeDir;
                 const head = snake[0];
                 let nx = head.x; let ny = head.y;
                 if (snakeDir === 'up') ny--; else if (snakeDir === 'down') ny++; else if (snakeDir === 'left') nx--; else nx++;
@@ -1227,7 +1249,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
                 }
               }
             }
-            drawGameScreen(dispCtx);
+            drawGameScreen(displayCtx);
           } else if (gameMode === 'pong') {
             if (!pongGameOver) {
               pongBall.x += pongBall.vx;
@@ -1255,7 +1277,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
                 playGameOver();
               }
             }
-            drawPongScreen(dispCtx);
+            drawPongScreen(displayCtx);
           } else if (gameMode === 'breakout') {
             if (!breakoutGameOver) {
               breakoutBall.x += breakoutBall.vx;
@@ -1289,7 +1311,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
                 return !hit;
               });
             }
-            drawBreakoutScreen(dispCtx);
+            drawBreakoutScreen(displayCtx);
           } else if (gameMode === 'dodge') {
             if (!dodgeGameOver) {
               dodgeObstacles.forEach((o) => { o.y += 2.2; });
@@ -1312,9 +1334,9 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
                 }
               }
             }
-            drawDodgeScreen(dispCtx);
+            drawDodgeScreen(displayCtx);
           } else {
-          dispCtx.drawImage(baseCanvas, 0, 0);
+          displayCtx.drawImage(baseCanvas, 0, 0);
             const nameLen = Math.min(nameStr.length, Math.floor(typingTime * NAME_TYPING_SPEED));
             const greetingStartTime = nameStr.length / NAME_TYPING_SPEED + GREETING_START_DELAY;
             const greetingLen = typingTime < greetingStartTime
@@ -1329,58 +1351,58 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
               playTyping();
             }
             const cursorOn = Math.floor(time * 2) % 2 === 0;
-            drawTypedHero(dispCtx, nameLen, greetingLen, cursorOn);
+            drawTypedHero(displayCtx, nameLen, greetingLen, cursorOn);
           const pulse = 0.5 + 0.5 * Math.sin(time * 1.8);
-          dispCtx.fillStyle = `rgba(245, 158, 11, ${0.05 * pulse})`;
-          dispCtx.fillRect(8, 2, screenW - 16, 22);
-          dispCtx.fillStyle = `rgba(192, 132, 252, ${0.03 * pulse})`;
-          dispCtx.fillRect(8, 2, screenW - 16, 22);
+          displayCtx.fillStyle = `rgba(245, 158, 11, ${0.05 * pulse})`;
+          displayCtx.fillRect(8, 2, screenW - 16, 22);
+          displayCtx.fillStyle = `rgba(192, 132, 252, ${0.03 * pulse})`;
+          displayCtx.fillRect(8, 2, screenW - 16, 22);
           if (cursorOn) {
-            dispCtx.fillStyle = '#f59e0b';
-            dispCtx.fillRect(52, screenH - 19, 2, 10);
+            displayCtx.fillStyle = '#f59e0b';
+            displayCtx.fillRect(52, screenH - 19, 2, 10);
           }
             // Play games button: auto glow + hover glare/animation
             const r = PLAY_GAME_RECT;
             const playPulse = 0.5 + 0.5 * Math.sin(time * 3);
             const glarePhase = (time * 0.8) % 1;
             const outerPad = playGameHovered ? 14 : 10;
-            dispCtx.save();
-            dispCtx.globalCompositeOperation = 'lighter';
+            displayCtx.save();
+            displayCtx.globalCompositeOperation = 'lighter';
             const glowIntensity = playGameHovered ? 0.3 + 0.2 * playPulse : 0.18 + 0.14 * playPulse;
-            dispCtx.shadowColor = 'rgba(251, 191, 36, 0.7)';
-            dispCtx.shadowBlur = playGameHovered ? 12 + 3 * playPulse : 8 + 2 * playPulse;
-            dispCtx.strokeStyle = `rgba(245, 158, 11, ${glowIntensity})`;
-            dispCtx.lineWidth = playGameHovered ? 3 : 2;
-            dispCtx.strokeRect(r.x - outerPad, r.y - outerPad, r.w + outerPad * 2, r.h + outerPad * 2);
-            dispCtx.shadowBlur = 0;
-            dispCtx.globalCompositeOperation = 'source-over';
-            dispCtx.strokeStyle = `rgba(245, 158, 11, ${0.45 + 0.4 * playPulse})`;
-            dispCtx.lineWidth = 2;
-            dispCtx.strokeRect(r.x, r.y, r.w, r.h);
+            displayCtx.shadowColor = 'rgba(251, 191, 36, 0.7)';
+            displayCtx.shadowBlur = playGameHovered ? 12 + 3 * playPulse : 8 + 2 * playPulse;
+            displayCtx.strokeStyle = `rgba(245, 158, 11, ${glowIntensity})`;
+            displayCtx.lineWidth = playGameHovered ? 3 : 2;
+            displayCtx.strokeRect(r.x - outerPad, r.y - outerPad, r.w + outerPad * 2, r.h + outerPad * 2);
+            displayCtx.shadowBlur = 0;
+            displayCtx.globalCompositeOperation = 'source-over';
+            displayCtx.strokeStyle = `rgba(245, 158, 11, ${0.45 + 0.4 * playPulse})`;
+            displayCtx.lineWidth = 2;
+            displayCtx.strokeRect(r.x, r.y, r.w, r.h);
             // Magenta inner accent
-            dispCtx.strokeStyle = `rgba(192, 132, 252, ${0.25 + 0.15 * playPulse})`;
-            dispCtx.lineWidth = 1;
-            dispCtx.strokeRect(r.x + 2, r.y + 2, r.w - 4, r.h - 4);
-            dispCtx.lineWidth = 2;
+            displayCtx.strokeStyle = `rgba(192, 132, 252, ${0.25 + 0.15 * playPulse})`;
+            displayCtx.lineWidth = 1;
+            displayCtx.strokeRect(r.x + 2, r.y + 2, r.w - 4, r.h - 4);
+            displayCtx.lineWidth = 2;
             // Glare sweep
             const sweepW = 50;
             const sweepX = r.x - sweepW + glarePhase * (r.w + sweepW * 2);
-            const grad = dispCtx.createLinearGradient(sweepX, 0, sweepX + sweepW, 0);
+            const grad = displayCtx.createLinearGradient(sweepX, 0, sweepX + sweepW, 0);
             grad.addColorStop(0, 'rgba(255, 230, 180, 0)');
             grad.addColorStop(0.35, 'rgba(255, 230, 180, 0.35)');
             grad.addColorStop(0.5, 'rgba(255, 248, 220, 0.48)');
             grad.addColorStop(0.65, 'rgba(255, 230, 180, 0.35)');
             grad.addColorStop(1, 'rgba(255, 230, 180, 0)');
-            dispCtx.save();
-            dispCtx.beginPath();
-            dispCtx.rect(r.x, r.y, r.w, r.h);
-            dispCtx.clip();
-            dispCtx.globalCompositeOperation = 'lighter';
-            dispCtx.fillStyle = grad;
-            dispCtx.fillRect(r.x - sweepW, r.y, r.w + sweepW * 2, r.h);
-            dispCtx.restore();
-            dispCtx.restore();
-            dispCtx.lineWidth = 1;
+            displayCtx.save();
+            displayCtx.beginPath();
+            displayCtx.rect(r.x, r.y, r.w, r.h);
+            displayCtx.clip();
+            displayCtx.globalCompositeOperation = 'lighter';
+            displayCtx.fillStyle = grad;
+            displayCtx.fillRect(r.x - sweepW, r.y, r.w + sweepW * 2, r.h);
+            displayCtx.restore();
+            displayCtx.restore();
+            displayCtx.lineWidth = 1;
           }
           contentTexture.needsUpdate = true;
         }
@@ -1393,7 +1415,6 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         renderer.setRenderTarget(null);
 
         composer.render();
-        animationId = requestAnimationFrame(tick);
       }
       animationId = requestAnimationFrame(tick);
 
@@ -1464,9 +1485,18 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
     e.stopPropagation();
     window.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
   };
+  const loadPercent = Math.round(loadProgress * 100);
 
   return (
     <section id="hero" className="hero3d-section">
+      {!loaded && (
+        <div className="hero3d-loading" aria-hidden>
+          <div className="hero3d-loading-glow" aria-hidden />
+          <div className="hero3d-loading-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={loadPercent}>
+            <div className="hero3d-loading-progress" style={{ width: `${loadPercent}%` }} />
+          </div>
+        </div>
+      )}
       {mounted && (
         <div 
           className={`hero3d-canvas-wrap ${loaded ? 'hero3d-canvas-loaded' : ''}`}

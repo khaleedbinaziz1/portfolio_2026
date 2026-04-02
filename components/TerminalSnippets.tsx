@@ -46,8 +46,16 @@ const snippets: Omit<TerminalSnippet, 'id' | 'delay'>[] = [
 
 export default function TerminalSnippets() {
   const [visibleSnippets, setVisibleSnippets] = useState<TerminalSnippet[]>([]);
+  const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isSmallScreen = window.innerWidth <= 768;
+    setEnabled(!reducedMotion && !isSmallScreen);
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) return;
     const showSnippet = () => {
       const snippet = snippets[Math.floor(Math.random() * snippets.length)];
       const newSnippet: TerminalSnippet = {
@@ -78,7 +86,9 @@ export default function TerminalSnippets() {
     // Double the interval to reduce frequency by half
     const interval = setInterval(showSnippet, 16000 + Math.random() * 8000);
     return () => clearInterval(interval);
-  }, []);
+  }, [enabled]);
+
+  if (!enabled) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">

@@ -56,7 +56,15 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
     }
 
     let animationId: number;
+    let lastFrameTime = 0;
+    let time = 0;
     const animate = () => {
+      animationId = requestAnimationFrame(animate);
+      if (document.hidden) return;
+      const now = performance.now();
+      if (now - lastFrameTime < 33) return;
+      lastFrameTime = now;
+      time += 0.033;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
         stars.forEach((star) => {
         ctx.fillStyle = `rgba(45, 212, 191, ${star.opacity})`;
@@ -64,13 +72,12 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
         ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
         ctx.fill();
         star.y -= star.speed;
-        star.opacity = 0.2 + Math.sin(Date.now() * 0.001 + star.x) * 0.2;
+        star.opacity = 0.2 + Math.sin(time + star.x) * 0.2;
         if (star.y < 0) {
           star.y = canvas.height;
           star.x = Math.random() * canvas.width;
         }
       });
-      animationId = requestAnimationFrame(animate);
     };
     animate();
 

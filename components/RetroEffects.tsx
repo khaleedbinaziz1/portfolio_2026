@@ -19,6 +19,13 @@ export default function RetroEffects({
   intensity = 'medium' 
 }: RetroEffectsProps) {
   const [randomCommands, setRandomCommands] = useState<Command[]>([]);
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isSmallScreen = window.innerWidth <= 768;
+    setEnabled(!reducedMotion && !isSmallScreen);
+  }, []);
 
   const terminalCommands = [
     'git status',
@@ -53,7 +60,7 @@ export default function RetroEffects({
   ];
 
   useEffect(() => {
-    if (type === 'terminal') {
+    if (enabled && type === 'terminal') {
       const spawnCommand = () => {
         const randomCmd = terminalCommands[Math.floor(Math.random() * terminalCommands.length)];
         const position = positions[Math.floor(Math.random() * positions.length)];
@@ -90,7 +97,9 @@ export default function RetroEffects({
       const interval = setInterval(spawnCommand, 6000 + Math.random() * 4000);
       return () => clearInterval(interval);
     }
-  }, [type, intensity]);
+  }, [type, intensity, enabled]);
+
+  if (!enabled) return null;
 
   if (type === 'terminal') {
     return (
