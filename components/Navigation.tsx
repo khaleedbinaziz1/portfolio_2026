@@ -10,7 +10,7 @@ const NAV_AMBER = '#f59e0b';
 const NAV_RED = '#e6392e';
 const NAV_MAGENTA = '#c084fc';
 const NAV_TEAL = '#00e5ff';
-const NAV_DARK = 'rgba(13, 10, 20, 0.97)';
+const NAV_DARK = 'rgba(26, 20, 38, 0.88)';
 const NAV_BG = 'transparent';
 
 const navLinks = [
@@ -32,6 +32,9 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
   // Starfield background effect — only run when main content is visible
   useEffect(() => {
     if (!contentVisible) return;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isSmallScreen = window.innerWidth <= 768;
+    if (reducedMotion || isSmallScreen) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -117,11 +120,11 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
       className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-500 font-mono nav-retro"
       style={{
         backgroundColor: scrolled ? NAV_DARK : NAV_BG,
-        backdropFilter: scrolled ? 'blur(10px)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(10px)' : 'none',
+        backdropFilter: scrolled ? 'blur(6px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(6px)' : 'none',
         borderBottom: scrolled ? '2px solid rgba(230, 57, 46, 0.4)' : 'none',
         boxShadow: scrolled
-          ? 'inset 4px 0 0 rgba(0, 229, 255, 0.15), 0 4px 24px rgba(0, 0, 0, 0.35)'
+          ? 'inset 3px 0 0 rgba(0, 229, 255, 0.12), 0 2px 14px rgba(0, 0, 0, 0.28)'
           : 'none',
       }}
     >

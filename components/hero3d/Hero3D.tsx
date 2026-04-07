@@ -407,6 +407,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
   const [mounted, setMounted] = useState(false);
   const [canvasOpacity, setCanvasOpacity] = useState(1);
   const [loadProgress, setLoadProgress] = useState(0);
+  const [showLoader, setShowLoader] = useState(true);
   const scrollRef = useRef(0);
   const lastOpacityRef = useRef(1);
   const timeRef = useRef(0);
@@ -443,7 +444,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       setLoadProgress(0.3);
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x0d0a14);
+      scene.background = new THREE.Color(0x2b2140);
       
       // Balanced lighting: warm key, cool rim, soft fill with a hint of magenta
       const ambientLight = new THREE.AmbientLight(0xe8e0f0, 0.5);
@@ -1178,6 +1179,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       function tick() {
         animationId = requestAnimationFrame(tick);
         if (document.hidden) return;
+        if (scrollRef.current > 2) return;
         if (isLowPowerDevice) {
           frameSkipCounter = (frameSkipCounter + 1) % 2;
           if (frameSkipCounter !== 0) return;
@@ -1480,6 +1482,12 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
     }
   }, [experienceStarted]);
 
+  useEffect(() => {
+    if (!loaded) return;
+    const t = window.setTimeout(() => setShowLoader(false), 420);
+    return () => window.clearTimeout(t);
+  }, [loaded]);
+
   const onMobileKey = (key: string) => (e: React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1497,6 +1505,14 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
           </div>
         </div>
       )}
+      {showLoader && loaded && (
+        <div className="hero3d-loading hero3d-loading-exit" aria-hidden>
+          <div className="hero3d-loading-glow" aria-hidden />
+          <div className="hero3d-loading-bar">
+            <div className="hero3d-loading-progress" style={{ width: '100%' }} />
+          </div>
+        </div>
+      )}
       {mounted && (
         <div 
           className={`hero3d-canvas-wrap ${loaded ? 'hero3d-canvas-loaded' : ''}`}
@@ -1508,12 +1524,6 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         </div>
       )}
 
-      <div  className="hero3d-backup" aria-hidden>
-        <p className="hero3d-backup-label">{personalInfo.intro}</p>
-        <h1 className="hero3d-backup-name">{personalInfo.name}</h1>
-        <p className="hero3d-backup-tagline">{personalInfo.whoami}</p>
-      </div>
-
       <div
         className="hero3d-bridge"
         aria-hidden
@@ -1523,7 +1533,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
           right: 0,
           bottom: 0,
           height: '60vh',
-          background: 'linear-gradient(180deg, transparent 0%, rgba(13, 10, 20, 0.3) 25%, rgba(10, 8, 18, 0.6) 50%, rgba(8, 6, 14, 0.85) 75%, #06040a 100%)',
+          background: 'linear-gradient(180deg, transparent 0%, rgba(28, 20, 40, 0.18) 25%, rgba(24, 18, 36, 0.38) 50%, rgba(18, 14, 28, 0.55) 75%, #120d1d 100%)',
           pointerEvents: 'none',
           zIndex: 2,
         }}

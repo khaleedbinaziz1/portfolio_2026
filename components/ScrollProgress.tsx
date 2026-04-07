@@ -1,20 +1,34 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function ScrollProgress() {
   const [percent, setPercent] = useState(0);
+  const rafIdRef = useRef<number | null>(null);
+  const percentRef = useRef(0);
 
   useEffect(() => {
-    const onScroll = () => {
+    const update = () => {
       const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
       const max = scrollHeight - clientHeight;
       const pct = max <= 0 ? 0 : Math.round((scrollTop / max) * 100);
-      setPercent(Math.min(100, pct));
+      const next = Math.min(100, pct);
+      if (next !== percentRef.current) {
+        percentRef.current = next;
+        setPercent(next);
+      }
+      rafIdRef.current = null;
+    };
+    const onScroll = () => {
+      if (rafIdRef.current !== null) return;
+      rafIdRef.current = requestAnimationFrame(update);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
+    update();
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (rafIdRef.current !== null) cancelAnimationFrame(rafIdRef.current);
+    };
   }, []);
 
   return (
