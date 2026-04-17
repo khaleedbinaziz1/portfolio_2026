@@ -15,8 +15,10 @@ const pixelifySans = Pixelify_Sans({
   weight: ["400", "500", "600", "700"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://khaledbinaziz.dev";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://khaledbinaziz.dev'),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Khaled Bin Aziz | Full-Stack Developer & Software Engineer",
     template: "%s | Khaled Bin Aziz"
@@ -59,16 +61,18 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+      { url: "/icon.png", sizes: "192x192", type: "image/png" },
       { url: "/icon.png", sizes: "32x32", type: "image/png" },
       { url: "/icon.png", sizes: "16x16", type: "image/png" },
     ],
     shortcut: "/icon.png",
-    apple: "/icon.png",
+    apple: [{ url: "/icon.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "/",
+    url: siteUrl,
     siteName: "Khaled Bin Aziz Portfolio",
     title: "Khaled Bin Aziz | Full-Stack Developer & Software Engineer",
     description: "Full-Stack Developer specializing in React, Next.js, and Node.js. Building scalable web applications serving 5,000+ users. Expert in TypeScript, system design, and cloud deployment.",
@@ -89,7 +93,7 @@ export const metadata: Metadata = {
     creator: "@khaledbinaziz",
   },
   alternates: {
-    canonical: "/",
+    canonical: siteUrl,
   },
   category: "technology",
   viewport: {
