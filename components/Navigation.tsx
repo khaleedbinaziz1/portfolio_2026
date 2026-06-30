@@ -92,24 +92,43 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
   }, [contentVisible]);
 
   useEffect(() => {
+    let rafId = 0;
+    let lastScrolled = scrolled;
+    let lastActive = activeSection;
+
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-      
-      const sections = navLinks.map(link => link.href.substring(1));
-      const currentSection = sections.find(section => {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          return rect.top <= 150 && rect.bottom >= 150;
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        const nextScrolled = window.scrollY > 50;
+        if (nextScrolled !== lastScrolled) {
+          lastScrolled = nextScrolled;
+          setScrolled(nextScrolled);
         }
-        return false;
+
+        const sections = navLinks.map(link => link.href.substring(1));
+        const currentSection = sections.find(section => {
+          const element = document.getElementById(section);
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            return rect.top <= 150 && rect.bottom >= 150;
+          }
+          return false;
+        }) || '';
+
+        if (currentSection !== lastActive) {
+          lastActive = currentSection;
+          setActiveSection(currentSection);
+        }
       });
-      setActiveSection(currentSection || '');
     };
     
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   return (

@@ -94,12 +94,12 @@ function createScreenTexture(
   const imageTop = 36;
   const lineHeight = 18;
   const lineHeightSmall = 13;
-  const fontMono = '16px "Courier New", monospace';
-  const fontMonoSmall = '12px "Courier New", monospace';
-  const fontBold = 'bold 24px "Courier New", monospace';
-  const heroIntroFont = '15px "Courier New", monospace';
-  const heroNameFont = 'bold 32px "Courier New", monospace';
-  const heroGreetingFont = 'bold 24px "Courier New", monospace';
+  const fontMono = '17px "Courier New", monospace';
+  const fontMonoSmall = '13px "Courier New", monospace';
+  const fontBold = 'bold 26px "Courier New", monospace';
+  const heroIntroFont = '16px "Courier New", monospace';
+  const heroNameFont = 'bold 34px "Courier New", monospace';
+  const heroGreetingFont = 'bold 26px "Courier New", monospace';
   const heroGreetingLineHeight = 28;
   const rightPanelX = 308;
   const rightPanelW = W - rightPanelX - 16;
@@ -214,10 +214,7 @@ function createScreenTexture(
       const heroYGreeting = heroYName + 42;
       ctx.font = heroIntroFont;
       ctx.fillStyle = colorLabel;
-      ctx.shadowColor = 'rgba(251, 191, 36, 0.35)';
-      ctx.shadowBlur = 4;
       ctx.fillText(intro, heroX, heroYStart);
-      ctx.shadowBlur = 0;
 
       function drawTypedHero(
         drawCtx: CanvasRenderingContext2D,
@@ -227,33 +224,13 @@ function createScreenTexture(
       ) {
         drawCtx.font = heroNameFont;
         drawCtx.fillStyle = colorBright;
-        drawCtx.shadowColor = colorBright;
-        drawCtx.shadowBlur = 24;
-        drawCtx.fillText(name.substring(0, nameLen), heroX, heroYName);
-        drawCtx.shadowBlur = 10;
-        drawCtx.fillText(name.substring(0, nameLen), heroX, heroYName);
-        drawCtx.shadowBlur = 0;
         drawCtx.fillText(name.substring(0, nameLen), heroX, heroYName);
         const visibleGreeting = greeting.substring(0, greetingLen);
         if (visibleGreeting) {
           drawCtx.font = heroGreetingFont;
           drawCtx.fillStyle = colorMagenta;
-          drawCtx.shadowColor = colorMagenta;
-          drawCtx.shadowBlur = 22;
           let gy = heroYGreeting;
           const gLines = wrapText(drawCtx, visibleGreeting, gridW);
-          gLines.forEach((line) => {
-            drawCtx.fillText(line, heroX, gy);
-            gy += heroGreetingLineHeight;
-          });
-          drawCtx.shadowBlur = 10;
-          gy = heroYGreeting;
-          gLines.forEach((line) => {
-            drawCtx.fillText(line, heroX, gy);
-            gy += heroGreetingLineHeight;
-          });
-          drawCtx.shadowBlur = 0;
-          gy = heroYGreeting;
           gLines.forEach((line) => {
             drawCtx.fillText(line, heroX, gy);
             gy += heroGreetingLineHeight;
@@ -356,10 +333,7 @@ function createScreenTexture(
       ctx.lineWidth = 1;
       ctx.font = 'bold 13px "Courier New", monospace';
       ctx.fillStyle = colorMagenta;
-      ctx.shadowColor = 'rgba(192, 132, 252, 0.5)';
-      ctx.shadowBlur = 8;
       ctx.fillText('▶  P L A Y   G A M E S  ◀', px + (pw - ctx.measureText('▶  P L A Y   G A M E S  ◀').width) / 2, playGameBoxY + playGameBoxH / 2 + 4);
-      ctx.shadowBlur = 0;
 
       // ─── Status bar ───
       const statusY = H - statusBarH - 2;
@@ -446,7 +420,6 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0x2b2140);
       
-      // Balanced lighting: warm key, cool rim, soft fill with a hint of magenta
       const ambientLight = new THREE.AmbientLight(0xe8e0f0, 0.5);
       scene.add(ambientLight);
       
@@ -475,29 +448,27 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         powerPreference: isLowPowerDevice ? 'default' : 'high-performance'
       });
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(isLowPowerDevice ? 1.1 : 1.6, window.devicePixelRatio));
+      renderer.setPixelRatio(Math.min(isLowPowerDevice ? 1.25 : 2, window.devicePixelRatio));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.5;
 
-      // Post-processing: stronger bloom for CRT phosphor glow (text and image glow more)
       const composer = new EffectComposer(renderer);
       const renderPass = new RenderPass(scene, camera);
       composer.addPass(renderPass);
 
       const bloomPass = new UnrealBloomPass(
         new THREE.Vector2(window.innerWidth, window.innerHeight),
-        isLowPowerDevice ? 0.28 : 0.45,  // strength — softer glow
-        isLowPowerDevice ? 0.32 : 0.45,  // radius
-        isLowPowerDevice ? 0.45 : 0.38   // threshold — slightly higher for cleaner highlights
+        isLowPowerDevice ? 0.05 : 0.08,
+        isLowPowerDevice ? 0.12 : 0.15,
+        isLowPowerDevice ? 0.75 : 0.68
       );
       composer.addPass(bloomPass);
 
-      // Vignette: softer edges, center stays bright
       const VignetteShader = {
         uniforms: {
           tDiffuse: { value: null },
-          offset: { value: 0.55 },
-          darkness: { value: 0.88 }
+          offset: { value: 1.05 },
+          darkness: { value: 0.18 }
         },
         vertexShader: `
           varying vec2 vUv;
@@ -548,43 +519,29 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       const { baseCanvas, displayCanvas, W: screenW, H: screenH, drawTypedHero } = screenTextureResult;
       const displayCtx = displayCanvas.getContext('2d');
 
-      // CRT effect: subtle noise, soft scanlines, gentle edge tint
       const CRT_NOISE_FRAG = `
-        #define PI 3.1415926538
-        #define LINE_SIZE 480.0
-        #define LINE_STRENGTH 0.025
-        #define LINE_OFFSET 1.6
-        #define NOISE_STRENGTH 0.06
-        #define NOISE_FINE 0.03
         uniform sampler2D uDiffuse;
         uniform float uTime;
         varying vec2 vUv;
-        float rand(vec2 co){
-          return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
-        }
-        float rand2(vec2 co){
-          return fract(sin(dot(co, vec2(39.17, 91.43))) * 21838.12);
-        }
-        float squareWave(float x){
-          return (
-            (4.0/PI * sin(PI*LINE_SIZE*x))
-            +(4.0/PI * 1.0/3.0 * sin(3.0*PI*LINE_SIZE*x))
-            +(4.0/PI * 1.0/5.0 * sin(5.0*PI*LINE_SIZE*x))
-            - LINE_OFFSET
-          )*LINE_STRENGTH;
-        }
         void main() {
           vec4 color = texture2D(uDiffuse, vUv);
           color.rgb *= 1.06;
           color.rgb += vec3(0.015, 0.012, 0.02);
-          float r = rand(vUv * (uTime * 0.08 + 1.0));
-          float r2 = rand2(vUv * 3.0 + uTime * 0.04);
-          gl_FragColor = color + (vec4(r,r,r,0) * NOISE_STRENGTH) + (vec4(r2,r2,r2,0) * NOISE_FINE);
-          gl_FragColor.rgb += squareWave(vUv.y);
-          float dist = length(vUv - 0.5);
-          float glow = 1.0 - smoothstep(0.25, 0.72, dist);
-          vec3 edgeTint = vec3(0.02, 0.015, 0.028);
-          gl_FragColor.rgb += edgeTint * glow;
+
+          vec2 centered = vUv - 0.5;
+          float dist = length(centered);
+          float pulse = 0.85 + 0.15 * sin(uTime * 1.4);
+
+          float edgeGlow = 1.0 - smoothstep(0.28, 0.55, dist);
+          color.rgb += vec3(0.06, 0.035, 0.07) * edgeGlow * pulse;
+
+          float centerGlow = 1.0 - smoothstep(0.0, 0.42, dist);
+          color.rgb += vec3(0.03, 0.02, 0.04) * centerGlow * 0.55;
+
+          float scan = sin(vUv.y * 480.0 * 3.14159) * 0.007;
+          color.rgb += scan;
+
+          gl_FragColor = color;
         }
       `;
       const CRT_VERT = `
@@ -896,7 +853,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         ctx.fillRect(food.x * GAME_CELL + 2, food.y * GAME_CELL + 2, GAME_CELL - 4, GAME_CELL - 4);
         ctx.fillStyle = GAME_PRIMARY;
         ctx.shadowColor = GAME_PRIMARY;
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 3;
         snake.forEach((seg, i) => {
           const pad = i === 0 ? 1 : 2;
           ctx.fillRect(seg.x * GAME_CELL + pad, seg.y * GAME_CELL + pad, GAME_CELL - pad * 2, GAME_CELL - pad * 2);
@@ -1372,7 +1329,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
             displayCtx.globalCompositeOperation = 'lighter';
             const glowIntensity = playGameHovered ? 0.3 + 0.2 * playPulse : 0.18 + 0.14 * playPulse;
             displayCtx.shadowColor = 'rgba(251, 191, 36, 0.7)';
-            displayCtx.shadowBlur = playGameHovered ? 12 + 3 * playPulse : 8 + 2 * playPulse;
+            displayCtx.shadowBlur = playGameHovered ? 5 + playPulse : 3 + playPulse;
             displayCtx.strokeStyle = `rgba(245, 158, 11, ${glowIntensity})`;
             displayCtx.lineWidth = playGameHovered ? 3 : 2;
             displayCtx.strokeRect(r.x - outerPad, r.y - outerPad, r.w + outerPad * 2, r.h + outerPad * 2);
@@ -1409,8 +1366,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
           contentTexture.needsUpdate = true;
         }
 
-        // CRT pass – scanlines + noise + dark orange glow
-        crtMaterial.uniforms.uTime.value = time;
+        // Brightness pass for monitor screen
         renderer.setRenderTarget(crtRenderTarget);
         renderer.clear();
         renderer.render(crtScene, crtCamera);
@@ -1484,7 +1440,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
 
   useEffect(() => {
     if (!loaded) return;
-    const t = window.setTimeout(() => setShowLoader(false), 420);
+    const t = window.setTimeout(() => setShowLoader(false), 200);
     return () => window.clearTimeout(t);
   }, [loaded]);
 
@@ -1495,24 +1451,18 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
   };
   const loadPercent = Math.round(loadProgress * 100);
 
+  const renderLoader = (exiting: boolean) => (
+    <div className={`hero3d-loading${exiting ? ' hero3d-loading-exit' : ''}`} aria-hidden={exiting} aria-busy={!exiting}>
+      <div className="hero3d-loading-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={loadPercent}>
+        <div className="hero3d-loading-progress" style={{ width: `${exiting ? 100 : loadPercent}%` }} />
+      </div>
+    </div>
+  );
+
   return (
     <section id="hero" className="hero3d-section">
-      {!loaded && (
-        <div className="hero3d-loading" aria-hidden>
-          <div className="hero3d-loading-glow" aria-hidden />
-          <div className="hero3d-loading-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={loadPercent}>
-            <div className="hero3d-loading-progress" style={{ width: `${loadPercent}%` }} />
-          </div>
-        </div>
-      )}
-      {showLoader && loaded && (
-        <div className="hero3d-loading hero3d-loading-exit" aria-hidden>
-          <div className="hero3d-loading-glow" aria-hidden />
-          <div className="hero3d-loading-bar">
-            <div className="hero3d-loading-progress" style={{ width: '100%' }} />
-          </div>
-        </div>
-      )}
+      {!loaded && renderLoader(false)}
+      {showLoader && loaded && renderLoader(true)}
       {mounted && (
         <div 
           className={`hero3d-canvas-wrap ${loaded ? 'hero3d-canvas-loaded' : ''}`}

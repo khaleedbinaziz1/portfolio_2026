@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   SiReact,
@@ -8,24 +8,16 @@ import {
   SiTypescript,
   SiMongodb,
   SiTailwindcss,
-  SiGraphql,
   SiGit,
   SiNextdotjs,
-  SiRedux,
   SiExpress,
-  SiPostgresql,
   SiMysql,
   SiFirebase,
   SiDocker,
   SiAwsamplify,
   SiVercel,
   SiPrisma,
-  SiSocketdotio,
-  SiJest,
-  SiCypress,
-  SiNginx,
   SiStripe,
-  SiFastapi,
   SiPhp,
   SiClerk,
 } from 'react-icons/si';
@@ -103,14 +95,6 @@ const STAGGER = 0.1;
 
 export default function Skills() {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
-  const [time, setTime] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(t => t + 0.05);
-    }, 200);
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <section
@@ -158,11 +142,8 @@ export default function Skills() {
                 <span style={{ color: 'var(--retro-amber)' }}>$</span>
                 <span style={{ color: 'rgba(167, 139, 250, 0.75)' }}> cd /skills</span>
                 <span 
-                  className="inline-block w-2 h-4 ml-1 align-middle"
-                  style={{
-                    backgroundColor: '#e040fb',
-                    opacity: Math.floor(time * 2) % 2 === 0 ? 1 : 0,
-                  }}
+                  className="skills-terminal-cursor inline-block w-2 h-4 ml-1 align-middle"
+                  style={{ backgroundColor: '#e040fb' }}
                 />
               </div>
             </div>
@@ -290,11 +271,8 @@ export default function Skills() {
           >
             <span style={{ color: '#4caf50' }}>●</span> All systems operational
             <span 
-              className="inline-block w-2 h-4 ml-2 align-middle"
-              style={{
-                backgroundColor: '#e040fb',
-                opacity: Math.floor(time * 2) % 2 === 0 ? 1 : 0,
-              }}
+              className="skills-terminal-cursor inline-block w-2 h-4 ml-2 align-middle"
+              style={{ backgroundColor: '#e040fb' }}
             />
           </div>
         </motion.div>
