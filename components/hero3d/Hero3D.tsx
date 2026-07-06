@@ -33,6 +33,43 @@ function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+type HeroViewport = {
+  width: number;
+  height: number;
+  aspect: number;
+  cameraZOffset: number;
+  cameraFov: number;
+  sceneScale: number;
+};
+
+function getHeroViewport(): HeroViewport {
+  const vv = window.visualViewport;
+  const width = vv?.width ?? window.innerWidth;
+  const height = vv?.height ?? window.innerHeight;
+  const aspect = width / height;
+  const portraitRatio = height / width;
+  const isPortrait = aspect < 1;
+  const isCompact = width <= 768;
+
+  const cameraZOffset = isPortrait
+    ? valMap(portraitRatio, [1.25, 2.4], [1.5, 4.25])
+    : isCompact
+      ? valMap(aspect, [0.85, 1.2], [0.75, 0])
+      : 0;
+
+  const cameraFov = isPortrait
+    ? valMap(aspect, [0.42, 0.78], [64, 50])
+    : isCompact
+      ? valMap(aspect, [0.85, 1.2], [54, 50])
+      : 50;
+
+  const sceneScale = isPortrait && isCompact
+    ? valMap(aspect, [0.42, 0.72], [0.68, 0.88])
+    : 1;
+
+  return { width, height, aspect, cameraZOffset, cameraFov, sceneScale };
+}
+
 // Enhanced Bayer matrix for superior dithering
 const BAYER_4 = [
   [0, 8, 2, 10],
@@ -435,8 +472,8 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       fillLight.position.set(1, 0.5, 1);
       scene.add(fillLight);
 
-      const aspect = window.innerWidth / window.innerHeight;
-      const camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 100);
+      const initialViewport = getHeroViewport();
+      const camera = new THREE.PerspectiveCamera(initialViewport.cameraFov, initialViewport.aspect, 0.1, 100);
       camera.position.set(0, 0, -2.5);
       camera.rotation.set(-Math.PI, 0, Math.PI);
       scene.add(camera);
@@ -447,7 +484,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         alpha: false,
         powerPreference: isLowPowerDevice ? 'default' : 'high-performance'
       });
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(initialViewport.width, initialViewport.height);
       renderer.setPixelRatio(Math.min(isLowPowerDevice ? 1.25 : 2, window.devicePixelRatio));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.5;
@@ -457,7 +494,7 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       composer.addPass(renderPass);
 
       const bloomPass = new UnrealBloomPass(
-        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        new THREE.Vector2(initialViewport.width, initialViewport.height),
         isLowPowerDevice ? 0.05 : 0.08,
         isLowPowerDevice ? 0.12 : 0.15,
         isLowPowerDevice ? 0.75 : 0.68
@@ -732,9 +769,6 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       setLoadProgress(1);
       setLoaded(true);
       onLoaded?.();
-
-      const portraitOffset = () =>
-        valMap(window.innerHeight / window.innerWidth, [0.75, 1.75], [0, 2]);
 
       const PLAY_GAME_RECT = { x: 338, y: 260, w: 260, h: 28 };
       const BACK_BUTTON_RECT = { x: 60, y: 58, w: 72, h: 22 };
@@ -1149,9 +1183,20 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         const scroll = scrollRef.current;
         const easedScroll = easeInOutCubic(Math.min(1, scroll));
         const anim = easedScroll * ROTATION_CAP;
+        const viewport = getHeroViewport();
+
+        if (Math.abs(camera.fov - viewport.cameraFov) > 0.05) {
+          camera.fov = viewport.cameraFov;
+          camera.updateProjectionMatrix();
+        }
+        if (Math.abs(camera.aspect - viewport.aspect) > 0.001) {
+          camera.aspect = viewport.aspect;
+          camera.updateProjectionMatrix();
+        }
+        computerGroup.scale.setScalar(viewport.sceneScale);
         
         // Smooth camera movement with easing (only up to 8% of full journey)
-        camera.position.z = valMap(anim, [0, ROTATION_CAP], [-2.5 - portraitOffset(), -10 - portraitOffset()]);
+        camera.position.z = valMap(anim, [0, ROTATION_CAP], [-1.5 - viewport.cameraZOffset, -10 - viewport.cameraZOffset]);
         camera.lookAt(0, 0, 0);
         
         // Computer group animations with easing (only up to 8% rotation/zoom)
@@ -1377,12 +1422,17 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
       animationId = requestAnimationFrame(tick);
 
       const onResize = () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
+        const viewport = getHeroViewport();
+        camera.aspect = viewport.aspect;
+        camera.fov = viewport.cameraFov;
         camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        composer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(viewport.width, viewport.height);
+        composer.setSize(viewport.width, viewport.height);
+        bloomPass.resolution.set(viewport.width, viewport.height);
       };
       window.addEventListener('resize', onResize);
+      window.visualViewport?.addEventListener('resize', onResize);
+      window.visualViewport?.addEventListener('scroll', onResize);
 
       cleanupRef.current = () => {
         canvas.removeEventListener('pointerdown', onPointerDown);
@@ -1390,6 +1440,8 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
         canvas.removeEventListener('pointerleave', onPointerLeave);
         window.removeEventListener('keydown', onKeyDown);
         window.removeEventListener('resize', onResize);
+        window.visualViewport?.removeEventListener('resize', onResize);
+        window.visualViewport?.removeEventListener('scroll', onResize);
         cancelAnimationFrame(animationId);
         composer.dispose();
         renderer.dispose();
