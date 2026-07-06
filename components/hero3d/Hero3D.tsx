@@ -1194,9 +1194,9 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
           camera.updateProjectionMatrix();
         }
         computerGroup.scale.setScalar(viewport.sceneScale);
-        
+        //for mobile
         // Smooth camera movement with easing (only up to 8% of full journey)
-        camera.position.z = valMap(anim, [0, ROTATION_CAP], [-1.0 - viewport.cameraZOffset, -10 - viewport.cameraZOffset]);
+        camera.position.z = valMap(anim, [0, ROTATION_CAP], [-0.7 - viewport.cameraZOffset, -10 - viewport.cameraZOffset]);
         camera.lookAt(0, 0, 0);
         
         // Computer group animations with easing (only up to 8% rotation/zoom)
