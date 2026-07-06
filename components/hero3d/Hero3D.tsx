@@ -40,6 +40,7 @@ type HeroViewport = {
   cameraZOffset: number;
   cameraFov: number;
   sceneScale: number;
+  cameraBaseZ: number; // NEW: base z-distance, differs for mobile vs desktop
 };
 
 function getHeroViewport(): HeroViewport {
@@ -67,7 +68,10 @@ function getHeroViewport(): HeroViewport {
     ? valMap(aspect, [0.42, 0.72], [0.68, 0.88])
     : 1;
 
-  return { width, height, aspect, cameraZOffset, cameraFov, sceneScale };
+  // NEW: mobile/compact gets 0.7, desktop gets 2.0
+  const cameraBaseZ = (isPortrait || isCompact) ? 0.7 : 2.0;
+
+  return { width, height, aspect, cameraZOffset, cameraFov, sceneScale, cameraBaseZ };
 }
 
 // Enhanced Bayer matrix for superior dithering
@@ -1194,9 +1198,9 @@ export default function Hero3D({ experienceStarted, onLoaded }: Hero3DProps) {
           camera.updateProjectionMatrix();
         }
         computerGroup.scale.setScalar(viewport.sceneScale);
-        //for mobile
         // Smooth camera movement with easing (only up to 8% of full journey)
-        camera.position.z = valMap(anim, [0, ROTATION_CAP], [-0.7 - viewport.cameraZOffset, -10 - viewport.cameraZOffset]);
+        // base z distance now comes from viewport.cameraBaseZ (2.0 desktop / 0.7 mobile) i mean the -viewport.cameraBaseZ here in the next line
+        camera.position.z = valMap(anim, [0, ROTATION_CAP], [-viewport.cameraBaseZ - viewport.cameraZOffset, -10 - viewport.cameraZOffset]);
         camera.lookAt(0, 0, 0);
         
         // Computer group animations with easing (only up to 8% rotation/zoom)
