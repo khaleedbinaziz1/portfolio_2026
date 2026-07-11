@@ -68,8 +68,8 @@ function getHeroViewport(): HeroViewport {
     ? valMap(aspect, [0.42, 0.72], [0.68, 0.88])
     : 1;
 
-  // NEW: mobile/compact gets 0.7, desktop gets 1.5
-  const cameraBaseZ = (isPortrait || isCompact) ? 0.7 : 1.5;
+  // NEW: mobile/compact gets 0.7, desktop gets 2.3
+  const cameraBaseZ = (isPortrait || isCompact) ? 0.7 : 2.3;
 
   return { width, height, aspect, cameraZOffset, cameraFov, sceneScale, cameraBaseZ };
 }
