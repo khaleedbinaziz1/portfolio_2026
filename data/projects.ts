@@ -61,5 +61,25 @@ export const projects: Project[] = [
     image: '/images/openstack.png',
     caseStudy: '/case-studies/open-stack-js',
   },
+  {
+    id: 6,
+    title: 'Kumira Ferry Dashboard',
+    description: 'Interactive ferry booking analytics dashboard for ticketing operations and passenger insights',
+    longDescription: 'A modern analytics dashboard for monitoring ferry bookings, revenue, refunds, route performance, and daily trends across Kumira and Sandwip.',
+    tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'],
+    live: 'https://portfolioticket.netlify.app/',
+    github: '#',
+    featured: true,
+  },
+  {
+    id: 7,
+    title: 'Kumira Ferry Admin Control Center',
+    description: 'Super-admin control panel for managing ferry bookings, fares, employees, and operational workflows',
+    longDescription: 'A secure admin workspace for ferry operations with employee management, booking controls, fare configuration, and centralized oversight of the service.',
+    tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'],
+    live: 'https://ticket-dashboard-eta-ashy.vercel.app/',
+    github: '#',
+    featured: true,
+  },
 ];
 

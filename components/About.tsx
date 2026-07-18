@@ -10,6 +10,11 @@ const STAGGER = 0.08;
 
 export default function About() {
   const aboutLines = personalInfo.about ?? [];
+  const terminalAboutLines = [
+    aboutLines[1] ?? 'Built e-commerce platforms and complex web apps. Focus on accessible, scalable products for clients.',
+    `▸ ${aboutLines[2] ?? 'Pursuing MSc in CSE with focus on AI/ML in healthcare and web tech.'}`,
+    '— end of about.txt —',
+  ];
 
   return (
     <section id="about" className="about-section relative">
@@ -85,13 +90,13 @@ export default function About() {
                       {
                         prompt: '$',
                         command: 'cat ~/about.txt',
-                        output: aboutLines[0] ?? 'Passionate about building for the web.',
+                        output: terminalAboutLines.join('\n'),
                         delay: 2200,
                       },
                       {
                         prompt: '$',
-                        command: 'wc -l ~/about.txt',
-                        output: `${aboutLines.length}`,
+                        command: 'years of experience',
+                        output: '3+ years building products',
                         delay: 1400,
                       },
                     ]}
@@ -102,31 +107,6 @@ export default function About() {
               </div>
             </motion.div>
 
-            <div className="about-story">
-              {aboutLines.slice(1).map((line, i) => (
-                <motion.p
-                  key={i}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-10px' }}
-                  transition={{ duration: 0.5, delay: i * STAGGER, ease: EASE }}
-                  className="about-story-p"
-                >
-                  <span className="about-story-bullet">▸</span>
-                  {line}
-                </motion.p>
-              ))}
-              <motion.p
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: aboutLines.length * STAGGER, ease: EASE }}
-                className="about-eof"
-                aria-hidden
-              >
-                — end of about.txt —
-              </motion.p>
-            </div>
           </div>
         </div>
       </motion.div>
