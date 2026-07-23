@@ -37,6 +37,7 @@ export default function Projects() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-24px' }}
               transition={{ duration: 0.45, delay: index * 0.06, ease: EASE }}
+              whileHover={{ y: -3 }}
               className="proj-card"
             >
               <div className="proj-inner">
@@ -80,24 +81,28 @@ export default function Projects() {
                 </div>
                 {project.image && (
                   project.caseStudy ? (
-                    <Link href={project.caseStudy} className="proj-img-wrap">
-                      <Image
-                        src={project.image}
-                        alt={project.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 280px"
-                      />
+                    <Link href={project.caseStudy} className="proj-img-wrap" style={{ overflow: 'hidden' }}>
+                      <div className="proj-img-zoom">
+                        <Image
+                          src={project.image}
+                          alt={project.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 280px"
+                        />
+                      </div>
                     </Link>
                   ) : (
-                    <div className="proj-img-wrap">
-                      <Image
-                        src={project.image}
-                        alt={project.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 280px"
-                      />
+                    <div className="proj-img-wrap" style={{ overflow: 'hidden' }}>
+                      <div className="proj-img-zoom">
+                        <Image
+                          src={project.image}
+                          alt={project.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 280px"
+                        />
+                      </div>
                     </div>
                   )
                 )}

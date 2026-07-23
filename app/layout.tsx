@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { JetBrains_Mono, Pixelify_Sans } from "next/font/google";
 import "./globals.css";
 import StructuredData from "@/components/StructuredData";
+import RetroCursor from "@/components/RetroCursor";
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -103,6 +104,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={`${jetbrainsMono.variable} ${pixelifySans.variable} font-pixel`}>
         <StructuredData />
+        <RetroCursor />
         {children}
       </body>
     </html>

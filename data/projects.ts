@@ -63,7 +63,7 @@ export const projects: Project[] = [
   },
   {
     id: 6,
-    title: 'Kumira Ferry Dashboard',
+    title: 'Boat Ticket Dashboard',
     description: 'Interactive ferry booking analytics dashboard for ticketing operations and passenger insights',
     longDescription: 'A modern analytics dashboard for monitoring ferry bookings, revenue, refunds, route performance, and daily trends across Kumira and Sandwip.',
     tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'],
@@ -73,7 +73,7 @@ export const projects: Project[] = [
   },
   {
     id: 7,
-    title: 'Kumira Ferry Admin Control Center',
+    title: 'Boat Ticket Admin Control Center',
     description: 'Super-admin control panel for managing ferry bookings, fares, employees, and operational workflows',
     longDescription: 'A secure admin workspace for ferry operations with employee management, booking controls, fare configuration, and centralized oversight of the service.',
     tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'],
