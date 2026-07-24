@@ -3,24 +3,24 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import RetroSoundToggle from './RetroSoundToggle';
-
-const NAV_AMBER = '#f59e0b';
-const NAV_TEAL = '#00e5ff';
+import { FiMenu, FiX } from 'react-icons/fi';
+import { plexMono } from '@/public/fonts';
 
 const navLinks = [
-  { name: 'About', href: '#about', channel: '01' },
-  { name: 'Skills', href: '#skills', channel: '02' },
-  { name: 'Projects', href: '#projects', channel: '03' },
-  { name: 'Contact', href: '#contact', channel: '04' },
+  { name: 'About', href: '#about' },
+  { name: 'Skills', href: '#skills' },
+  { name: 'Projects', href: '#projects' },
+  { name: 'Contact', href: '#contact' },
+  { name: 'Lessons', href: '/lessons' },
 ];
 
 type NavigationProps = { contentVisible?: boolean };
 
 export default function Navigation({ contentVisible = true }: NavigationProps) {
   const [activeSection, setActiveSection] = useState('');
-  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
   const [booted, setBooted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!contentVisible) return;
@@ -36,15 +36,20 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
       if (rafId) return;
       rafId = requestAnimationFrame(() => {
         rafId = 0;
-        const sections = navLinks.map(link => link.href.substring(1));
-        const currentSection = sections.find(section => {
-          const element = document.getElementById(section);
-          if (element) {
-            const rect = element.getBoundingClientRect();
-            return rect.top <= 150 && rect.bottom >= 150;
-          }
-          return false;
-        }) || '';
+        setScrolled(window.scrollY > 12);
+
+        const sections = navLinks
+          .filter((link) => link.href.startsWith('#'))
+          .map((link) => link.href.substring(1));
+        const currentSection =
+          sections.find((section) => {
+            const element = document.getElementById(section);
+            if (element) {
+              const rect = element.getBoundingClientRect();
+              return rect.top <= 150 && rect.bottom >= 150;
+            }
+            return false;
+          }) || '';
 
         if (currentSection !== lastActive) {
           lastActive = currentSection;
@@ -62,78 +67,188 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
   }, []);
 
   return (
-    <motion.nav
-      initial={{ x: 30, opacity: 0 }}
-      animate={{ x: booted ? 0 : 30, opacity: booted ? 1 : 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-      className="fixed right-4 sm:right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col items-end gap-5 font-mono select-none"
+    <motion.header
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: booted ? 0 : -20, opacity: booted ? 1 : 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className={`khb-nav ${plexMono.variable} ${scrolled ? 'khb-nav-scrolled' : ''}`}
     >
-      {navLinks.map((link) => {
-        const isActive = activeSection === link.href.substring(1);
-        const isHovered = hoveredLink === link.href;
+      <style>{`
+        .khb-nav {
+          --brass: #d9a94e;
+          --teal: #5fe3d6;
+          --ink: #0b0d12;
+          --paper: #f5f1e8;
+          --muted: rgba(245, 241, 232, 0.62);
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 50;
+          font-family: var(--khb-font-mono), monospace;
+          background: rgba(11, 13, 18, 0.4);
+          border-bottom: 1px solid transparent;
+          transition: background-color .3s ease, border-color .3s ease, backdrop-filter .3s ease;
+        }
+        .khb-nav-scrolled {
+          background: rgba(11, 13, 18, 0.82);
+          backdrop-filter: blur(10px);
+          border-bottom-color: rgba(245, 241, 232, 0.1);
+        }
+        .khb-nav *, .khb-nav *::before, .khb-nav *::after { box-sizing: border-box; }
 
-        return (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="group flex items-center gap-2"
-            onMouseEnter={() => setHoveredLink(link.href)}
-            onMouseLeave={() => setHoveredLink(null)}
-            aria-label={link.name}
-          >
-            {/* label — only shown on hover/active */}
-            <AnimatePresence>
-              {(isHovered || isActive) && (
-                <motion.span
-                  initial={{ opacity: 0, x: 6 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 6 }}
-                  transition={{ duration: 0.15 }}
-                  className="text-[11px] tracking-widest whitespace-nowrap"
-                  style={{
-                    color: isActive ? NAV_AMBER : NAV_TEAL,
-                    textShadow: isActive
-                      ? `0 0 8px ${NAV_AMBER}80`
-                      : `0 0 6px ${NAV_TEAL}60`,
-                  }}
-                >
-                  {link.name.toUpperCase()}
-                </motion.span>
-              )}
-            </AnimatePresence>
+        .khb-nav-inner {
+          max-width: 1180px;
+          margin: 0 auto;
+          padding: 16px 24px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        @media (min-width: 960px) { .khb-nav-inner { padding: 16px 40px; } }
 
-            {/* channel number */}
-            <span
-              className="text-[10px] tabular-nums transition-all duration-200"
-              style={{
-                color: isActive ? NAV_AMBER : 'rgba(0,229,255,0.45)',
-                opacity: isActive ? 1 : isHovered ? 0.9 : 0.55,
-              }}
-            >
-              {link.channel}
-            </span>
+        .khb-nav-brand {
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--paper);
+          text-decoration: none;
+        }
+        .khb-nav-brand span { color: var(--brass); }
 
-            {/* tick mark — grows and glows when active */}
-            <motion.span
-              className="block h-[2px]"
-              animate={{
-                width: isActive ? 20 : 10,
-                backgroundColor: isActive ? NAV_AMBER : NAV_TEAL,
-                opacity: isActive ? 1 : isHovered ? 0.8 : 0.4,
-              }}
-              transition={{ duration: 0.2 }}
-              style={{
-                boxShadow: isActive ? `0 0 6px ${NAV_AMBER}` : 'none',
-              }}
-            />
-          </Link>
-        );
-      })}
+        .khb-nav-links {
+          display: none;
+          align-items: center;
+          gap: 28px;
+        }
+        @media (min-width: 768px) { .khb-nav-links { display: flex; } }
 
-      {/* sound toggle, quietly tucked below */}
-      <div className="mt-1 opacity-80">
-        <RetroSoundToggle />
+        .khb-nav-link {
+          position: relative;
+          font-size: 11px;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          text-decoration: none;
+          color: var(--muted);
+          padding: 4px 0;
+          transition: color .2s ease;
+        }
+        .khb-nav-link:hover { color: var(--paper); }
+        .khb-nav-link-active { color: var(--brass); }
+
+        .khb-nav-underline {
+          position: absolute;
+          left: 0;
+          bottom: -3px;
+          height: 1.5px;
+          background: var(--brass);
+          border-radius: 1px;
+        }
+
+        .khb-nav-toggle {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 34px;
+          height: 34px;
+          border-radius: 4px;
+          border: 1px solid rgba(245, 241, 232, 0.15);
+          color: var(--paper);
+          background: transparent;
+        }
+        @media (min-width: 768px) { .khb-nav-toggle { display: none; } }
+        .khb-nav-toggle:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+
+        .khb-nav-mobile {
+          overflow: hidden;
+          border-top: 1px solid rgba(245, 241, 232, 0.1);
+          background: rgba(11, 13, 18, 0.96);
+          backdrop-filter: blur(10px);
+        }
+        @media (min-width: 768px) { .khb-nav-mobile { display: none; } }
+
+        .khb-nav-mobile-inner {
+          padding: 10px 24px 18px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .khb-nav-mobile-link {
+          padding: 13px 0;
+          border-bottom: 1px dashed rgba(245, 241, 232, 0.1);
+          font-size: 12px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          text-decoration: none;
+          color: var(--muted);
+        }
+        .khb-nav-mobile-link:last-child { border-bottom: none; }
+        .khb-nav-mobile-link-active { color: var(--brass); }
+      `}</style>
+
+      <div className="khb-nav-inner">
+        <Link href="/" className="khb-nav-brand">
+          KHB<span>.</span>SYS
+        </Link>
+
+        <nav className="khb-nav-links" aria-label="Primary">
+          {navLinks.map((link) => {
+            const isActive = link.href.startsWith('#') && activeSection === link.href.substring(1);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`khb-nav-link ${isActive ? 'khb-nav-link-active' : ''}`}
+                aria-current={isActive ? 'true' : undefined}
+              >
+                {link.name}
+                {isActive && (
+                  <motion.span layoutId="khb-nav-underline" className="khb-nav-underline" style={{ width: '100%' }} />
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <button
+          type="button"
+          className="khb-nav-toggle"
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          {menuOpen ? <FiX size={17} /> : <FiMenu size={17} />}
+        </button>
       </div>
-    </motion.nav>
+
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            className="khb-nav-mobile"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+          >
+            <div className="khb-nav-mobile-inner">
+              {navLinks.map((link) => {
+                const isActive = link.href.startsWith('#') && activeSection === link.href.substring(1);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`khb-nav-mobile-link ${isActive ? 'khb-nav-mobile-link-active' : ''}`}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.header>
   );
 }

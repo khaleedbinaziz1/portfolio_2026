@@ -1,20 +1,15 @@
-import type { Metadata } from "next";
-import { JetBrains_Mono, Pixelify_Sans } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import StructuredData from "@/components/StructuredData";
 import RetroCursor from "@/components/RetroCursor";
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
+const jetbrainsMono = {
   variable: "--font-mono",
-  weight: ["400", "500", "600", "700"],
-});
+};
 
-const pixelifySans = Pixelify_Sans({
-  subsets: ["latin"],
+const pixelifySans = {
   variable: "--font-pixel",
-  weight: ["400", "500", "600", "700"],
-});
+};
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://khaledbinaziz.dev";
 
@@ -87,12 +82,13 @@ export const metadata: Metadata = {
     canonical: siteUrl,
   },
   category: "technology",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    viewportFit: "cover",
-  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

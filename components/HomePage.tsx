@@ -6,10 +6,11 @@ import Navigation from '@/components/Navigation';
 const Hero3D = dynamic(() => import('@/components/hero3d/Hero3D'), { ssr: false });
 const About = dynamic(() => import('@/components/About'));
 const Skills = dynamic(() => import('@/components/Skills'));
+
 const Projects = dynamic(() => import('@/components/Projects'));
 const Contact = dynamic(() => import('@/components/Contact'));
 const Footer = dynamic(() => import('@/components/Footer'));
-const RetroSoundHandler = dynamic(() => import('@/components/RetroSoundHandler'), { ssr: false });
+
 
 export default function HomePage() {
   return (
@@ -18,14 +19,15 @@ export default function HomePage() {
         <div className="bg-pixel-blocks" aria-hidden />
         <div className="pixel-grid-overlay" aria-hidden />
 
-        <RetroSoundHandler />
+
 
         <div className="bg-vignette"></div>
 
         <div className="page-main-content">
-          <Hero3D experienceStarted={true} />
+          <Hero3D />
           <About />
           <Skills />
+
           <Projects />
           <Contact />
           <Footer />

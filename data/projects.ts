@@ -68,6 +68,7 @@ export const projects: Project[] = [
     longDescription: 'A modern analytics dashboard for monitoring ferry bookings, revenue, refunds, route performance, and daily trends across Kumira and Sandwip.',
     tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'],
     live: 'https://portfolioticket.netlify.app/',
+    image: '/images/ticket_dash.png',
     github: '#',
     featured: true,
   },
@@ -79,6 +80,7 @@ export const projects: Project[] = [
     tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'],
     live: 'https://ticket-dashboard-eta-ashy.vercel.app/',
     github: '#',
+    image: '/images/ticket_admin.png',
     featured: true,
   },
 ];
