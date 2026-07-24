@@ -12,19 +12,18 @@ const EASE = [0.22, 0.61, 0.36, 1] as const;
 const whatsappHref = `https://wa.me/${personalInfo.phone.replace(/\D/g, '')}`;
 
 const NAV_LINKS = [
-  { label: 'Home', href: '#hero' },
+  { label: 'Home', href: '/' },
   { label: 'About', href: '#about' },
   { label: 'Projects', href: '#projects' },
-  { label: 'Learning Hub', href: '#learning' },
+  { label: 'Resources', href: '/resources' },
   { label: 'Contact', href: '#contact' },
 ] as const;
 
 // Placeholder routes — wire these up once the resource pages/files exist.
 const RESOURCE_LINKS = [
-  { label: 'O Level CS Question Papers', href: '/resources/o-level-question-papers' },
-  { label: 'O Level CS Notes', href: '/resources/o-level-notes' },
-  { label: 'Cheat Sheets', href: '/resources/cheat-sheets' },
-  { label: 'Mock Exams & MCQs', href: '/resources/mock-exams' },
+  { label: 'O Level CS Question Papers', href: '/resources/solved-past-papers' },
+  { label: 'O Level CS Notes', href: '/resources/topical-notes' },
+
 ] as const;
 
 const SOCIAL_LINKS = [

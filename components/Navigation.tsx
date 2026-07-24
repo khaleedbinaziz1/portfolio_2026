@@ -11,7 +11,7 @@ const navLinks = [
   { name: 'Skills', href: '#skills' },
   { name: 'Projects', href: '#projects' },
   { name: 'Contact', href: '#contact' },
-  { name: 'Lessons', href: '/lessons' },
+  { name: 'Resources', href: '/resources' },
 ];
 
 type NavigationProps = { contentVisible?: boolean };

@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useRef } from 'react';
 import {
   SiReact,
   SiNodedotjs,
@@ -30,7 +31,7 @@ const technologyCategories: {
   name: string;
   cmd: string;
   accent: Accent;
-  technologies: { name: string; icon: React.ComponentType<{ className?: string }> }[];
+  technologies: { name: string; icon: React.ComponentType<{ className?: string }>; color: string }[];
 }[] = [
   {
     code: 'SKL.01',
@@ -38,11 +39,11 @@ const technologyCategories: {
     cmd: 'ls -la /skills/frontend',
     accent: 'teal',
     technologies: [
-      { name: 'TypeScript', icon: SiTypescript },
-      { name: 'React', icon: SiReact },
-      { name: 'Next.js', icon: SiNextdotjs },
-      { name: 'Tailwind CSS', icon: SiTailwindcss },
-      { name: 'Framer Motion', icon: TbBrandFramerMotion },
+      { name: 'TypeScript', icon: SiTypescript, color: '#3178C6' },
+      { name: 'React', icon: SiReact, color: '#61DAFB' },
+      { name: 'Next.js', icon: SiNextdotjs, color: '#F5F1E8' },
+      { name: 'Tailwind CSS', icon: SiTailwindcss, color: '#38BDF8' },
+      { name: 'Framer Motion', icon: TbBrandFramerMotion, color: '#EF008F' },
     ],
   },
   {
@@ -51,10 +52,10 @@ const technologyCategories: {
     cmd: 'cat /skills/backend/*',
     accent: 'brass',
     technologies: [
-      { name: 'Node.js', icon: SiNodedotjs },
-      { name: 'Express.js', icon: SiExpress },
-      { name: 'PHP', icon: SiPhp },
-      { name: 'Prisma ORM', icon: SiPrisma },
+      { name: 'Node.js', icon: SiNodedotjs, color: '#5FA04E' },
+      { name: 'Express.js', icon: SiExpress, color: '#F5F1E8' },
+      { name: 'PHP', icon: SiPhp, color: '#8892BF' },
+      { name: 'Prisma ORM', icon: SiPrisma, color: '#5A67D8' },
     ],
   },
   {
@@ -63,9 +64,9 @@ const technologyCategories: {
     cmd: 'show databases',
     accent: 'teal',
     technologies: [
-      { name: 'MongoDB', icon: SiMongodb },
-      { name: 'Firestore', icon: SiFirebase },
-      { name: 'MySQL', icon: SiMysql },
+      { name: 'MongoDB', icon: SiMongodb, color: '#47A248' },
+      { name: 'Firestore', icon: SiFirebase, color: '#FFCA28' },
+      { name: 'MySQL', icon: SiMysql, color: '#4479A1' },
     ],
   },
   {
@@ -74,10 +75,10 @@ const technologyCategories: {
     cmd: 'kubectl get deployments',
     accent: 'brass',
     technologies: [
-      { name: 'Docker', icon: SiDocker },
-      { name: 'AWS', icon: SiAwsamplify },
-      { name: 'Vercel', icon: SiVercel },
-      { name: 'Git/GitHub', icon: SiGit },
+      { name: 'Docker', icon: SiDocker, color: '#2496ED' },
+      { name: 'AWS', icon: SiAwsamplify, color: '#FF9900' },
+      { name: 'Vercel', icon: SiVercel, color: '#F5F1E8' },
+      { name: 'Git/GitHub', icon: SiGit, color: '#F05133' },
     ],
   },
   {
@@ -86,15 +87,37 @@ const technologyCategories: {
     cmd: 'auth --status',
     accent: 'teal',
     technologies: [
-      { name: 'Clerk', icon: SiClerk },
-      { name: 'Firebase Auth', icon: SiFirebase },
-      { name: 'Stripe', icon: SiStripe },
+      { name: 'Clerk', icon: SiClerk, color: '#6C47FF' },
+      { name: 'Firebase Auth', icon: SiFirebase, color: '#FFCA28' },
+      { name: 'Stripe', icon: SiStripe, color: '#635BFF' },
     ],
   },
 ];
 
 const EASE = [0.22, 0.61, 0.36, 1] as const;
 const STAGGER = 0.08;
+
+// Cursor-tracked spotlight, written straight to CSS custom properties via a
+// ref so hovering a card never triggers a React re-render.
+function useSpotlight<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const raf = useRef<number | null>(null);
+
+  const onMouseMove = (e: React.MouseEvent<T>) => {
+    const el = ref.current;
+    if (!el) return;
+    const x = e.clientX;
+    const y = e.clientY;
+    if (raf.current) cancelAnimationFrame(raf.current);
+    raf.current = requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      el.style.setProperty('--mx', `${x - rect.left}px`);
+      el.style.setProperty('--my', `${y - rect.top}px`);
+    });
+  };
+
+  return { ref, onMouseMove };
+}
 
 export default function Skills() {
   return (
@@ -138,6 +161,7 @@ export default function Skills() {
         }
 
         .khb-skills .khb-tag {
+          position: relative;
           font-family: var(--khb-font-mono), monospace;
           font-size: 11px;
           letter-spacing: 0.15em;
@@ -147,8 +171,31 @@ export default function Skills() {
           padding: 5px 10px;
           border-radius: 3px;
           display: inline-block;
+          overflow: hidden;
+          isolation: isolate;
+          transition: color .35s ease, border-color .35s ease, transform .2s ease;
         }
+        .khb-skills .khb-tag::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: var(--brass);
+          transform: translateX(-101%);
+          transition: transform .35s cubic-bezier(.16,1,.3,1);
+          z-index: -1;
+        }
+        .khb-skills .khb-tag:hover {
+          color: var(--ink);
+          border-color: var(--brass);
+          transform: translateY(-1px);
+        }
+        .khb-skills .khb-tag:hover::before { transform: translateX(0); }
         .khb-skills .khb-tag--teal { color: var(--teal); border-color: rgba(95,227,214,0.35); }
+        .khb-skills .khb-tag--teal::before { background: var(--teal); }
+        .khb-skills .khb-tag--teal:hover { color: var(--ink); border-color: var(--teal); }
+        @media (prefers-reduced-motion: reduce) {
+          .khb-skills .khb-tag, .khb-skills .khb-tag::before { transition: none; }
+        }
 
         .khb-skills .khb-skills-cmdline {
           font-family: var(--khb-font-mono), monospace;
@@ -200,6 +247,7 @@ export default function Skills() {
         @media (min-width: 1024px) { .khb-skills .khb-skills-cards { grid-template-columns: repeat(3, 1fr); } }
 
         .khb-skills .khb-skills-card {
+          position: relative;
           background: var(--panel);
           border: 1px solid var(--card-border, rgba(217,169,78,0.3));
           border-radius: 6px;
@@ -209,9 +257,27 @@ export default function Skills() {
         .khb-skills .khb-skills-card:hover {
           transform: translateY(-4px);
           box-shadow: 0 20px 36px -18px rgba(0,0,0,0.6);
+          border-color: var(--card-accent, var(--brass));
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .khb-skills .khb-skills-card { transition: none; }
         }
 
+        /* cursor-tracked spotlight, position driven by --mx/--my on mousemove */
+        .khb-skills .khb-skills-card-glow {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity .3s ease;
+          background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), var(--card-accent, var(--brass)), transparent 72%);
+          mix-blend-mode: screen;
+          filter: opacity(0.12);
+        }
+        .khb-skills .khb-skills-card:hover .khb-skills-card-glow { opacity: 1; }
+
         .khb-skills .khb-skills-card-bar {
+          position: relative;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -224,14 +290,24 @@ export default function Skills() {
           font-size: 10px;
           letter-spacing: 0.2em;
           color: var(--card-accent, var(--brass));
+          transition: letter-spacing .3s ease;
         }
+        .khb-skills .khb-skills-card:hover .khb-skills-card-code { letter-spacing: 0.28em; }
         .khb-skills .khb-skills-card-dots { display: flex; gap: 6px; }
-        .khb-skills .khb-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .khb-skills .khb-dot-teal { background: var(--teal); opacity: 0.7; }
-        .khb-skills .khb-dot-brass { background: var(--brass); opacity: 0.7; }
-        .khb-skills .khb-dot-muted { background: var(--muted-2); }
+        .khb-skills .khb-dot {
+          width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+          animation: khb-skills-dot-breathe 3.6s ease-in-out infinite;
+        }
+        .khb-skills .khb-dot-teal { background: var(--teal); opacity: 0.7; animation-delay: 0s; }
+        .khb-skills .khb-dot-brass { background: var(--brass); opacity: 0.7; animation-delay: .5s; }
+        .khb-skills .khb-dot-muted { background: var(--muted-2); animation-delay: 1s; }
+        @keyframes khb-skills-dot-breathe {
+          0%, 100% { opacity: .45; transform: scale(1); }
+          50% { opacity: .9; transform: scale(1.15); }
+        }
+        @media (prefers-reduced-motion: reduce) { .khb-skills .khb-dot { animation: none; } }
 
-        .khb-skills .khb-skills-card-body { padding: 20px 20px 18px; }
+        .khb-skills .khb-skills-card-body { position: relative; padding: 20px 20px 18px; }
         .khb-skills .khb-skills-card-cmd {
           font-family: var(--khb-font-mono), monospace;
           font-size: 12px;
@@ -251,14 +327,30 @@ export default function Skills() {
           display: flex;
           align-items: center;
           gap: 10px;
-          padding: 7px 0;
+          padding: 7px 4px;
+          margin: 0 -4px;
+          border-radius: 4px;
           border-bottom: 1px solid rgba(245,241,232,0.06);
+          transition: transform .25s cubic-bezier(.16,1,.3,1), background-color .25s ease;
         }
         .khb-skills .khb-skills-tech-row:last-child { border-bottom: none; }
+        .khb-skills .khb-skills-tech-row:hover {
+          transform: translateX(4px);
+          background-color: rgba(245,241,232,0.04);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .khb-skills .khb-skills-tech-row { transition: none; }
+        }
         .khb-skills .khb-skills-tech-icon {
-          font-size: 15px;
-          color: var(--muted);
+          font-size: 16px;
           flex-shrink: 0;
+          color: var(--icon-color, var(--muted));
+          filter: drop-shadow(0 0 0 transparent);
+          transition: transform .3s cubic-bezier(.16,1,.3,1), filter .3s ease;
+        }
+        .khb-skills .khb-skills-tech-row:hover .khb-skills-tech-icon {
+          transform: scale(1.18) rotate(-6deg);
+          filter: drop-shadow(0 0 6px color-mix(in srgb, var(--icon-color, var(--brass)) 55%, transparent));
         }
         .khb-skills .khb-skills-tech-label {
           font-family: var(--khb-font-sans), sans-serif;
@@ -270,6 +362,13 @@ export default function Skills() {
           font-family: var(--khb-font-mono), monospace;
           font-size: 12px;
           color: var(--card-accent, var(--brass));
+          opacity: 0.55;
+          transform: scale(0.9);
+          transition: opacity .25s ease, transform .25s cubic-bezier(.16,1,.3,1);
+        }
+        .khb-skills .khb-skills-tech-row:hover .khb-skills-tech-check {
+          opacity: 1;
+          transform: scale(1.1);
         }
 
         .khb-skills .khb-skills-card-footer {
@@ -288,7 +387,9 @@ export default function Skills() {
         .khb-skills .khb-skills-card-footer-dot {
           width: 6px; height: 6px; border-radius: 50%;
           background: var(--card-accent, var(--brass));
+          animation: khb-skills-dot-breathe 3.6s ease-in-out infinite;
         }
+        @media (prefers-reduced-motion: reduce) { .khb-skills .khb-skills-card-footer-dot { animation: none; } }
 
         .khb-skills .khb-skills-status {
           margin-top: 40px;
@@ -302,8 +403,14 @@ export default function Skills() {
           border: 1px solid rgba(217,169,78,0.25);
           border-radius: 4px;
           padding: 8px 14px;
+          transition: border-color .3s ease;
         }
-        .khb-skills .khb-skills-status-dot { color: var(--teal); }
+        .khb-skills .khb-skills-status:hover { border-color: rgba(217,169,78,0.5); }
+        .khb-skills .khb-skills-status-dot {
+          color: var(--teal);
+          animation: khb-skills-dot-breathe 2.4s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) { .khb-skills .khb-skills-status-dot { animation: none; } }
       `}</style>
 
       <div className="khb-skills-grid-bg" aria-hidden="true" />
@@ -341,55 +448,13 @@ export default function Skills() {
             const accentBorder =
               category.accent === 'brass' ? 'rgba(217,169,78,0.3)' : 'rgba(95,227,214,0.3)';
             return (
-              <motion.div
+              <SkillCard
                 key={category.name}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-50px' }}
-                transition={{ duration: 0.5, delay: categoryIndex * STAGGER, ease: EASE }}
-                className="khb-skills-card"
-                style={
-                  {
-                    '--card-accent': accentColor,
-                    '--card-border': accentBorder,
-                  } as React.CSSProperties
-                }
-              >
-                <div className="khb-skills-card-bar">
-                  <span className="khb-skills-card-code">{category.code}</span>
-                  <div className="khb-skills-card-dots">
-                    <span className="khb-dot khb-dot-teal" />
-                    <span className="khb-dot khb-dot-brass" />
-                    <span className="khb-dot khb-dot-muted" />
-                  </div>
-                </div>
-
-                <div className="khb-skills-card-body">
-                  <div className="khb-skills-card-cmd">
-                    <span className="prompt">$</span>
-                    {category.cmd}
-                  </div>
-                  <h3 className="khb-skills-card-heading">{category.name}</h3>
-
-                  <ul className="khb-skills-tech-list">
-                    {category.technologies.map((tech) => {
-                      const Icon = tech.icon;
-                      return (
-                        <li key={tech.name} className="khb-skills-tech-row">
-                          <Icon className="khb-skills-tech-icon" />
-                          <span className="khb-skills-tech-label">{tech.name}</span>
-                          <span className="khb-skills-tech-check">✓</span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-
-                  <div className="khb-skills-card-footer">
-                    <span className="khb-skills-card-footer-dot" />
-                    <span>{category.technologies.length} loaded</span>
-                  </div>
-                </div>
-              </motion.div>
+                category={category}
+                index={categoryIndex}
+                accentColor={accentColor}
+                accentBorder={accentBorder}
+              />
             );
           })}
         </div>
@@ -407,5 +472,77 @@ export default function Skills() {
         </motion.div>
       </motion.div>
     </section>
+  );
+}
+
+function SkillCard({
+  category,
+  index,
+  accentColor,
+  accentBorder,
+}: {
+  category: (typeof technologyCategories)[number];
+  index: number;
+  accentColor: string;
+  accentBorder: string;
+}) {
+  const spotlight = useSpotlight<HTMLDivElement>();
+
+  return (
+    <motion.div
+      ref={spotlight.ref}
+      onMouseMove={spotlight.onMouseMove}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.5, delay: index * STAGGER, ease: EASE }}
+      className="khb-skills-card"
+      style={
+        {
+          '--card-accent': accentColor,
+          '--card-border': accentBorder,
+        } as React.CSSProperties
+      }
+    >
+      <span className="khb-skills-card-glow" aria-hidden="true" />
+      <div className="khb-skills-card-bar">
+        <span className="khb-skills-card-code">{category.code}</span>
+        <div className="khb-skills-card-dots">
+          <span className="khb-dot khb-dot-teal" />
+          <span className="khb-dot khb-dot-brass" />
+          <span className="khb-dot khb-dot-muted" />
+        </div>
+      </div>
+
+      <div className="khb-skills-card-body">
+        <div className="khb-skills-card-cmd">
+          <span className="prompt">$</span>
+          {category.cmd}
+        </div>
+        <h3 className="khb-skills-card-heading">{category.name}</h3>
+
+        <ul className="khb-skills-tech-list">
+          {category.technologies.map((tech) => {
+            const Icon = tech.icon;
+            return (
+              <li
+                key={tech.name}
+                className="khb-skills-tech-row"
+                style={{ '--icon-color': tech.color } as React.CSSProperties}
+              >
+                <Icon className="khb-skills-tech-icon" />
+                <span className="khb-skills-tech-label">{tech.name}</span>
+                <span className="khb-skills-tech-check">✓</span>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="khb-skills-card-footer">
+          <span className="khb-skills-card-footer-dot" />
+          <span>{category.technologies.length} loaded</span>
+        </div>
+      </div>
+    </motion.div>
   );
 }

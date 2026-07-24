@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useRef } from 'react';
 import TerminalCommand from './TerminalCommand';
 import { personalInfo } from '@/data/personal';
 import { plexMono, plexSerif, plexSans } from '@/public/fonts';
@@ -32,8 +33,61 @@ const learningHighlights = [
   },
 ] as const;
 
+// Small helper: tilt an element toward the cursor using direct style writes
+// (no React state), so it stays cheap even on lower-end devices.
+function useTilt<T extends HTMLElement>(strength = 8) {
+  const ref = useRef<T | null>(null);
+  const raf = useRef<number | null>(null);
+
+  const onMouseMove = (e: React.MouseEvent<T>) => {
+    const el = ref.current;
+    if (!el) return;
+    const x = e.clientX;
+    const y = e.clientY;
+    if (raf.current) cancelAnimationFrame(raf.current);
+    raf.current = requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      const px = (x - rect.left) / rect.width - 0.5;
+      const py = (y - rect.top) / rect.height - 0.5;
+      el.style.transform = `rotate(-2deg) perspective(700px) rotateX(${(-py * strength).toFixed(2)}deg) rotateY(${(px * strength).toFixed(2)}deg)`;
+    });
+  };
+
+  const onMouseLeave = () => {
+    const el = ref.current;
+    if (!el) return;
+    if (raf.current) cancelAnimationFrame(raf.current);
+    el.style.transform = 'rotate(-2deg)';
+  };
+
+  return { ref, onMouseMove, onMouseLeave };
+}
+
+// Cursor-tracked spotlight for the learning cards, again via direct CSS
+// variable writes instead of state, so hovering never triggers a re-render.
+function useSpotlight<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const raf = useRef<number | null>(null);
+
+  const onMouseMove = (e: React.MouseEvent<T>) => {
+    const el = ref.current;
+    if (!el) return;
+    const x = e.clientX;
+    const y = e.clientY;
+    if (raf.current) cancelAnimationFrame(raf.current);
+    raf.current = requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      el.style.setProperty('--mx', `${x - rect.left}px`);
+      el.style.setProperty('--my', `${y - rect.top}px`);
+    });
+  };
+
+  return { ref, onMouseMove };
+}
+
 export default function About() {
   const aboutLines = personalInfo.about ?? [];
+  const cardTilt = useTilt<HTMLDivElement>(7);
 
   // Falls back to solid default copy if personalInfo.about isn't populated yet.
   const paragraphs = [
@@ -96,7 +150,9 @@ export default function About() {
         @keyframes khb-about-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
         @media (prefers-reduced-motion: reduce) { .khb-about .khb-rise { animation: none; opacity: 1; } }
 
+        /* Tags: quiet fill-sweep on hover instead of a flat color snap */
         .khb-about .khb-tag {
+          position: relative;
           font-family: var(--khb-font-mono), monospace;
           font-size: 11px;
           letter-spacing: 0.15em;
@@ -106,8 +162,31 @@ export default function About() {
           padding: 5px 10px;
           border-radius: 3px;
           display: inline-block;
+          overflow: hidden;
+          isolation: isolate;
+          transition: color .35s ease, border-color .35s ease, transform .2s ease;
         }
+        .khb-about .khb-tag::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: var(--brass);
+          transform: translateX(-101%);
+          transition: transform .35s cubic-bezier(.16,1,.3,1);
+          z-index: -1;
+        }
+        .khb-about .khb-tag:hover {
+          color: var(--ink);
+          border-color: var(--brass);
+          transform: translateY(-1px);
+        }
+        .khb-about .khb-tag:hover::before { transform: translateX(0); }
         .khb-about .khb-tag--teal { color: var(--teal); border-color: rgba(95,227,214,0.35); }
+        .khb-about .khb-tag--teal::before { background: var(--teal); }
+        .khb-about .khb-tag--teal:hover { color: var(--ink); border-color: var(--teal); }
+        @media (prefers-reduced-motion: reduce) {
+          .khb-about .khb-tag, .khb-about .khb-tag::before { transition: none; }
+        }
 
         .khb-about .khb-eyebrow {
           font-family: var(--khb-font-mono), monospace;
@@ -131,6 +210,15 @@ export default function About() {
           padding: 18px;
           transform: rotate(-2deg);
           box-shadow: 0 24px 44px -18px rgba(0,0,0,0.65);
+          transition: box-shadow .35s ease, border-color .35s ease;
+          will-change: transform;
+        }
+        .khb-about .khb-about-card:hover {
+          border-color: rgba(217,169,78,0.55);
+          box-shadow: 0 30px 54px -16px rgba(0,0,0,0.75);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .khb-about .khb-about-card { transform: rotate(-2deg) !important; transition: none; }
         }
         .khb-about .khb-about-card-tag-row {
           display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
@@ -149,7 +237,18 @@ export default function About() {
           border-radius: 3px;
           border: 1px solid rgba(245,241,232,0.08);
         }
-        .khb-about .khb-about-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .khb-about .khb-about-photo {
+          width: 100%; height: 100%; object-fit: cover; display: block;
+          transition: transform .5s cubic-bezier(.16,1,.3,1), filter .5s ease;
+          transform: scale(1.001); /* avoid subpixel edge flicker at rest */
+        }
+        .khb-about .khb-about-card:hover .khb-about-photo {
+          transform: scale(1.06);
+          filter: saturate(1.08);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .khb-about .khb-about-photo { transition: none; }
+        }
         .khb-about .khb-about-card-caption {
           display: flex;
           flex-direction: column;
@@ -195,6 +294,10 @@ export default function About() {
           border: 1px solid rgba(245,241,232,0.1);
           border-radius: 6px;
           overflow: hidden;
+          transition: border-color .35s ease;
+        }
+        .khb-about .khb-about-terminal:hover {
+          border-color: rgba(245,241,232,0.2);
         }
         .khb-about .khb-about-term-header {
           display: flex;
@@ -205,10 +308,20 @@ export default function About() {
           border-bottom: 1px solid rgba(245,241,232,0.08);
         }
         .khb-about .khb-about-term-dots { display: flex; gap: 6px; }
-        .khb-about .khb-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-        .khb-about .khb-dot-teal { background: var(--teal); opacity: 0.7; }
-        .khb-about .khb-dot-brass { background: var(--brass); opacity: 0.7; }
-        .khb-about .khb-dot-muted { background: var(--muted-2); }
+        .khb-about .khb-dot {
+          width: 9px; height: 9px; border-radius: 50%; display: inline-block;
+          animation: khb-dot-breathe 3.6s ease-in-out infinite;
+        }
+        .khb-about .khb-dot-teal { background: var(--teal); opacity: 0.7; animation-delay: 0s; }
+        .khb-about .khb-dot-brass { background: var(--brass); opacity: 0.7; animation-delay: .5s; }
+        .khb-about .khb-dot-muted { background: var(--muted-2); animation-delay: 1s; }
+        @keyframes khb-dot-breathe {
+          0%, 100% { opacity: .45; transform: scale(1); }
+          50% { opacity: .9; transform: scale(1.15); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .khb-about .khb-dot { animation: none; }
+        }
         .khb-about .khb-about-term-title { font-family: var(--khb-font-mono), monospace; font-size: 12px; color: var(--muted); }
         .khb-about .khb-about-term-body {
           padding: 18px 20px 22px;
@@ -263,12 +376,28 @@ export default function About() {
           border: 1px solid rgba(245, 241, 232, 0.1);
           border-radius: 8px;
           padding: 22px 20px;
+          overflow: hidden;
           transition: border-color .35s ease, transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s ease;
         }
         .khb-about .khb-learning-card:hover {
           border-color: var(--card-border, rgba(217,169,78,0.35));
           transform: translateY(-3px);
           box-shadow: 0 18px 30px -18px rgba(0,0,0,0.75);
+        }
+        /* cursor-tracked spotlight, positioned via --mx/--my written on mousemove */
+        .khb-about .khb-learning-card-glow {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity .3s ease;
+          background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), var(--card-accent, var(--brass)), transparent 70%);
+          mix-blend-mode: screen;
+          filter: opacity(0.14);
+        }
+        .khb-about .khb-learning-card:hover .khb-learning-card-glow { opacity: 1; }
+        @media (prefers-reduced-motion: reduce) {
+          .khb-about .khb-learning-card, .khb-about .khb-learning-card-glow { transition: none; }
         }
         .khb-about .khb-learning-card::before,
         .khb-about .khb-learning-card::after {
@@ -293,7 +422,9 @@ export default function About() {
           color: var(--card-accent, var(--brass));
           display: block;
           margin-bottom: 14px;
+          transition: letter-spacing .3s ease;
         }
+        .khb-about .khb-learning-card:hover .khb-learning-card-code { letter-spacing: 0.28em; }
         .khb-about .khb-learning-card-title {
           font-family: var(--khb-font-mono), monospace;
           font-size: 15px;
@@ -325,9 +456,28 @@ export default function About() {
           font-size: 12px;
           letter-spacing: 0.02em;
           color: var(--muted);
+          transform: translateX(0);
+          transition: transform .3s cubic-bezier(.16,1,.3,1), color .3s ease;
         }
+        .khb-about .khb-learning-card:hover .khb-learning-card-points li {
+          transform: translateX(3px);
+          color: var(--paper);
+        }
+        .khb-about .khb-learning-card-points li:nth-child(1) { transition-delay: 0ms; }
+        .khb-about .khb-learning-card-points li:nth-child(2) { transition-delay: 30ms; }
+        .khb-about .khb-learning-card-points li:nth-child(3) { transition-delay: 60ms; }
+        .khb-about .khb-learning-card-points li:nth-child(4) { transition-delay: 90ms; }
         .khb-about .khb-learning-card-points li span.khb-bullet {
           color: var(--card-accent, var(--brass));
+          display: inline-block;
+          transition: transform .3s cubic-bezier(.16,1,.3,1);
+        }
+        .khb-about .khb-learning-card:hover .khb-learning-card-points li span.khb-bullet {
+          transform: translateX(2px) scale(1.15);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .khb-about .khb-learning-card-points li,
+          .khb-about .khb-learning-card-points li span.khb-bullet { transition: none; }
         }
       `}</style>
 
@@ -347,7 +497,12 @@ export default function About() {
           transition={{ duration: 0.6, delay: 0.1, ease: EASE }}
           className="khb-about-card-wrap"
         >
-          <div className="khb-about-card">
+          <div
+            className="khb-about-card"
+            ref={cardTilt.ref}
+            onMouseMove={cardTilt.onMouseMove}
+            onMouseLeave={cardTilt.onMouseLeave}
+          >
             <div className="khb-about-card-tag-row">
               <span className="khb-tag">IDX.00</span>
               <span className="khb-about-card-idx">ABOUT</span>
@@ -462,33 +617,59 @@ export default function About() {
               accent === 'brass' ? 'rgba(217,169,78,0.35)' : 'rgba(95,227,214,0.35)';
 
             return (
-              <motion.div
+              <LearningCard
                 key={item.title}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-24px' }}
-                transition={{ duration: 0.4, delay: index * 0.06, ease: EASE }}
-                className="khb-learning-card"
-                style={
-                  { '--card-accent': accentColor, '--card-border': accentBorder } as React.CSSProperties
-                }
-              >
-                <span className="khb-learning-card-code">{item.code}</span>
-                <h4 className="khb-learning-card-title">{item.title}</h4>
-                <p className="khb-learning-card-desc">{item.description}</p>
-                <ul className="khb-learning-card-points">
-                  {item.points.map((point) => (
-                    <li key={point}>
-                      <span className="khb-bullet">▸</span>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
+                item={item}
+                index={index}
+                accentColor={accentColor}
+                accentBorder={accentBorder}
+              />
             );
           })}
         </div>
       </motion.div>
     </section>
+  );
+}
+
+function LearningCard({
+  item,
+  index,
+  accentColor,
+  accentBorder,
+}: {
+  item: (typeof learningHighlights)[number];
+  index: number;
+  accentColor: string;
+  accentBorder: string;
+}) {
+  const spotlight = useSpotlight<HTMLDivElement>();
+
+  return (
+    <motion.div
+      ref={spotlight.ref}
+      onMouseMove={spotlight.onMouseMove}
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-24px' }}
+      transition={{ duration: 0.4, delay: index * 0.06, ease: EASE }}
+      className="khb-learning-card"
+      style={
+        { '--card-accent': accentColor, '--card-border': accentBorder } as React.CSSProperties
+      }
+    >
+      <span className="khb-learning-card-glow" aria-hidden="true" />
+      <span className="khb-learning-card-code">{item.code}</span>
+      <h4 className="khb-learning-card-title">{item.title}</h4>
+      <p className="khb-learning-card-desc">{item.description}</p>
+      <ul className="khb-learning-card-points">
+        {item.points.map((point) => (
+          <li key={point}>
+            <span className="khb-bullet">▸</span>
+            <span>{point}</span>
+          </li>
+        ))}
+      </ul>
+    </motion.div>
   );
 }
