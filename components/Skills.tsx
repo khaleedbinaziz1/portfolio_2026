@@ -14,7 +14,6 @@ import {
   SiMysql,
   SiFirebase,
   SiDocker,
-  SiAwsamplify,
   SiVercel,
   SiPrisma,
   SiStripe,
@@ -76,7 +75,6 @@ const technologyCategories: {
     accent: 'brass',
     technologies: [
       { name: 'Docker', icon: SiDocker, color: '#2496ED' },
-      { name: 'AWS', icon: SiAwsamplify, color: '#FF9900' },
       { name: 'Vercel', icon: SiVercel, color: '#F5F1E8' },
       { name: 'Git/GitHub', icon: SiGit, color: '#F05133' },
     ],
