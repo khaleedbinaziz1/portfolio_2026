@@ -23,7 +23,7 @@ export default function TerminalCommand({
   commands,
   autoStart = true,
   loop = false,
-  speed = 100,
+  speed = 45,
   className = '',
   onComplete,
 }: TerminalCommandProps) {
@@ -53,23 +53,23 @@ export default function TerminalCommand({
       } else {
         clearInterval(typingInterval);
         setIsTyping(false);
-        
+
         setTimeout(() => {
           setShowOutput(true);
-          
+
           setTimeout(() => {
-            setCompletedCommands(prev => [...prev, { ...currentCommand }]);
+            setCompletedCommands((prev) => [...prev, { ...currentCommand }]);
 
             if (currentCommandIndex < commands.length - 1) {
-              setCurrentCommandIndex(prev => prev + 1);
+              setCurrentCommandIndex((prev) => prev + 1);
             } else if (loop) {
               setCurrentCommandIndex(0);
             } else {
               setIsComplete(true);
               onComplete?.();
             }
-          }, currentCommand.delay || 2000);
-        }, 500);
+          }, currentCommand.delay || 1600);
+        }, 350);
       }
     }, speed);
 
@@ -84,17 +84,22 @@ export default function TerminalCommand({
       animate={{ opacity: 1 }}
       className={`font-mono text-xs ${className}`}
     >
-      <div className="space-y-2">
+      <div className="space-y-3">
         {completedCommands.map((command, index) => (
           <div key={`${command.command}-${index}`} className="space-y-1">
             <div className="flex items-start gap-2">
-              <span className="font-bold flex-shrink-0" style={{ color: 'var(--retro-green)' }}>{command.prompt}</span>
+              <span className="font-bold flex-shrink-0 text-[#d9a94e]">
+                {command.prompt}
+              </span>
               <div className="flex-1">
-                <span className="terminal-command-text">{command.command}</span>
+                <span className="text-[#f5f1e8] font-medium">{command.command}</span>
               </div>
             </div>
             {command.output && (
-              <div className="mt-1 ml-4 terminal-command-output" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+              <div
+                className="mt-1 ml-4 text-[#5fe3d6]"
+                style={{ whiteSpace: 'pre-wrap', lineHeight: 1.65 }}
+              >
                 {command.output}
               </div>
             )}
@@ -104,22 +109,26 @@ export default function TerminalCommand({
         {!isComplete && (
           <div className="space-y-1">
             <div className="flex items-start gap-2">
-              <span className="font-bold flex-shrink-0" style={{ color: 'var(--retro-green)' }}>{currentCommand.prompt}</span>
+              <span className="font-bold flex-shrink-0 text-[#d9a94e]">
+                {currentCommand.prompt}
+              </span>
               <div className="flex-1">
-                <span className="terminal-command-text">{currentText}</span>
+                <span className="text-[#f5f1e8] font-medium">{currentText}</span>
                 {isTyping && (
                   <motion.span
                     animate={{ opacity: [0, 1, 0] }}
                     transition={{ duration: 0.8, repeat: Infinity }}
-                    className="terminal-command-cursor inline-block w-2 h-4 ml-1"
-                    style={{ backgroundColor: 'var(--retro-green)' }}
+                    className="inline-block w-2 h-4 ml-1 bg-[#d9a94e] align-middle shadow-[0_0_8px_#d9a94e]"
                   />
                 )}
               </div>
             </div>
 
             {showOutput && currentCommand.output && (
-              <div className="mt-1 ml-4 terminal-command-output" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+              <div
+                className="mt-1 ml-4 text-[#5fe3d6]"
+                style={{ whiteSpace: 'pre-wrap', lineHeight: 1.65 }}
+              >
                 {currentCommand.output}
               </div>
             )}
@@ -129,4 +138,3 @@ export default function TerminalCommand({
     </motion.div>
   );
 }
-

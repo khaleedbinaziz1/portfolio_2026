@@ -2,27 +2,101 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ================================================================
+   ARCHITECTURAL MONOCHROME & KINETIC OPAL — 2026 DESIGN SYSTEM
+   ================================================================ */
 :root {
-  --leading-tight: 1.25;
-  --leading-snug: 1.375;
-  --leading-normal: 1.5;
-  --leading-relaxed: 1.625;
-  --leading-body: 1.7;
-  --leading-loose: 1.8;
+  /* Depths - Deep Graphite Obsidian */
+  --void: #08090d;
+  --surface: rgba(16, 18, 25, 0.6);
+  --surface-solid: #0d0f15;
+  --surface-elevated: rgba(24, 27, 38, 0.75);
+  --surface-card: #11131c;
+  --surface-glass: rgba(16, 18, 25, 0.65);
 
-  --tracking-tight: -0.01em;
-  --tracking-normal: 0;
-  --tracking-wide: 0.05em;
-  --tracking-wider: 0.1em;
-  --tracking-widest: 0.15em;
+  /* Typography Colors - Platinum Alabaster & Muted Slate */
+  --ivory: #f1f3f7;
+  --ivory-muted: #9499ad;
+  --ivory-dim: #595e72;
+  --ivory-ghost: rgba(241, 243, 247, 0.08);
 
-  --weight-normal: 400;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-  --weight-bold: 700;
+  /* Kinetic Opal Accents (Subtle, Muted, Refined — never aggressive) */
+  --opal-cyan: #7dd3fc;
+  --opal-violet: #a78bfa;
+  --opal-teal: #5eead4;
+  --opal-emerald: #6ee7b7;
+  --opal-rose: #fda4af;
+  --opal-amber: #fcd34d;
+
+  /* Aliased accents to match component variables seamlessly */
+  --aurora-blue: #7dd3fc;
+  --aurora-violet: #a78bfa;
+  --aurora-teal: #5eead4;
+  --aurora-rose: #fda4af;
+  --aurora-amber: #fcd34d;
+
+  /* Refined, whisper-delicate gradients */
+  --gradient-primary: linear-gradient(135deg, #a78bfa 0%, #7dd3fc 100%);
+  --gradient-aurora: linear-gradient(135deg, #7dd3fc 0%, #5eead4 50%, #a78bfa 100%);
+  --gradient-subtle: linear-gradient(135deg, rgba(167, 139, 250, 0.08), rgba(125, 211, 252, 0.08));
+  --gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+
+  /* Hairline Borders */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-hover: rgba(255, 255, 255, 0.18);
+  --border-accent: rgba(167, 139, 250, 0.35);
+
+  /* Shadows — Soft, Deep, Atmospheric */
+  --shadow-card: 0 12px 36px -12px rgba(0, 0, 0, 0.7);
+  --shadow-card-hover: 0 20px 48px -12px rgba(0, 0, 0, 0.85), 0 0 24px rgba(167, 139, 250, 0.1);
+  --shadow-glow-blue: 0 0 30px rgba(125, 211, 252, 0.12);
+  --shadow-glow-violet: 0 0 30px rgba(167, 139, 250, 0.12);
+
+  /* Typography Stacks */
+  --font-display: var(--font-display, 'Space Grotesk'), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: var(--font-body, 'Inter'), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: var(--font-mono, 'JetBrains Mono'), ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --font-serif: var(--font-serif, 'Playfair Display'), Georgia, serif;
+
+  /* Spacing */
+  --section-pad-y: clamp(80px, 10vh, 130px);
+  --section-pad-x: clamp(20px, 4vw, 44px);
+  --max-w: 1240px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+
+  /* Physics Transitions */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 0.18s;
+  --duration-normal: 0.32s;
+  --duration-slow: 0.55s;
+
+  /* Legacy mappings */
+  --ink: var(--void);
+  --panel: var(--surface);
+  --panel-elevated: var(--surface-elevated);
+  --paper: var(--ivory);
+  --brass: var(--opal-amber);
+  --teal: var(--opal-teal);
+  --muted: var(--ivory-muted);
+  --muted-2: var(--ivory-dim);
+  --khb-font-mono: var(--font-mono);
+  --khb-font-sans: var(--font-body);
+  --khb-font-serif: var(--font-serif);
 }
 
-* {
+/* ================================================================
+   RESET & BASE STYLES
+   ================================================================ */
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -30,30 +104,277 @@
 
 html {
   scroll-behavior: smooth;
-}
-
-html,
-body {
-  overflow-x: hidden;
+  background-color: var(--void);
+  color: var(--ivory);
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   min-height: 100vh;
-  line-height: var(--leading-body);
+  background-color: var(--void);
+  color: var(--ivory);
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  line-height: 1.68;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Hide native scrollbar — add back a custom progress indicator if needed */
-html {
-  scrollbar-width: none;
-}
-html::-webkit-scrollbar {
-  width: 0;
-  display: none;
+::selection {
+  background-color: rgba(167, 139, 250, 0.25);
+  color: #ffffff;
 }
 
-/* Desktop padding used by project card content in a couple of legacy layouts */
-@media (min-width: 768px) {
-  .project-card-content {
-    padding-left: calc(1.75rem + 5px) !important;
+/* ================================================================
+   MINIMALIST SLEEK SCROLLBAR
+   ================================================================ */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: var(--void);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(167, 139, 250, 0.35);
+}
+
+/* ================================================================
+   PAGE ATMOSPHERIC WRAPPER
+   ================================================================ */
+.page-content-wrap {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--void);
+}
+
+/* Delicate mathematical point grid */
+.bg-pixel-blocks {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.35;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Ultra-subtle film grain */
+.pixel-grid-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.12;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.04) 0px,
+    rgba(255, 255, 255, 0.04) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* Soft atmospheric vignette */
+.bg-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse at 50% 20%,
+    transparent 0%,
+    rgba(8, 9, 13, 0.4) 60%,
+    var(--void) 100%
+  );
+}
+
+.page-main-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+.page-fixed-ui {
+  position: relative;
+  z-index: 50;
+}
+
+/* ================================================================
+   FLUID MAGNETIC CURSOR
+   ================================================================ */
+@media (hover: hover) and (pointer: fine) {
+  .retro-cursor-glow {
+    position: fixed;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+      circle,
+      rgba(167, 139, 250, 0.22) 0%,
+      rgba(125, 211, 252, 0.08) 45%,
+      transparent 75%
+    );
+    mix-blend-mode: screen;
+    transition: width 0.25s var(--ease-out-expo),
+      height 0.25s var(--ease-out-expo),
+      opacity 0.2s ease;
+    opacity: 0.75;
   }
+
+  .retro-cursor-glow.is-active {
+    width: 48px;
+    height: 48px;
+    background: radial-gradient(
+      circle,
+      rgba(167, 139, 250, 0.35) 0%,
+      rgba(125, 211, 252, 0.15) 50%,
+      transparent 80%
+    );
+    opacity: 1;
+  }
+
+  .retro-cursor-core {
+    position: fixed;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(-50%, -50%);
+    background: #ffffff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 16px rgba(167, 139, 250, 0.5);
+    transition: transform 0.18s var(--ease-out-expo), background-color 0.2s ease;
+  }
+
+  .retro-cursor-core.is-active {
+    transform: translate(-50%, -50%) scale(1.4);
+    background: var(--opal-cyan);
+    box-shadow: 0 0 10px var(--opal-cyan), 0 0 20px rgba(125, 211, 252, 0.6);
+  }
+}
+
+@media (hover: none) {
+  .retro-cursor-glow,
+  .retro-cursor-core {
+    display: none !important;
+  }
+}
+
+/* ================================================================
+   SCROLL PROGRESS HUD (MINIMALIST)
+   ================================================================ */
+.scroll-progress-hud {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+@media (max-width: 1024px) {
+  .scroll-progress-hud {
+    display: none;
+  }
+}
+
+.scroll-hud-track {
+  width: 1.5px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 1px;
+  overflow: hidden;
+  position: relative;
+}
+
+.scroll-hud-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--gradient-primary);
+  border-radius: 1px;
+  transition: height 0.12s linear;
+}
+
+.scroll-hud-val {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.15em;
+  color: var(--ivory-dim);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  margin-top: 6px;
+}
+
+/* ================================================================
+   DARK CASE STUDY UTILITIES
+   ================================================================ */
+.case-study-dark {
+  background-color: var(--void) !important;
+  color: var(--ivory) !important;
+  position: relative;
+  min-height: 100vh;
+}
+
+.case-study-dark h1,
+.case-study-dark h2,
+.case-study-dark h3,
+.case-study-dark h4,
+.case-study-dark .text-gray-900 {
+  color: var(--ivory) !important;
+}
+
+.case-study-dark p,
+.case-study-dark .text-gray-700,
+.case-study-dark .text-gray-600 {
+  color: var(--ivory-muted) !important;
+}
+
+.case-study-dark .text-gray-500 {
+  color: var(--ivory-dim) !important;
+}
+
+.case-study-dark .bg-white {
+  background-color: var(--surface-card) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+.case-study-dark .bg-gray-50 {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+.case-study-dark .bg-gray-100 {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.case-study-dark .border-gray-100,
+.case-study-dark .border-gray-200,
+.case-study-dark .border-gray-300 {
+  border-color: var(--border-default) !important;
+}
+
+.case-study-dark a:hover {
+  color: var(--opal-cyan) !important;
+}
+
+.case-study-dark .hover\:text-gray-900:hover {
+  color: var(--ivory) !important;
 }

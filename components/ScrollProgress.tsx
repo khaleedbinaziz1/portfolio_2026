@@ -19,12 +19,15 @@ export default function ScrollProgress() {
       }
       rafIdRef.current = null;
     };
+
     const onScroll = () => {
       if (rafIdRef.current !== null) return;
       rafIdRef.current = requestAnimationFrame(update);
     };
+
     window.addEventListener('scroll', onScroll, { passive: true });
     update();
+
     return () => {
       window.removeEventListener('scroll', onScroll);
       if (rafIdRef.current !== null) cancelAnimationFrame(rafIdRef.current);
@@ -33,19 +36,18 @@ export default function ScrollProgress() {
 
   return (
     <div
-      className="scroll-progress"
+      className="scroll-progress-hud"
       role="status"
-      aria-live="polite"
-      aria-label={`Scroll progress: ${percent} percent`}
+      aria-label={`Scroll progress: ${percent}%`}
     >
-      <div className="scroll-progress-track">
+      <div className="scroll-hud-track">
         <div
-          className="scroll-progress-fill"
+          className="scroll-hud-fill"
           style={{ height: `${percent}%` }}
         />
       </div>
-      <span className="scroll-progress-label" aria-hidden="true">
-        {percent}%
+      <span className="scroll-hud-val">
+        {String(percent).padStart(2, '0')}%
       </span>
     </div>
   );

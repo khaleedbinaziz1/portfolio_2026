@@ -3,31 +3,34 @@
 import dynamic from 'next/dynamic';
 import Navigation from '@/components/Navigation';
 
-const Hero3D = dynamic(() => import('@/components/hero3d/Hero3D'), { ssr: false });
-const About = dynamic(() => import('@/components/About'));
-const Skills = dynamic(() => import('@/components/Skills'));
+import Hero3D from '@/components/hero3d/Hero3D';
+import About from '@/components/About';
+import Skills from '@/components/Skills';
+import Experience from '@/components/Experience';
+import Projects from '@/components/Projects';
+import Contact from '@/components/Contact';
+import Footer from '@/components/Footer';
 
-const Projects = dynamic(() => import('@/components/Projects'));
-const Contact = dynamic(() => import('@/components/Contact'));
-const Footer = dynamic(() => import('@/components/Footer'));
-
+const ScrollProgress = dynamic(() => import('@/components/ScrollProgress'), { ssr: false });
+const CommandPalette = dynamic(() => import('@/components/CommandPalette'), { ssr: false });
+const SectionRail = dynamic(() => import('@/components/SectionRail'), { ssr: false });
 
 export default function HomePage() {
   return (
     <main>
       <div className="page-content-wrap">
-        <div className="bg-pixel-blocks" aria-hidden />
-        <div className="pixel-grid-overlay" aria-hidden />
+        <div className="bg-pixel-blocks" aria-hidden="true" />
+        <div className="pixel-grid-overlay" aria-hidden="true" />
+        <div className="bg-vignette" aria-hidden="true" />
 
-
-
-        <div className="bg-vignette"></div>
+        <ScrollProgress />
+        <SectionRail />
 
         <div className="page-main-content">
           <Hero3D />
           <About />
           <Skills />
-
+          <Experience />
           <Projects />
           <Contact />
           <Footer />
@@ -37,6 +40,7 @@ export default function HomePage() {
           <div className="page-nav-wrap">
             <Navigation contentVisible={true} />
           </div>
+          <CommandPalette />
         </div>
       </div>
     </main>

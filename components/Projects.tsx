@@ -1,356 +1,849 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef } from 'react';
 import { projects } from '@/data/projects';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FiFileText, FiExternalLink } from 'react-icons/fi';
-import { plexMono, plexSerif, plexSans } from '@/public/fonts';
+import {
+  FiFileText,
+  FiExternalLink,
+  FiGithub,
+  FiArrowUpRight,
+  FiLayers,
+  FiStar,
+} from 'react-icons/fi';
+import TextScramble from '@/components/TextScramble';
+import { sound } from '@/lib/sound';
 
-const EASE = [0.22, 0.61, 0.36, 1] as const;
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+type ProjectCategory = 'all' | 'fullstack' | 'dashboards' | 'learning';
+
+const CATEGORIES: { id: ProjectCategory; label: string }[] = [
+  { id: 'all', label: 'All Works' },
+  { id: 'fullstack', label: 'Full-Stack & APIs' },
+  { id: 'dashboards', label: 'ERPs & Dashboards' },
+  { id: 'learning', label: 'EdTech & Open Source' },
+];
+
+function useTilt<T extends HTMLElement>(strength = 4) {
+  const ref = useRef<T | null>(null);
+  const raf = useRef<number | null>(null);
+
+  const onMouseMove = (e: React.MouseEvent<T>) => {
+    const el = ref.current;
+    if (!el) return;
+    if (raf.current) cancelAnimationFrame(raf.current);
+    raf.current = requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width - 0.5;
+      const py = (e.clientY - rect.top) / rect.height - 0.5;
+      el.style.transform = `perspective(900px) rotateX(${(-py * strength).toFixed(2)}deg) rotateY(${(px * strength).toFixed(2)}deg) translateY(-3px)`;
+    });
+  };
+
+  const onMouseLeave = () => {
+    const el = ref.current;
+    if (!el) return;
+    if (raf.current) cancelAnimationFrame(raf.current);
+    el.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+  };
+
+  return { ref, onMouseMove, onMouseLeave };
+}
+
+function useSpotlight<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const raf = useRef<number | null>(null);
+
+  const onMouseMove = (e: React.MouseEvent<T>) => {
+    const el = ref.current;
+    if (!el) return;
+    if (raf.current) cancelAnimationFrame(raf.current);
+    raf.current = requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      el.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+      el.style.setProperty('--my', `${e.clientY - rect.top}px`);
+    });
+  };
+
+  return { ref, onMouseMove };
+}
+
+function ProjectCard({
+  project,
+  index,
+}: {
+  project: (typeof projects)[0];
+  index: number;
+}) {
+  const tilt = useTilt<HTMLElement>(4);
+  const spotlight = useSpotlight<HTMLElement>();
+  const code = `SYS.${String(project.id).padStart(2, '0')}`;
+
+  return (
+    <motion.article
+      ref={tilt.ref}
+      onMouseMove={(e) => {
+        tilt.onMouseMove(e);
+        spotlight.onMouseMove(e);
+      }}
+      onMouseLeave={tilt.onMouseLeave}
+      onMouseEnter={() => sound.tick(1300, 0.01)}
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-30px' }}
+      transition={{ duration: 0.55, delay: index * 0.05, ease: EASE }}
+      className="ln-project-card"
+    >
+      {/* Header bar */}
+      <div className="ln-project-bar">
+        <div className="ln-project-code-wrap">
+          <span className="ln-project-dot" />
+          <span className="ln-project-code">{code}</span>
+        </div>
+        <span className="ln-project-status">PRODUCTION</span>
+      </div>
+
+      {/* Media Preview */}
+      <div className="ln-project-media">
+        {project.image ? (
+          <div className="ln-project-image-wrap">
+            <Image
+              src={project.image}
+              alt={project.title}
+              fill
+              className="ln-project-img"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+            <div className="ln-project-overlay" />
+          </div>
+        ) : (
+          <div className="ln-project-placeholder">
+            <FiLayers size={28} />
+            <span>ARCHITECTURE // PREVIEW</span>
+          </div>
+        )}
+
+        {project.live && (
+          <a
+            href={project.live}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ln-project-float-link"
+            aria-label={`Open live site for ${project.title}`}
+          >
+            <span>Live System</span>
+            <FiArrowUpRight size={13} />
+          </a>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="ln-project-body">
+        <h3 className="ln-project-title">{project.title}</h3>
+        <p className="ln-project-desc">{project.description}</p>
+
+        <div className="ln-project-tech-list">
+          {project.tech.map((t) => (
+            <span key={t} className="ln-tech-pill">
+              {t}
+            </span>
+          ))}
+        </div>
+
+        <div className="ln-project-actions">
+          {project.caseStudy && (
+            <Link
+              href={project.caseStudy}
+              className="ln-action-btn ln-action-primary"
+            >
+              <FiFileText size={12} />
+              <span>Case Study</span>
+            </Link>
+          )}
+
+          {project.live && (
+            <a
+              href={project.live}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ln-action-btn ln-action-secondary"
+            >
+              <FiExternalLink size={12} />
+              <span>Launch</span>
+            </a>
+          )}
+
+          {project.github && project.github !== '#' && (
+            <a
+              href={project.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ln-action-btn ln-action-ghost"
+              aria-label="View source repository"
+            >
+              <FiGithub size={13} />
+            </a>
+          )}
+        </div>
+      </div>
+    </motion.article>
+  );
+}
 
 export default function Projects() {
+  const [filter, setFilter] = useState<ProjectCategory>('all');
+
+  const filteredProjects = projects.filter((p) => {
+    if (filter === 'all') return true;
+    if (filter === 'fullstack')
+      return p.tech.includes('Node.js') || p.tech.includes('MongoDB');
+    if (filter === 'dashboards')
+      return (
+        p.title.toLowerCase().includes('dashboard') ||
+        p.title.toLowerCase().includes('admin') ||
+        p.title.toLowerCase().includes('erp') ||
+        p.title.toLowerCase().includes('autopilot')
+      );
+    if (filter === 'learning')
+      return (
+        p.title.toLowerCase().includes('open stack') ||
+        p.title.toLowerCase().includes('takasphere')
+      );
+    return true;
+  });
+
+  const featured = projects.find((p) => p.id === 4) || projects[0];
+
   return (
-    <section
-      id="projects"
-      className={`khb-projects ${plexMono.variable} ${plexSerif.variable} ${plexSans.variable}`}
-    >
+    <section id="projects" className="ln-projects">
       <style>{`
-        .khb-projects {
-          --ink: #0b0d12;
-          --panel: #12151c;
-          --paper: #f5f1e8;
-          --brass: #d9a94e;
-          --teal: #5fe3d6;
-          --muted: rgba(245, 241, 232, 0.62);
-          --muted-2: rgba(245, 241, 232, 0.34);
+        .ln-projects {
           position: relative;
           width: 100%;
           overflow: hidden;
-          background: var(--ink);
-          color: var(--paper);
-          font-family: var(--khb-font-sans), sans-serif;
-          padding: 96px 24px;
-          box-sizing: border-box;
-        }
-        .khb-projects *, .khb-projects *::before, .khb-projects *::after { box-sizing: border-box; }
-        @media (min-width: 960px) { .khb-projects { padding: 140px 40px; } }
-
-        .khb-projects .khb-grid { position: absolute; inset: 0; background-image: radial-gradient(rgba(217,169,78,0.35) 1px, transparent 1px); background-size: 26px 26px; opacity: 0.4; pointer-events: none; }
-        .khb-projects .khb-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at top, transparent 0%, var(--ink) 78%); pointer-events: none; }
-
-        .khb-projects .khb-inner { position: relative; max-width: 1180px; margin: 0 auto; }
-
-        .khb-projects .khb-rise { animation: khb-projects-rise .7s cubic-bezier(.16,1,.3,1) both; }
-        @keyframes khb-projects-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-        @media (prefers-reduced-motion: reduce) { .khb-projects .khb-rise { animation: none; opacity: 1; } }
-
-        .khb-projects .khb-tag {
-          font-family: var(--khb-font-mono), monospace;
-          font-size: 11px;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          color: var(--brass);
-          border: 1px solid rgba(217,169,78,0.35);
-          padding: 5px 10px;
-          border-radius: 3px;
-          display: inline-block;
+          background: var(--void);
+          color: var(--ivory);
+          padding: var(--section-pad-y) var(--section-pad-x);
         }
 
-        .khb-projects .khb-cmdline {
-          font-family: var(--khb-font-mono), monospace;
-          font-size: 13px;
-          color: var(--muted);
-          margin: 18px 0 14px;
-        }
-        .khb-projects .khb-cmdline .prompt { color: var(--brass); margin-right: 6px; }
-
-        .khb-projects .khb-title {
-          font-family: var(--khb-font-mono), monospace;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: -0.01em;
-          font-size: clamp(2rem, 5vw, 3rem);
-          margin: 0 0 14px;
-        }
-        .khb-projects .khb-rule { height: 1px; background: linear-gradient(to right, rgba(217,169,78,0.4), transparent); margin-bottom: 10px; }
-        .khb-projects .khb-count { font-family: var(--khb-font-mono), monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-2); }
-
-        /* ---- sleek card grid ---- */
-        .khb-projects .khb-rail {
-          margin-top: 56px;
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(252px, 1fr));
-          gap: 26px 22px;
-        }
-
-        .khb-projects .khb-card {
+        .ln-projects-inner {
           position: relative;
-          background: var(--panel);
-          border: 1px solid rgba(245, 241, 232, 0.1);
-          border-radius: 8px;
+          max-width: var(--max-w);
+          margin: 0 auto;
+        }
+
+        /* Section Header */
+        .ln-section-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-family: var(--font-mono);
+          font-size: 11px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--opal-cyan);
+          margin-bottom: 16px;
+        }
+
+        .ln-section-label::before {
+          content: '';
+          width: 24px;
+          height: 1px;
+          background: var(--opal-cyan);
+          opacity: 0.6;
+        }
+
+        .ln-section-title {
+          font-family: var(--font-display);
+          font-weight: 600;
+          font-size: clamp(1.75rem, 3.2vw, 2.4rem);
+          letter-spacing: -0.025em;
+          line-height: 1.15;
+          margin-bottom: 12px;
+          color: var(--ivory);
+        }
+
+        .ln-section-subtitle {
+          font-family: var(--font-body);
+          font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+          color: var(--ivory-muted);
+          max-width: 580px;
+          line-height: 1.6;
+          margin-bottom: 40px;
+        }
+
+        /* Flagship Featured Card */
+        .ln-featured {
+          position: relative;
+          background: var(--surface);
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-lg);
+          padding: 28px;
+          margin-bottom: 48px;
+          overflow: hidden;
+          backdrop-filter: blur(16px);
+          transition: border-color var(--duration-normal) ease, box-shadow var(--duration-normal) ease;
+        }
+
+        .ln-featured:hover {
+          border-color: var(--border-hover);
+          box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.7);
+        }
+
+        .ln-featured-inner {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 28px;
+          align-items: center;
+        }
+
+        @media (min-width: 960px) {
+          .ln-featured-inner {
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 40px;
+          }
+        }
+
+        .ln-featured-media {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 16 / 10;
+          border-radius: var(--radius-md);
+          overflow: hidden;
+          background: #0d0f15;
+          border: 1px solid var(--border-subtle);
+        }
+
+        .ln-featured-img {
+          object-fit: cover;
+          transition: transform 0.6s var(--ease-out-expo);
+        }
+
+        .ln-featured:hover .ln-featured-img {
+          transform: scale(1.025);
+        }
+
+        .ln-featured-badge {
+          position: absolute;
+          top: 14px;
+          left: 14px;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 5px 12px;
+          background: rgba(8, 9, 13, 0.85);
+          backdrop-filter: blur(12px);
+          border: 1px solid var(--border-subtle);
+          border-radius: 100px;
+          font-family: var(--font-mono);
+          font-size: 10px;
+          letter-spacing: 0.12em;
+          color: var(--opal-cyan);
+          z-index: 2;
+        }
+
+        .ln-featured-label {
+          font-family: var(--font-mono);
+          font-size: 10.5px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: var(--ivory-dim);
+          margin-bottom: 8px;
+        }
+
+        .ln-featured-title {
+          font-family: var(--font-display);
+          font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+          font-weight: 600;
+          letter-spacing: -0.02em;
+          line-height: 1.2;
+          margin-bottom: 12px;
+          color: var(--ivory);
+        }
+
+        .ln-featured-desc {
+          font-family: var(--font-body);
+          font-size: 14px;
+          line-height: 1.65;
+          color: var(--ivory-muted);
+          margin-bottom: 20px;
+        }
+
+        .ln-featured-stats {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+          margin-bottom: 20px;
+          padding: 12px 0;
+          border-top: 1px solid var(--border-subtle);
+          border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .ln-fstat-val {
+          font-family: var(--font-display);
+          font-size: 15px;
+          font-weight: 600;
+          color: var(--ivory);
+        }
+
+        .ln-fstat-lbl {
+          font-family: var(--font-mono);
+          font-size: 9.5px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--ivory-dim);
+          margin-top: 2px;
+        }
+
+        /* Filter Pills */
+        .ln-filters {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-bottom: 36px;
+        }
+
+        .ln-filter-btn {
+          font-family: var(--font-mono);
+          font-size: 11.5px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 7px 16px;
+          border-radius: 100px;
+          border: 1px solid var(--border-subtle);
+          background: transparent;
+          color: var(--ivory-dim);
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .ln-filter-btn:hover {
+          color: var(--ivory);
+          border-color: var(--border-hover);
+        }
+
+        .ln-filter-btn.active {
+          color: #ffffff;
+          background: rgba(255, 255, 255, 0.06);
+          border-color: rgba(255, 255, 255, 0.22);
+        }
+
+        /* Grid of Cards */
+        .ln-projects-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        @media (min-width: 640px) {
+          .ln-projects-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (min-width: 1080px) {
+          .ln-projects-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
+        /* Card Component */
+        .ln-project-card {
+          position: relative;
+          background: var(--surface);
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-lg);
           overflow: hidden;
           display: flex;
           flex-direction: column;
-          transition: background-color .35s ease, border-color .35s ease, transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s ease;
-        }
-        .khb-projects .khb-card:hover,
-        .khb-projects .khb-card:focus-within {
-          background: #171b24;
-          border-color: var(--card-border, rgba(217,169,78,0.35));
-          transform: translateY(-3px);
-          box-shadow: 0 18px 30px -18px rgba(0,0,0,0.75);
+          backdrop-filter: blur(16px);
+          transition: border-color var(--duration-normal) ease, box-shadow var(--duration-normal) ease;
         }
 
-        /* corner brackets — draw in on hover, precise not decorative-fussy */
-        .khb-projects .khb-card::before,
-        .khb-projects .khb-card::after {
-          content: '';
-          position: absolute;
-          width: 14px;
-          height: 14px;
-          border-color: var(--card-accent, var(--brass));
-          opacity: 0;
-          transition: opacity .3s ease;
-          pointer-events: none;
-          z-index: 3;
+        .ln-project-card:hover {
+          border-color: var(--border-hover);
+          box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.7);
         }
-        .khb-projects .khb-card::before {
-          top: 8px; left: 8px;
-          border-top: 1.5px solid; border-left: 1.5px solid;
-        }
-        .khb-projects .khb-card::after {
-          bottom: 8px; right: 8px;
-          border-bottom: 1.5px solid; border-right: 1.5px solid;
-        }
-        .khb-projects .khb-card:hover::before,
-        .khb-projects .khb-card:hover::after { opacity: 0.9; }
 
-        .khb-projects .khb-card-bar {
+        .ln-project-bar {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 10px 14px;
-          border-bottom: 1px solid rgba(245,241,232,0.08);
-        }
-        .khb-projects .khb-card-code {
-          font-family: var(--khb-font-mono), monospace;
-          font-size: 10px;
-          letter-spacing: 0.2em;
-          color: var(--card-accent, var(--brass));
-        }
-        .khb-projects .khb-card-idx {
-          font-family: var(--khb-font-mono), monospace;
-          font-size: 10px;
-          letter-spacing: 0.1em;
-          color: var(--muted-2);
+          padding: 10px 16px;
+          border-bottom: 1px solid var(--border-subtle);
+          background: rgba(0, 0, 0, 0.2);
         }
 
-        .khb-projects .khb-card-thumb {
-          position: relative;
-          display: block;
-          width: 100%;
-          aspect-ratio: 4 / 3;
-          overflow: hidden;
-          border-bottom: 1px solid rgba(245,241,232,0.08);
+        .ln-project-code-wrap {
+          display: flex;
+          align-items: center;
+          gap: 6px;
         }
-        .khb-projects .khb-card-thumb-img {
+
+        .ln-project-dot {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: var(--opal-cyan);
+        }
+
+        .ln-project-code {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          letter-spacing: 0.16em;
+          color: var(--ivory-dim);
+        }
+
+        .ln-project-status {
+          font-family: var(--font-mono);
+          font-size: 9px;
+          letter-spacing: 0.1em;
+          color: var(--opal-teal);
+        }
+
+        .ln-project-media {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 16 / 10;
+          overflow: hidden;
+          background: #0d0f15;
+          border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .ln-project-image-wrap {
           position: relative;
           width: 100%;
           height: 100%;
-          transition: transform .5s cubic-bezier(.16,1,.3,1);
         }
-        .khb-projects .khb-card:hover .khb-card-thumb-img { transform: scale(1.035); }
 
-        .khb-projects .khb-card-noimg {
+        .ln-project-img {
+          object-fit: cover;
+          transition: transform 0.6s var(--ease-out-expo);
+        }
+
+        .ln-project-card:hover .ln-project-img {
+          transform: scale(1.035);
+        }
+
+        .ln-project-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, transparent 50%, rgba(8, 9, 13, 0.5) 100%);
+        }
+
+        .ln-project-placeholder {
           width: 100%;
-          aspect-ratio: 4 / 3;
+          height: 100%;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
-          border-bottom: 1px solid rgba(245,241,232,0.08);
-          background: linear-gradient(135deg, rgba(245,241,232,0.025), transparent 60%);
-        }
-        .khb-projects .khb-card-noimg span {
-          font-family: var(--khb-font-mono), monospace;
+          gap: 8px;
+          color: var(--ivory-dim);
+          font-family: var(--font-mono);
           font-size: 10px;
-          letter-spacing: 0.25em;
-          color: var(--muted-2);
+          letter-spacing: 0.14em;
         }
 
-        .khb-projects .khb-card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
-        .khb-projects .khb-card-title {
-          font-family: var(--khb-font-mono), monospace;
-          font-size: 14.5px;
-          font-weight: 600;
-          margin: 0 0 8px;
-          line-height: 1.3;
-          letter-spacing: -0.01em;
+        .ln-project-float-link {
+          position: absolute;
+          bottom: 10px;
+          right: 10px;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 5px 10px;
+          background: rgba(8, 9, 13, 0.85);
+          backdrop-filter: blur(10px);
+          border: 1px solid var(--border-subtle);
+          border-radius: 100px;
+          font-family: var(--font-mono);
+          font-size: 10px;
+          color: var(--ivory);
+          text-decoration: none;
+          opacity: 0;
+          transform: translateY(4px);
+          transition: all 0.2s ease;
+          z-index: 2;
         }
-        .khb-projects .khb-card-desc {
-          font-family: var(--khb-font-serif), serif;
+
+        .ln-project-card:hover .ln-project-float-link {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .ln-project-body {
+          padding: 18px 18px;
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+
+        .ln-project-title {
+          font-family: var(--font-display);
+          font-size: 16px;
+          font-weight: 600;
+          letter-spacing: -0.01em;
+          margin-bottom: 6px;
+          line-height: 1.3;
+          color: var(--ivory);
+        }
+
+        .ln-project-desc {
+          font-family: var(--font-body);
           font-size: 13px;
           line-height: 1.55;
-          color: var(--muted);
-          margin: 0 0 16px;
+          color: var(--ivory-muted);
+          margin-bottom: 16px;
           display: -webkit-box;
           -webkit-line-clamp: 3;
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
 
-        .khb-projects .khb-card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; margin-bottom: 14px; }
-        .khb-projects .khb-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 5px;
-          font-family: var(--khb-font-mono), monospace;
-          font-size: 10.5px;
-          font-weight: 600;
-          letter-spacing: 0.05em;
-          text-transform: uppercase;
-          text-decoration: none;
-          padding: 7px 11px;
-          border-radius: 2px;
-          transition: background-color .2s ease, color .2s ease, border-color .2s ease;
-        }
-        .khb-projects .khb-btn-primary { background: var(--brass); color: var(--ink); }
-        .khb-projects .khb-btn-primary:hover { background: #ecc26a; }
-        .khb-projects .khb-btn-outline { background: transparent; color: var(--teal); border: 1px solid rgba(95,227,214,0.5); }
-        .khb-projects .khb-btn-outline:hover { background: rgba(95,227,214,0.1); }
-        .khb-projects .khb-btn:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
-
-        .khb-projects .khb-card-tech {
-          list-style: none;
+        .ln-project-tech-list {
           display: flex;
           flex-wrap: wrap;
           gap: 5px;
-          margin: 0;
-          padding: 12px 0 0;
-          border-top: 1px solid rgba(245,241,232,0.08);
+          margin-top: auto;
+          margin-bottom: 16px;
+          padding-top: 12px;
+          border-top: 1px solid var(--border-subtle);
         }
-        .khb-projects .khb-card-tech-tag {
-          font-family: var(--khb-font-mono), monospace;
+
+        .ln-tech-pill {
+          font-family: var(--font-mono);
           font-size: 9.5px;
-          letter-spacing: 0.05em;
-          text-transform: uppercase;
-          color: var(--muted);
+          letter-spacing: 0.04em;
+          color: var(--ivory-dim);
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid var(--border-subtle);
+          padding: 2px 7px;
+          border-radius: 4px;
         }
-        .khb-projects .khb-card-tech-tag:not(:last-child)::after { content: '/'; margin-left: 5px; color: var(--muted-2); }
+
+        .ln-project-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .ln-action-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          font-family: var(--font-body);
+          font-size: 11.5px;
+          font-weight: 500;
+          padding: 6px 14px;
+          border-radius: 100px;
+          text-decoration: none;
+          transition: all 0.2s ease;
+        }
+
+        .ln-action-primary {
+          background: var(--ivory);
+          color: #08090d;
+        }
+
+        .ln-action-primary:hover {
+          background: #ffffff;
+          transform: translateY(-1px);
+        }
+
+        .ln-action-secondary {
+          background: transparent;
+          color: var(--ivory-muted);
+          border: 1px solid var(--border-default);
+        }
+
+        .ln-action-secondary:hover {
+          border-color: var(--border-hover);
+          color: var(--ivory);
+        }
+
+        .ln-action-ghost {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 30px;
+          height: 30px;
+          border-radius: 100px;
+          color: var(--ivory-dim);
+          border: 1px solid var(--border-subtle);
+          transition: all 0.2s ease;
+          margin-left: auto;
+        }
+
+        .ln-action-ghost:hover {
+          color: var(--ivory);
+          border-color: var(--border-hover);
+        }
       `}</style>
 
-      <div className="khb-grid" aria-hidden="true" />
-      <div className="khb-vignette" aria-hidden="true" />
-
-      <motion.div
-        initial={{ opacity: 0, y: 28 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-40px', amount: 0.1 }}
-        transition={{ duration: 0.55, ease: EASE }}
-        className="khb-inner"
-      >
-        <header>
-          <span className="khb-tag">PROJECTS · 02</span>
-          <div className="khb-cmdline">
-            <span className="prompt">$</span>cat projects
+      <div className="ln-projects-inner">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.6, ease: EASE }}
+        >
+          <div className="ln-section-label">
+            <TextScramble text="Works // 04" />
           </div>
-          <h2 className="khb-title">Some Things I&apos;ve Built</h2>
-          <div className="khb-rule" />
-          <p className="khb-count" aria-hidden="true">
-            ls — {projects.length} project{projects.length !== 1 ? 's' : ''} found
+          <h2 className="ln-section-title">Production systems & platforms.</h2>
+          <p className="ln-section-subtitle">
+            A curated index of full-stack platforms, retail ERP suites, and developer tooling engineered for real-world resilience.
           </p>
-        </header>
+        </motion.div>
 
-        <div className="khb-rail">
-          {projects.map((project, index) => {
-            const accent = index % 2 === 0 ? 'teal' : 'brass';
-            const accentColor = accent === 'brass' ? '#D9A94E' : '#5FE3D6';
-            const accentBorder = accent === 'brass' ? 'rgba(217,169,78,0.35)' : 'rgba(95,227,214,0.35)';
-            const code = `PRJ.${String(index + 1).padStart(2, '0')}`;
-
-            const image = project.image && (
-              <div className="khb-card-thumb-img">
-                <Image
-                  src={project.image}
-                  alt={project.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 320px"
-                />
+        {/* Flagship Showcase */}
+        {featured && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-30px' }}
+            transition={{ duration: 0.65, ease: EASE }}
+            className="ln-featured"
+          >
+            <div className="ln-featured-inner">
+              <div className="ln-featured-media">
+                <span className="ln-featured-badge">
+                  <FiStar size={11} />
+                  <span>FLAGSHIP PLATFORM</span>
+                </span>
+                {featured.image && (
+                  <Image
+                    src={featured.image}
+                    alt={featured.title}
+                    fill
+                    className="ln-featured-img"
+                    priority
+                    sizes="(max-width: 960px) 100vw, 620px"
+                  />
+                )}
               </div>
-            );
+
+              <div className="ln-featured-content">
+                <div className="ln-featured-label">ENTERPRISE ERP & RETAIL MANAGEMENT</div>
+                <h3 className="ln-featured-title">{featured.title}</h3>
+                <p className="ln-featured-desc">
+                  {featured.longDescription || featured.description}
+                </p>
+
+                <div className="ln-featured-stats">
+                  <div>
+                    <div className="ln-fstat-val">Full-Stack</div>
+                    <div className="ln-fstat-lbl">Architecture</div>
+                  </div>
+                  <div>
+                    <div className="ln-fstat-val">Multi-Role</div>
+                    <div className="ln-fstat-lbl">RBAC Auth</div>
+                  </div>
+                  <div>
+                    <div className="ln-fstat-val">Real-Time</div>
+                    <div className="ln-fstat-lbl">Inventory Sync</div>
+                  </div>
+                </div>
+
+                <div className="ln-project-tech-list" style={{ marginBottom: '18px' }}>
+                  {featured.tech.map((t) => (
+                    <span key={t} className="ln-tech-pill">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="ln-project-actions">
+                  {featured.caseStudy && (
+                    <Link
+                      href={featured.caseStudy}
+                      className="ln-action-btn ln-action-primary"
+                    >
+                      <FiFileText size={12} />
+                      <span>Case Study</span>
+                    </Link>
+                  )}
+                  {featured.live && (
+                    <a
+                      href={featured.live}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ln-action-btn ln-action-secondary"
+                    >
+                      <FiExternalLink size={12} />
+                      <span>Live Dashboard</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Filter Pills with Spring Animation */}
+        <div className="ln-filters">
+          {CATEGORIES.map((cat) => {
+            const isActive = filter === cat.id;
+            let count = projects.length;
+            if (cat.id === 'fullstack') count = projects.filter((p) => p.tech.includes('Node.js') || p.tech.includes('MongoDB')).length;
+            else if (cat.id === 'dashboards') count = projects.filter((p) => p.title.toLowerCase().includes('dashboard') || p.title.toLowerCase().includes('erp') || p.title.toLowerCase().includes('autopilot')).length;
+            else if (cat.id === 'learning') count = projects.filter((p) => p.title.toLowerCase().includes('open stack') || p.title.toLowerCase().includes('takasphere')).length;
 
             return (
-              <motion.article
-                key={project.id}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-24px' }}
-                transition={{ duration: 0.4, delay: index * 0.04, ease: EASE }}
-                className="khb-card"
-                style={{ '--card-accent': accentColor, '--card-border': accentBorder } as React.CSSProperties}
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => {
+                  sound.tick(1100, 0.02);
+                  setFilter(cat.id);
+                }}
+                className={`ln-filter-btn ${isActive ? 'active' : ''}`}
+                style={{ position: 'relative' }}
               >
-                <div className="khb-card-bar">
-                  <span className="khb-card-code">{code}</span>
-                  <span className="khb-card-idx">{String(index + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}</span>
-                </div>
-
-                {project.image ? (
-                  project.caseStudy ? (
-                    <Link href={project.caseStudy} className="khb-card-thumb">
-                      {image}
-                    </Link>
-                  ) : (
-                    <div className="khb-card-thumb">{image}</div>
-                  )
-                ) : (
-                  <div className="khb-card-noimg">
-                    <span>NO PREVIEW</span>
-                  </div>
+                {isActive && (
+                  <motion.div
+                    layoutId="projectFilterPill"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      borderRadius: '100px',
+                      background: 'rgba(255, 255, 255, 0.08)',
+                      border: '1px solid rgba(255, 255, 255, 0.22)',
+                      zIndex: 0,
+                    }}
+                    transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+                  />
                 )}
-
-                <div className="khb-card-body">
-                  <h3 className="khb-card-title">{project.title}</h3>
-                  <p className="khb-card-desc">{project.description}</p>
-
-                  <div className="khb-card-actions">
-                    {project.caseStudy && (
-                      <Link
-                        href={project.caseStudy}
-                        className="khb-btn khb-btn-primary"
-                        aria-label={`View case study for ${project.title}`}
-                      >
-                        <FiFileText size={12} />
-                        <span>Case Study</span>
-                      </Link>
-                    )}
-                    {project.live && (
-                      <Link
-                        href={project.live}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="khb-btn khb-btn-outline"
-                        aria-label={`Visit live site for ${project.title}`}
-                      >
-                        <FiExternalLink size={12} />
-                        <span>Visit</span>
-                      </Link>
-                    )}
-                  </div>
-
-                  <ul className="khb-card-tech" aria-label="Technologies">
-                    {project.tech.map((tech) => (
-                      <li key={tech} className="khb-card-tech-tag">
-                        {tech}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </motion.article>
+                <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span>{cat.label}</span>
+                  <span style={{ fontSize: '9px', opacity: 0.6, fontFamily: 'var(--font-mono)' }}>({count})</span>
+                </span>
+              </button>
             );
           })}
         </div>
-      </motion.div>
+
+        {/* Grid of Projects */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={filter}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -14 }}
+            transition={{ duration: 0.35, ease: EASE }}
+            className="ln-projects-grid"
+          >
+            {filteredProjects.map((project, idx) => (
+              <ProjectCard key={project.id} project={project} index={idx} />
+            ))}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </section>
   );
 }

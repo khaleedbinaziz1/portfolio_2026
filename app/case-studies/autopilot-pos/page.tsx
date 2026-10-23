@@ -40,7 +40,7 @@ const primaryColor = '#8F75E6';
 const AutopilotPOSCaseStudy = () => {
 
 return (
-<div className="min-h-screen bg-white">
+<div className="min-h-screen bg-[#0b0d12] text-[#f5f1e8] case-study-dark">
 
 <Navigation />
 

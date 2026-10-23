@@ -28,11 +28,11 @@ import kumira from '../../../public/images/kumira.png';
 import kumira_dashboard from '../../../public/images/kumira_dashboard.png';
 import kumira_admin from '../../../public/images/Kumira_admin.png';
 
-const primaryColor = '#065D71';
+const primaryColor = '#5fe3d6';
 
 const KumiraCaseStudy = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#0b0d12] text-[#f5f1e8] case-study-dark">
       <Navigation />
       
       {/* Hero Section */}

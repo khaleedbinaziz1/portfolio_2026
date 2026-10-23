@@ -29,7 +29,7 @@ const primaryColor = '#1B8A5F';
 
 const TakaSphereCaseStudy = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#0b0d12] text-[#f5f1e8] case-study-dark">
       <Navigation />
       
       {/* Hero Section */}

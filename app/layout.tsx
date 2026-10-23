@@ -2,14 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import StructuredData from "@/components/StructuredData";
 import RetroCursor from "@/components/RetroCursor";
-
-const jetbrainsMono = {
-  variable: "--font-mono",
-};
-
-const pixelifySans = {
-  variable: "--font-pixel",
-};
+import { spaceGrotesk, inter, jetbrainsMono, playfair } from "@/public/fonts";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://khaledbinaziz.dev";
 
@@ -17,9 +10,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: "Khaled Bin Aziz | Full-Stack Developer & Software Engineer",
-    template: "%s | Khaled Bin Aziz"
+    template: "%s | Khaled Bin Aziz",
   },
-  description: "Full-Stack Developer specializing in React, Next.js, and Node.js. Building scalable web applications serving 5,000+ users. Expert in TypeScript, system design, and cloud deployment. Currently pursuing MSc in Computer Science.",
+  description:
+    "Full-Stack Developer specializing in React, Next.js, and Node.js. Building scalable web applications serving 5,000+ users. Expert in TypeScript, system design, and cloud deployment. Currently pursuing MSc in Computer Science.",
   keywords: [
     "Full-Stack Developer",
     "Software Engineer",
@@ -36,7 +30,7 @@ export const metadata: Metadata = {
     "MongoDB",
     "Express.js",
     "E-commerce Developer",
-    "Web Applications"
+    "Web Applications",
   ],
   authors: [{ name: "Khaled Bin Aziz", url: "https://github.com/khaleedbinaziz1" }],
   creator: "Khaled Bin Aziz",
@@ -47,9 +41,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   verification: {
@@ -61,7 +55,8 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "Khaled Bin Aziz Portfolio",
     title: "Khaled Bin Aziz | Full-Stack Developer & Software Engineer",
-    description: "Full-Stack Developer specializing in React, Next.js, and Node.js. Building scalable web applications serving 5,000+ users. Expert in TypeScript, system design, and cloud deployment.",
+    description:
+      "Full-Stack Developer specializing in React, Next.js, and Node.js. Building scalable web applications serving 5,000+ users. Expert in TypeScript, system design, and cloud deployment.",
     images: [
       {
         url: "/og-image.png",
@@ -74,7 +69,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Khaled Bin Aziz | Full-Stack Developer",
-    description: "Full-Stack Developer specializing in React, Next.js, and Node.js. Building scalable web applications.",
+    description:
+      "Full-Stack Developer specializing in React, Next.js, and Node.js. Building scalable web applications.",
     images: ["/og-image.png"],
     creator: "@khaledbinaziz",
   },
@@ -97,8 +93,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className={`${jetbrainsMono.variable} ${pixelifySans.variable} font-pixel`}>
+    <html
+      lang="en"
+      className={`scroll-smooth ${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} ${playfair.variable}`}
+    >
+      <body className="bg-[#050508] text-[#f0ece2] font-sans antialiased">
         <StructuredData />
         <RetroCursor />
         {children}

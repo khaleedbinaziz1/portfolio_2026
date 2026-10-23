@@ -2,54 +2,29 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { useRef } from 'react';
-import TerminalCommand from './TerminalCommand';
+import { useRef, useState } from 'react';
 import { personalInfo } from '@/data/personal';
-import { plexMono, plexSerif, plexSans } from '@/public/fonts';
+import { FiMapPin, FiTrendingUp, FiUsers, FiZap, FiCheck } from 'react-icons/fi';
+import TextScramble from '@/components/TextScramble';
+import AnimatedCounter from '@/components/AnimatedCounter';
+import { sound } from '@/lib/sound';
 
-const EASE = [0.22, 0.61, 0.36, 1] as const;
+const EASE = [0.16, 1, 0.3, 1] as const;
 
-const learningHighlights = [
-  {
-    code: 'LRN.01',
-    title: 'O Level Computer Science',
-    description:
-      'Structured notes, practical programming, past papers, MCQs, and revision guides for students.',
-    points: ['Complete notes', 'Video lessons', 'Mock exams', 'Practical programming'],
-  },
-  {
-    code: 'LRN.02',
-    title: 'Programming & Web Development',
-    description:
-      'Clear tutorials and real-world examples covering JavaScript, React, Laravel, Node.js, and Git.',
-    points: ['Hands-on projects', 'Beginner-friendly lessons', 'Best practices', 'Production mindset'],
-  },
-  {
-    code: 'LRN.03',
-    title: 'Resources & Study Tools',
-    description:
-      'Downloadable study materials and cheat sheets designed to make learning easier and more practical.',
-    points: ['PDF notes', 'Cheat sheets', 'Revision checklists', 'Exercise sets'],
-  },
-] as const;
-
-// Small helper: tilt an element toward the cursor using direct style writes
-// (no React state), so it stays cheap even on lower-end devices.
-function useTilt<T extends HTMLElement>(strength = 8) {
+// ── Bento card tilt (direct DOM writes, zero re-renders) ──
+function useTilt<T extends HTMLElement>(strength = 5) {
   const ref = useRef<T | null>(null);
   const raf = useRef<number | null>(null);
 
   const onMouseMove = (e: React.MouseEvent<T>) => {
     const el = ref.current;
     if (!el) return;
-    const x = e.clientX;
-    const y = e.clientY;
     if (raf.current) cancelAnimationFrame(raf.current);
     raf.current = requestAnimationFrame(() => {
       const rect = el.getBoundingClientRect();
-      const px = (x - rect.left) / rect.width - 0.5;
-      const py = (y - rect.top) / rect.height - 0.5;
-      el.style.transform = `rotate(-2deg) perspective(700px) rotateX(${(-py * strength).toFixed(2)}deg) rotateY(${(px * strength).toFixed(2)}deg)`;
+      const px = (e.clientX - rect.left) / rect.width - 0.5;
+      const py = (e.clientY - rect.top) / rect.height - 0.5;
+      el.style.transform = `perspective(900px) rotateX(${(-py * strength).toFixed(2)}deg) rotateY(${(px * strength).toFixed(2)}deg) translateY(-2px)`;
     });
   };
 
@@ -57,14 +32,13 @@ function useTilt<T extends HTMLElement>(strength = 8) {
     const el = ref.current;
     if (!el) return;
     if (raf.current) cancelAnimationFrame(raf.current);
-    el.style.transform = 'rotate(-2deg)';
+    el.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0px)';
   };
 
   return { ref, onMouseMove, onMouseLeave };
 }
 
-// Cursor-tracked spotlight for the learning cards, again via direct CSS
-// variable writes instead of state, so hovering never triggers a re-render.
+// ── Spotlight effect ──
 function useSpotlight<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const raf = useRef<number | null>(null);
@@ -72,604 +46,585 @@ function useSpotlight<T extends HTMLElement>() {
   const onMouseMove = (e: React.MouseEvent<T>) => {
     const el = ref.current;
     if (!el) return;
-    const x = e.clientX;
-    const y = e.clientY;
     if (raf.current) cancelAnimationFrame(raf.current);
     raf.current = requestAnimationFrame(() => {
       const rect = el.getBoundingClientRect();
-      el.style.setProperty('--mx', `${x - rect.left}px`);
-      el.style.setProperty('--my', `${y - rect.top}px`);
+      el.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+      el.style.setProperty('--my', `${e.clientY - rect.top}px`);
     });
   };
 
   return { ref, onMouseMove };
 }
 
-export default function About() {
-  const aboutLines = personalInfo.about ?? [];
-  const cardTilt = useTilt<HTMLDivElement>(7);
+const PRINCIPLES = [
+  {
+    id: 'scale',
+    tag: 'Scalability',
+    label: 'High-Throughput Web Systems',
+    desc: 'Designing modular microservices and event-driven backends that easily sustain tens of thousands of concurrent requests without latency spikes.',
+  },
+  {
+    id: 'craft',
+    tag: 'Craftsmanship',
+    label: 'Fluid Full-Stack Experiences',
+    desc: 'Bridging technical rigor with tactile micro-interactions — ensuring applications feel instantaneous, accessible, and enjoyable to use.',
+  },
+  {
+    id: 'education',
+    tag: 'Education',
+    label: 'CS Pedagogy & Mentorship',
+    desc: 'Authoring structured past paper guides and curriculum notes to guide the next generation of engineers toward core computational thinking.',
+  },
+];
 
-  // Falls back to solid default copy if personalInfo.about isn't populated yet.
-  const paragraphs = [
-    aboutLines[0] ??
-      "I'm a Full-Stack Software Engineer building modern web applications with React, Next.js, Laravel, Node.js, TypeScript, and cloud tooling — turning ideas into software that holds up in production.",
-    aboutLines[1] ??
-      'I like solving hard problems and designing systems that scale. But the technology is only half of it.',
-    aboutLines[2] ??
-      'Alongside development, I care about computer science education. Through tutorials, structured notes, and practical resources, I help students connect classroom concepts to the kind of software actually being built.',
-  ];
+const STATS = [
+  { icon: FiTrendingUp, value: '70%', label: 'Performance Boost' },
+  { icon: FiUsers, value: '5,000+', label: 'Production Users' },
+  { icon: FiZap, value: '50K+', label: 'Daily Operations' },
+];
+
+export default function About() {
+  const [activePrinciple, setActivePrinciple] = useState(PRINCIPLES[0].id);
+  const currentPrinciple = PRINCIPLES.find((p) => p.id === activePrinciple) || PRINCIPLES[0];
+
+  const photoTilt = useTilt<HTMLDivElement>(4);
+  const bioSpotlight = useSpotlight<HTMLDivElement>();
 
   return (
-    <section
-      id="about"
-      className={`khb-about ${plexMono.variable} ${plexSerif.variable} ${plexSans.variable}`}
-    >
+    <section id="about" className="ln-about">
       <style>{`
-        .khb-about {
-          --ink: #0b0d12;
-          --panel: #12151c;
-          --paper: #f5f1e8;
-          --brass: #d9a94e;
-          --teal: #5fe3d6;
-          --muted: rgba(245, 241, 232, 0.62);
-          --muted-2: rgba(245, 241, 232, 0.34);
+        .ln-about {
           position: relative;
           width: 100%;
           overflow: hidden;
-          background: var(--ink);
-          color: var(--paper);
-          font-family: var(--khb-font-sans), sans-serif;
-          padding: 96px 24px;
-          box-sizing: border-box;
-        }
-        .khb-about *, .khb-about *::before, .khb-about *::after { box-sizing: border-box; }
-        @media (min-width: 960px) { .khb-about { padding: 140px 40px; } }
-
-        .khb-about .khb-about-grid {
-          position: absolute; inset: 0;
-          background-image: radial-gradient(rgba(217,169,78,0.22) 1px, transparent 1px);
-          background-size: 26px 26px;
-          opacity: 0.3;
-          pointer-events: none;
+          background: var(--void);
+          color: var(--ivory);
+          padding: var(--section-pad-y) var(--section-pad-x);
         }
 
-        .khb-about .khb-about-inner {
+        .ln-about-inner {
           position: relative;
-          max-width: 1180px;
+          max-width: var(--max-w);
           margin: 0 auto;
+        }
+
+        /* Section Header: Calibrated, Non-Aggressive */
+        .ln-section-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-family: var(--font-mono);
+          font-size: 11px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--opal-cyan);
+          margin-bottom: 16px;
+        }
+
+        .ln-section-label::before {
+          content: '';
+          width: 24px;
+          height: 1px;
+          background: var(--opal-cyan);
+          opacity: 0.6;
+        }
+
+        .ln-section-title {
+          font-family: var(--font-display);
+          font-weight: 600;
+          font-size: clamp(1.75rem, 3.2vw, 2.4rem);
+          letter-spacing: -0.025em;
+          line-height: 1.15;
+          margin-bottom: 12px;
+          color: var(--ivory);
+        }
+
+        .ln-section-subtitle {
+          font-family: var(--font-body);
+          font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+          color: var(--ivory-muted);
+          max-width: 580px;
+          line-height: 1.6;
+          margin-bottom: 44px;
+        }
+
+        /* Bento Grid Layout */
+        .ln-bento-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 56px;
-          align-items: start;
-        }
-        @media (min-width: 960px) {
-          .khb-about .khb-about-inner { grid-template-columns: 0.72fr 1.28fr; gap: 72px; }
+          gap: 18px;
         }
 
-        .khb-about .khb-rise { animation: khb-about-rise .7s cubic-bezier(.16,1,.3,1) both; }
-        @keyframes khb-about-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-        @media (prefers-reduced-motion: reduce) { .khb-about .khb-rise { animation: none; opacity: 1; } }
+        @media (min-width: 768px) {
+          .ln-bento-grid {
+            grid-template-columns: repeat(12, 1fr);
+          }
+        }
 
-        /* Tags: quiet fill-sweep on hover instead of a flat color snap */
-        .khb-about .khb-tag {
+        /* Bento Base Card */
+        .ln-bento-card {
           position: relative;
-          font-family: var(--khb-font-mono), monospace;
-          font-size: 11px;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
-          color: var(--brass);
-          border: 1px solid rgba(217,169,78,0.35);
-          padding: 5px 10px;
-          border-radius: 3px;
-          display: inline-block;
+          background: var(--surface);
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-lg);
+          padding: 24px;
           overflow: hidden;
-          isolation: isolate;
-          transition: color .35s ease, border-color .35s ease, transform .2s ease;
-        }
-        .khb-about .khb-tag::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: var(--brass);
-          transform: translateX(-101%);
-          transition: transform .35s cubic-bezier(.16,1,.3,1);
-          z-index: -1;
-        }
-        .khb-about .khb-tag:hover {
-          color: var(--ink);
-          border-color: var(--brass);
-          transform: translateY(-1px);
-        }
-        .khb-about .khb-tag:hover::before { transform: translateX(0); }
-        .khb-about .khb-tag--teal { color: var(--teal); border-color: rgba(95,227,214,0.35); }
-        .khb-about .khb-tag--teal::before { background: var(--teal); }
-        .khb-about .khb-tag--teal:hover { color: var(--ink); border-color: var(--teal); }
-        @media (prefers-reduced-motion: reduce) {
-          .khb-about .khb-tag, .khb-about .khb-tag::before { transition: none; }
+          transition: border-color var(--duration-normal) ease, box-shadow var(--duration-normal) ease;
+          backdrop-filter: blur(16px);
         }
 
-        .khb-about .khb-eyebrow {
-          font-family: var(--khb-font-mono), monospace;
-          font-size: 12px;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: var(--muted);
+        .ln-bento-card:hover {
+          border-color: var(--border-hover);
+          box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.75);
         }
 
-        /* ID card */
-        .khb-about .khb-about-card-wrap { display: flex; justify-content: center; }
-        @media (min-width: 960px) {
-          .khb-about .khb-about-card-wrap { justify-content: flex-start; position: sticky; top: 120px; }
-        }
-        .khb-about .khb-about-card {
-          width: 100%;
-          max-width: 320px;
-          background: var(--panel);
-          border: 1px solid rgba(217,169,78,0.3);
-          border-radius: 6px;
-          padding: 18px;
-          transform: rotate(-2deg);
-          box-shadow: 0 24px 44px -18px rgba(0,0,0,0.65);
-          transition: box-shadow .35s ease, border-color .35s ease;
-          will-change: transform;
-        }
-        .khb-about .khb-about-card:hover {
-          border-color: rgba(217,169,78,0.55);
-          box-shadow: 0 30px 54px -16px rgba(0,0,0,0.75);
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .khb-about .khb-about-card { transform: rotate(-2deg) !important; transition: none; }
-        }
-        .khb-about .khb-about-card-tag-row {
-          display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
-        }
-        .khb-about .khb-about-card-idx {
-          font-family: var(--khb-font-mono), monospace;
-          font-size: 10px;
-          letter-spacing: 0.2em;
-          color: var(--muted-2);
-        }
-        .khb-about .khb-about-photo-frame {
-          position: relative;
-          width: 100%;
-          aspect-ratio: 400 / 520;
-          overflow: hidden;
-          border-radius: 3px;
-          border: 1px solid rgba(245,241,232,0.08);
-        }
-        .khb-about .khb-about-photo {
-          width: 100%; height: 100%; object-fit: cover; display: block;
-          transition: transform .5s cubic-bezier(.16,1,.3,1), filter .5s ease;
-          transform: scale(1.001); /* avoid subpixel edge flicker at rest */
-        }
-        .khb-about .khb-about-card:hover .khb-about-photo {
-          transform: scale(1.06);
-          filter: saturate(1.08);
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .khb-about .khb-about-photo { transition: none; }
-        }
-        .khb-about .khb-about-card-caption {
+        /* Cell 1: Photo & Identity (4 Cols) */
+        .ln-bento-photo-cell {
+          grid-column: span 12;
           display: flex;
           flex-direction: column;
-          gap: 2px;
-          margin-top: 14px;
-          padding-top: 14px;
-          border-top: 1px dashed rgba(245,241,232,0.16);
-        }
-        .khb-about .khb-about-card-name { font-family: var(--khb-font-mono), monospace; font-size: 13px; font-weight: 600; color: var(--paper); }
-        .khb-about .khb-about-card-role { font-family: var(--khb-font-serif), serif; font-size: 12px; color: var(--muted); }
-
-        /* Main column */
-        .khb-about .khb-about-header { margin-bottom: 24px; }
-        .khb-about .khb-about-title {
-          font-family: var(--khb-font-mono), monospace;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: -0.01em;
-          font-size: clamp(2rem, 5vw, 3rem);
-          margin: 14px 0 8px;
-        }
-        .khb-about .khb-about-subtitle {
-          font-style: italic;
-          font-family: var(--khb-font-serif), serif;
-          color: var(--muted);
         }
 
-        .khb-about .khb-about-copy { max-width: 640px; margin-bottom: 24px; }
-        .khb-about .khb-about-copy p {
-          font-family: var(--khb-font-serif), serif;
-          font-size: 16px;
-          line-height: 1.75;
-          color: var(--muted);
-          margin: 0 0 16px;
+        @media (min-width: 768px) {
+          .ln-bento-photo-cell {
+            grid-column: span 5;
+          }
         }
 
-        .khb-about .khb-about-facts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 36px; }
+        @media (min-width: 1024px) {
+          .ln-bento-photo-cell {
+            grid-column: span 4;
+          }
+        }
 
-        /* Terminal */
-        .khb-about .khb-about-terminal-wrap { max-width: 640px; }
-        .khb-about .khb-about-terminal {
-          background: var(--panel);
-          border: 1px solid rgba(245,241,232,0.1);
-          border-radius: 6px;
+        .ln-photo-wrap {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 4 / 4.5;
+          border-radius: var(--radius-md);
           overflow: hidden;
-          transition: border-color .35s ease;
+          background: #0d0f15;
+          border: 1px solid var(--border-subtle);
+          margin-bottom: 18px;
         }
-        .khb-about .khb-about-terminal:hover {
-          border-color: rgba(245,241,232,0.2);
+
+        .ln-photo-img {
+          object-fit: cover;
+          transition: transform 0.6s var(--ease-out-expo);
         }
-        .khb-about .khb-about-term-header {
+
+        .ln-bento-photo-cell:hover .ln-photo-img {
+          transform: scale(1.03);
+        }
+
+        .ln-photo-badge {
+          position: absolute;
+          bottom: 12px;
+          left: 12px;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 5px 12px;
+          background: rgba(8, 9, 13, 0.8);
+          backdrop-filter: blur(12px);
+          border: 1px solid var(--border-subtle);
+          border-radius: 100px;
+          font-family: var(--font-mono);
+          font-size: 10.5px;
+          color: var(--ivory);
+          letter-spacing: 0.06em;
+        }
+
+        .ln-id-name {
+          font-family: var(--font-display);
+          font-size: 18px;
+          font-weight: 600;
+          letter-spacing: -0.01em;
+          color: var(--ivory);
+          margin-bottom: 4px;
+        }
+
+        .ln-id-role {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          color: var(--opal-cyan);
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        /* Cell 2: Interactive Engineering Principles (7/8 Cols) */
+        .ln-bento-bio-cell {
+          grid-column: span 12;
+          display: flex;
+          flex-direction: column;
+        }
+
+        @media (min-width: 768px) {
+          .ln-bento-bio-cell {
+            grid-column: span 7;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .ln-bento-bio-cell {
+            grid-column: span 8;
+          }
+        }
+
+        .ln-bento-tag {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: var(--ivory-dim);
+          margin-bottom: 14px;
+        }
+
+        .ln-bio-heading {
+          font-family: var(--font-display);
+          font-size: clamp(1.2rem, 2vw, 1.45rem);
+          font-weight: 600;
+          letter-spacing: -0.015em;
+          line-height: 1.35;
+          margin-bottom: 16px;
+          color: var(--ivory);
+        }
+
+        .ln-bio-text {
+          font-family: var(--font-body);
+          font-size: 14.5px;
+          line-height: 1.65;
+          color: var(--ivory-muted);
+          margin-bottom: 24px;
+        }
+
+        /* Interactive Principle Tabs */
+        .ln-principle-tabs {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-bottom: 18px;
+        }
+
+        .ln-principle-btn {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          letter-spacing: 0.06em;
+          padding: 6px 14px;
+          border-radius: 100px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid var(--border-subtle);
+          color: var(--ivory-dim);
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .ln-principle-btn:hover {
+          color: var(--ivory);
+          border-color: var(--border-hover);
+        }
+
+        .ln-principle-btn.active {
+          color: #ffffff;
+          background: rgba(125, 211, 252, 0.1);
+          border-color: rgba(125, 211, 252, 0.35);
+        }
+
+        .ln-principle-card {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-md);
+          padding: 16px 18px;
+          margin-top: auto;
+        }
+
+        .ln-principle-title {
+          font-family: var(--font-display);
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--ivory);
+          margin-bottom: 6px;
           display: flex;
           align-items: center;
-          gap: 10px;
-          padding: 10px 14px;
-          background: rgba(245,241,232,0.04);
-          border-bottom: 1px solid rgba(245,241,232,0.08);
+          gap: 6px;
         }
-        .khb-about .khb-about-term-dots { display: flex; gap: 6px; }
-        .khb-about .khb-dot {
-          width: 9px; height: 9px; border-radius: 50%; display: inline-block;
-          animation: khb-dot-breathe 3.6s ease-in-out infinite;
-        }
-        .khb-about .khb-dot-teal { background: var(--teal); opacity: 0.7; animation-delay: 0s; }
-        .khb-about .khb-dot-brass { background: var(--brass); opacity: 0.7; animation-delay: .5s; }
-        .khb-about .khb-dot-muted { background: var(--muted-2); animation-delay: 1s; }
-        @keyframes khb-dot-breathe {
-          0%, 100% { opacity: .45; transform: scale(1); }
-          50% { opacity: .9; transform: scale(1.15); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .khb-about .khb-dot { animation: none; }
-        }
-        .khb-about .khb-about-term-title { font-family: var(--khb-font-mono), monospace; font-size: 12px; color: var(--muted); }
-        .khb-about .khb-about-term-body {
-          padding: 18px 20px 22px;
-          font-family: var(--khb-font-mono), monospace;
-          font-size: 13.5px;
-          line-height: 1.7;
-        }
-        .khb-about .khb-about-term-static { margin: 0 0 4px; color: var(--paper); }
-        .khb-about .khb-about-prompt { color: var(--brass); margin-right: 6px; }
-        .khb-about .khb-about-term-output { color: var(--teal); margin-bottom: 12px; }
 
-        /* Learning hub */
-        .khb-about .khb-learning {
-          position: relative;
-          max-width: 1180px;
-          margin: 88px auto 0;
-        }
-        .khb-about .khb-learning-header { margin-bottom: 36px; }
-        .khb-about .khb-learning-cmdline {
-          font-family: var(--khb-font-mono), monospace;
+        .ln-principle-desc {
+          font-family: var(--font-body);
           font-size: 13px;
-          color: var(--muted);
-          margin: 18px 0 14px;
-        }
-        .khb-about .khb-learning-cmdline .khb-about-prompt { color: var(--brass); margin-right: 6px; }
-        .khb-about .khb-learning-title {
-          font-family: var(--khb-font-mono), monospace;
-          font-weight: 700;
-          letter-spacing: -0.01em;
-          font-size: clamp(1.5rem, 3.4vw, 2.1rem);
-          margin: 0 0 12px;
-        }
-        .khb-about .khb-learning-desc {
-          font-family: var(--khb-font-serif), serif;
-          font-size: 15px;
-          line-height: 1.7;
-          color: var(--muted);
-          max-width: 640px;
-          margin: 0;
+          line-height: 1.55;
+          color: var(--ivory-muted);
         }
 
-        .khb-about .khb-learning-grid {
+        /* Cell 3: Metrics Strip (Span 12 or 8) */
+        .ln-bento-metrics-cell {
+          grid-column: span 12;
+        }
+
+        @media (min-width: 1024px) {
+          .ln-bento-metrics-cell {
+            grid-column: span 7;
+          }
+        }
+
+        .ln-metrics-grid {
           display: grid;
-          grid-template-columns: 1fr;
-          gap: 22px;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
+          height: 100%;
         }
-        @media (min-width: 720px) { .khb-about .khb-learning-grid { grid-template-columns: repeat(3, 1fr); } }
 
-        .khb-about .khb-learning-card {
-          position: relative;
-          background: var(--panel);
-          border: 1px solid rgba(245, 241, 232, 0.1);
-          border-radius: 8px;
-          padding: 22px 20px;
-          overflow: hidden;
-          transition: border-color .35s ease, transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s ease;
-        }
-        .khb-about .khb-learning-card:hover {
-          border-color: var(--card-border, rgba(217,169,78,0.35));
-          transform: translateY(-3px);
-          box-shadow: 0 18px 30px -18px rgba(0,0,0,0.75);
-        }
-        /* cursor-tracked spotlight, positioned via --mx/--my written on mousemove */
-        .khb-about .khb-learning-card-glow {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          opacity: 0;
-          transition: opacity .3s ease;
-          background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), var(--card-accent, var(--brass)), transparent 70%);
-          mix-blend-mode: screen;
-          filter: opacity(0.14);
-        }
-        .khb-about .khb-learning-card:hover .khb-learning-card-glow { opacity: 1; }
-        @media (prefers-reduced-motion: reduce) {
-          .khb-about .khb-learning-card, .khb-about .khb-learning-card-glow { transition: none; }
-        }
-        .khb-about .khb-learning-card::before,
-        .khb-about .khb-learning-card::after {
-          content: '';
-          position: absolute;
-          width: 14px;
-          height: 14px;
-          border-color: var(--card-accent, var(--brass));
-          opacity: 0;
-          transition: opacity .3s ease;
-          pointer-events: none;
-        }
-        .khb-about .khb-learning-card::before { top: 8px; left: 8px; border-top: 1.5px solid; border-left: 1.5px solid; }
-        .khb-about .khb-learning-card::after { bottom: 8px; right: 8px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
-        .khb-about .khb-learning-card:hover::before,
-        .khb-about .khb-learning-card:hover::after { opacity: 0.9; }
-
-        .khb-about .khb-learning-card-code {
-          font-family: var(--khb-font-mono), monospace;
-          font-size: 10px;
-          letter-spacing: 0.2em;
-          color: var(--card-accent, var(--brass));
-          display: block;
-          margin-bottom: 14px;
-          transition: letter-spacing .3s ease;
-        }
-        .khb-about .khb-learning-card:hover .khb-learning-card-code { letter-spacing: 0.28em; }
-        .khb-about .khb-learning-card-title {
-          font-family: var(--khb-font-mono), monospace;
-          font-size: 15px;
-          font-weight: 600;
-          margin: 0 0 10px;
-          line-height: 1.3;
-        }
-        .khb-about .khb-learning-card-desc {
-          font-family: var(--khb-font-serif), serif;
-          font-size: 13.5px;
-          line-height: 1.6;
-          color: var(--muted);
-          margin: 0 0 16px;
-        }
-        .khb-about .khb-learning-card-points {
-          list-style: none;
-          margin: 0;
-          padding: 14px 0 0;
-          border-top: 1px dashed rgba(245,241,232,0.14);
+        .ln-bento-metric-box {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid var(--border-subtle);
+          border-radius: var(--radius-md);
+          padding: 18px 16px;
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          justify-content: center;
+          transition: all 0.25s ease;
         }
-        .khb-about .khb-learning-card-points li {
+
+        .ln-bento-metric-box:hover {
+          border-color: var(--border-hover);
+          background: rgba(255, 255, 255, 0.04);
+          transform: translateY(-2px);
+        }
+
+        .ln-bento-m-val {
+          font-family: var(--font-display);
+          font-size: clamp(1.4rem, 2.2vw, 1.8rem);
+          font-weight: 600;
+          color: var(--ivory);
+          letter-spacing: -0.02em;
+        }
+
+        .ln-bento-m-lbl {
+          font-family: var(--font-mono);
+          font-size: 10px;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--ivory-dim);
+          margin-top: 4px;
+        }
+
+        /* Cell 4: Education & Research (Span 12 or 5) */
+        .ln-bento-edu-cell {
+          grid-column: span 12;
+        }
+
+        @media (min-width: 1024px) {
+          .ln-bento-edu-cell {
+            grid-column: span 5;
+          }
+        }
+
+        .ln-edu-list {
           display: flex;
-          align-items: baseline;
-          gap: 8px;
-          font-family: var(--khb-font-mono), monospace;
-          font-size: 12px;
-          letter-spacing: 0.02em;
-          color: var(--muted);
-          transform: translateX(0);
-          transition: transform .3s cubic-bezier(.16,1,.3,1), color .3s ease;
+          flex-direction: column;
+          gap: 14px;
         }
-        .khb-about .khb-learning-card:hover .khb-learning-card-points li {
-          transform: translateX(3px);
-          color: var(--paper);
+
+        .ln-edu-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid var(--border-subtle);
         }
-        .khb-about .khb-learning-card-points li:nth-child(1) { transition-delay: 0ms; }
-        .khb-about .khb-learning-card-points li:nth-child(2) { transition-delay: 30ms; }
-        .khb-about .khb-learning-card-points li:nth-child(3) { transition-delay: 60ms; }
-        .khb-about .khb-learning-card-points li:nth-child(4) { transition-delay: 90ms; }
-        .khb-about .khb-learning-card-points li span.khb-bullet {
-          color: var(--card-accent, var(--brass));
-          display: inline-block;
-          transition: transform .3s cubic-bezier(.16,1,.3,1);
+
+        .ln-edu-item:last-child {
+          border-bottom: none;
+          padding-bottom: 0;
         }
-        .khb-about .khb-learning-card:hover .khb-learning-card-points li span.khb-bullet {
-          transform: translateX(2px) scale(1.15);
+
+        .ln-edu-bullet {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--opal-cyan);
+          margin-top: 6px;
+          flex-shrink: 0;
         }
-        @media (prefers-reduced-motion: reduce) {
-          .khb-about .khb-learning-card-points li,
-          .khb-about .khb-learning-card-points li span.khb-bullet { transition: none; }
+
+        .ln-edu-degree {
+          font-family: var(--font-display);
+          font-size: 13.5px;
+          font-weight: 600;
+          color: var(--ivory);
+          margin-bottom: 2px;
+        }
+
+        .ln-edu-school {
+          font-family: var(--font-mono);
+          font-size: 10.5px;
+          letter-spacing: 0.06em;
+          color: var(--ivory-dim);
         }
       `}</style>
 
-      <div className="khb-about-grid" aria-hidden="true" />
-
-      <motion.div
-        initial={{ opacity: 0, y: 32 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-40px', amount: 0.1 }}
-        transition={{ duration: 0.6, ease: EASE }}
-        className="khb-about-inner"
-      >
+      <div className="ln-about-inner">
+        {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, x: -24 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: '-30px' }}
-          transition={{ duration: 0.6, delay: 0.1, ease: EASE }}
-          className="khb-about-card-wrap"
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.6, ease: EASE }}
         >
-          <div
-            className="khb-about-card"
-            ref={cardTilt.ref}
-            onMouseMove={cardTilt.onMouseMove}
-            onMouseLeave={cardTilt.onMouseLeave}
-          >
-            <div className="khb-about-card-tag-row">
-              <span className="khb-tag">IDX.00</span>
-              <span className="khb-about-card-idx">ABOUT</span>
-            </div>
-            <div className="khb-about-photo-frame">
-              <Image
-                src="/images/me.jpg"
-                alt={`Portrait of ${personalInfo.name}`}
-                width={400}
-                height={520}
-                className="khb-about-photo"
-                sizes="(max-width: 767px) 100vw, min(38vw, 360px)"
-                priority={false}
-              />
-            </div>
-            <div className="khb-about-card-caption">
-              <span className="khb-about-card-name">{personalInfo.name}</span>
-              <span className="khb-about-card-role">{personalInfo.title}</span>
-            </div>
+          <div className="ln-section-label">
+            <TextScramble text="Identity // 01" />
           </div>
+          <h2 className="ln-section-title">Engineering software that holds up under pressure.</h2>
+          <p className="ln-section-subtitle">
+            Two years in production — e-commerce platforms, ticketing systems, retail ERPs, and CS education.
+            Here's the thinking behind the work.
+          </p>
         </motion.div>
 
-        <div className="khb-about-main">
-          <div className="khb-about-header khb-rise">
-            <span className="khb-tag khb-tag--teal">ABOUT · 00</span>
-            <h2 className="khb-about-title">About</h2>
-            <p className="khb-eyebrow khb-about-subtitle">// the person behind the screen</p>
-          </div>
-
-          <div className="khb-about-copy khb-rise" style={{ animationDelay: '.08s' }}>
-            {paragraphs.map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
-          </div>
-
-          <div className="khb-about-facts khb-rise" style={{ animationDelay: '.16s' }}>
-            <span className="khb-tag">3+ YRS EXPERIENCE</span>
-            <span className="khb-tag khb-tag--teal">MSC CSE · AI/ML IN HEALTHCARE</span>
-          </div>
-
+        {/* Bento Grid */}
+        <div className="ln-bento-grid">
+          {/* Cell 1: Photo & Status */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            ref={photoTilt.ref}
+            onMouseMove={photoTilt.onMouseMove}
+            onMouseLeave={photoTilt.onMouseLeave}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-20px' }}
-            transition={{ duration: 0.5, delay: 0.24, ease: EASE }}
-            className="khb-about-terminal-wrap"
+            viewport={{ once: true, margin: '-30px' }}
+            transition={{ duration: 0.6, ease: EASE }}
+            className="ln-bento-card ln-bento-photo-cell"
           >
-            <div className="khb-about-terminal">
-              <div className="khb-about-term-header">
-                <div className="khb-about-term-dots">
-                  <span className="khb-dot khb-dot-teal" />
-                  <span className="khb-dot khb-dot-brass" />
-                  <span className="khb-dot khb-dot-muted" />
-                </div>
-                <div className="khb-about-term-title">about.txt</div>
+            <div className="ln-photo-wrap">
+              <Image
+                src="/images/me.jpg"
+                alt="Khaled Bin Aziz"
+                fill
+                className="ln-photo-img"
+                sizes="(max-width: 768px) 100vw, 360px"
+              />
+              <div className="ln-photo-badge">
+                <FiMapPin size={11} color="var(--opal-teal)" />
+                <span>Chattogram, Bangladesh</span>
               </div>
-              <div className="khb-about-term-body">
-                <p className="khb-about-term-static">
-                  <span className="khb-about-prompt">$</span> whoami
-                </p>
-                <p className="khb-about-term-static khb-about-term-output">
-                  {personalInfo.name} · {personalInfo.title}
-                </p>
-                <TerminalCommand
-                  commands={[
-                    {
-                      prompt: '$',
-                      command: 'cat ~/about.txt',
-                      output: paragraphs.slice(1).join('\n'),
-                      delay: 2200,
-                    },
-                    {
-                      prompt: '$',
-                      command: 'years of experience',
-                      output: '3+ years building products',
-                      delay: 1400,
-                    },
-                  ]}
-                  autoStart={true}
-                  speed={45}
-                />
+            </div>
+          </motion.div>
+
+          {/* Cell 2: Philosophy & Interactive Focus Areas */}
+          <motion.div
+            ref={bioSpotlight.ref}
+            onMouseMove={bioSpotlight.onMouseMove}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-30px' }}
+            transition={{ duration: 0.6, delay: 0.08, ease: EASE }}
+            className="ln-bento-card ln-bento-bio-cell"
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <div className="ln-bento-tag" style={{ margin: 0 }}>PHILOSOPHY // PERSPECTIVE</div>
+            </div>
+
+            <h3 className="ln-bio-heading">
+              Technology is most powerful when engineered cleanly and explained transparently.
+            </h3>
+            <p className="ln-bio-text">
+              Over the last two years, I’ve engineered e-commerce platforms, ticketing systems, and enterprise POS ERPs
+              handling mission-critical sales and inventory data. Parallel to development, I mentor CS students to bridge academic theory with real-world engineering.
+            </p>
+
+            {/* Interactive Principle Switcher */}
+            <div className="ln-principle-tabs">
+              {PRINCIPLES.map((p) => {
+                const isActive = activePrinciple === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      sound.tick(1000, 0.02);
+                      setActivePrinciple(p.id);
+                    }}
+                    className={`ln-principle-btn ${isActive ? 'active' : ''}`}
+                    style={{ position: 'relative' }}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="activePrincipleTab"
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          borderRadius: '100px',
+                          background: 'rgba(125, 211, 252, 0.12)',
+                          border: '1px solid rgba(125, 211, 252, 0.4)',
+                          zIndex: 0,
+                        }}
+                        transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+                      />
+                    )}
+                    <span style={{ position: 'relative', zIndex: 1 }}>{p.tag}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="ln-principle-card">
+              <div className="ln-principle-title">
+                <FiCheck size={13} color="var(--opal-cyan)" />
+                <span>{currentPrinciple.label}</span>
+              </div>
+              <p className="ln-principle-desc">{currentPrinciple.desc}</p>
+            </div>
+          </motion.div>
+
+          {/* Cell 3: Impact Metrics */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-30px' }}
+            transition={{ duration: 0.6, delay: 0.14, ease: EASE }}
+            className="ln-bento-card ln-bento-metrics-cell"
+          >
+            <div className="ln-bento-tag">QUANTIFIED IMPACT // BENCHMARKS</div>
+            <div className="ln-metrics-grid">
+              {STATS.map((s) => (
+                <div key={s.label} className="ln-bento-metric-box">
+                  <div className="ln-bento-m-val">
+                    <AnimatedCounter value={s.value} duration={1.2} />
+                  </div>
+                  <div className="ln-bento-m-lbl">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Cell 4: Academic Rigor */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-30px' }}
+            transition={{ duration: 0.6, delay: 0.18, ease: EASE }}
+            className="ln-bento-card ln-bento-edu-cell"
+          >
+            <div className="ln-bento-tag">FOUNDATION // ACADEMIA</div>
+            <div className="ln-edu-list">
+              <div className="ln-edu-item">
+                <span className="ln-edu-bullet" />
+                <div>
+                  <div className="ln-edu-degree">MSc in Computer Science & Engineering</div>
+                  <div className="ln-edu-school">East Delta University • 2025 – Present</div>
+                </div>
+              </div>
+              <div className="ln-edu-item">
+                <span className="ln-edu-bullet" />
+                <div>
+                  <div className="ln-edu-degree">BSc in Computer Science & Engineering</div>
+                  <div className="ln-edu-school">East Delta University • Graduated 2024</div>
+                </div>
               </div>
             </div>
           </motion.div>
         </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 28 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-40px', amount: 0.1 }}
-        transition={{ duration: 0.55, ease: EASE }}
-        className="khb-learning"
-      >
-        <header className="khb-learning-header">
-          <span className="khb-tag khb-tag--teal">ABOUT · 00b</span>
-          <div className="khb-learning-cmdline">
-            <span className="khb-about-prompt">$</span>cat learning-hub
-          </div>
-          <h3 className="khb-learning-title">Building software. Sharing knowledge.</h3>
-          <p className="khb-learning-desc">
-            This is where product building, education, and practical impact come together
-            through tutorials, study materials, and long-form resources.
-          </p>
-        </header>
-
-        <div className="khb-learning-grid">
-          {learningHighlights.map((item, index) => {
-            const accent = index % 2 === 0 ? 'brass' : 'teal';
-            const accentColor = accent === 'brass' ? '#D9A94E' : '#5FE3D6';
-            const accentBorder =
-              accent === 'brass' ? 'rgba(217,169,78,0.35)' : 'rgba(95,227,214,0.35)';
-
-            return (
-              <LearningCard
-                key={item.title}
-                item={item}
-                index={index}
-                accentColor={accentColor}
-                accentBorder={accentBorder}
-              />
-            );
-          })}
-        </div>
-      </motion.div>
+      </div>
     </section>
-  );
-}
-
-function LearningCard({
-  item,
-  index,
-  accentColor,
-  accentBorder,
-}: {
-  item: (typeof learningHighlights)[number];
-  index: number;
-  accentColor: string;
-  accentBorder: string;
-}) {
-  const spotlight = useSpotlight<HTMLDivElement>();
-
-  return (
-    <motion.div
-      ref={spotlight.ref}
-      onMouseMove={spotlight.onMouseMove}
-      initial={{ opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-24px' }}
-      transition={{ duration: 0.4, delay: index * 0.06, ease: EASE }}
-      className="khb-learning-card"
-      style={
-        { '--card-accent': accentColor, '--card-border': accentBorder } as React.CSSProperties
-      }
-    >
-      <span className="khb-learning-card-glow" aria-hidden="true" />
-      <span className="khb-learning-card-code">{item.code}</span>
-      <h4 className="khb-learning-card-title">{item.title}</h4>
-      <p className="khb-learning-card-desc">{item.description}</p>
-      <ul className="khb-learning-card-points">
-        {item.points.map((point) => (
-          <li key={point}>
-            <span className="khb-bullet">▸</span>
-            <span>{point}</span>
-          </li>
-        ))}
-      </ul>
-    </motion.div>
   );
 }

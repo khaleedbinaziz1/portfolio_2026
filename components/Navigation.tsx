@@ -3,57 +3,76 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { FiMenu, FiX } from 'react-icons/fi';
-import { plexMono } from '@/public/fonts';
+import { FiMenu, FiX, FiArrowUpRight, FiSearch } from 'react-icons/fi';
+import { sound } from '@/lib/sound';
 
-const navLinks = [
-  { name: 'About', href: '#about' },
-  { name: 'Skills', href: '#skills' },
-  { name: 'Projects', href: '#projects' },
-  { name: 'Contact', href: '#contact' },
-  { name: 'Resources', href: '/resources' },
+const NAV_LINKS = [
+  { num: '01', name: 'About', href: '#about' },
+  { num: '02', name: 'Skills', href: '#skills' },
+  { num: '03', name: 'Experience', href: '#experience' },
+  { num: '04', name: 'Works', href: '#projects' },
+  { num: '05', name: 'Contact', href: '#contact' },
+  { num: 'SYS', name: 'Resources', href: '/resources' },
 ];
 
-type NavigationProps = { contentVisible?: boolean };
+type NavigationProps = {
+  contentVisible?: boolean;
+};
 
 export default function Navigation({ contentVisible = true }: NavigationProps) {
   const [activeSection, setActiveSection] = useState('');
-  const [booted, setBooted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [audioEl, setAudioEl] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    if (!contentVisible) return;
-    const t = setTimeout(() => setBooted(true), 150);
-    return () => clearTimeout(t);
-  }, [contentVisible]);
+    const audio = new Audio('/audio.mp3');
+    audio.loop = true;
+    audio.volume = 0.22;
+    setAudioEl(audio);
+
+    return () => {
+      audio.pause();
+      audio.src = '';
+    };
+  }, []);
+
+  const toggleAudio = () => {
+    sound.tick(1200, 0.03);
+    if (!audioEl) return;
+    if (isPlayingAudio) {
+      audioEl.pause();
+      setIsPlayingAudio(false);
+    } else {
+      audioEl
+        .play()
+        .then(() => setIsPlayingAudio(true))
+        .catch(() => {});
+    }
+  };
 
   useEffect(() => {
     let rafId = 0;
-    let lastActive = activeSection;
-
     const handleScroll = () => {
       if (rafId) return;
       rafId = requestAnimationFrame(() => {
         rafId = 0;
-        setScrolled(window.scrollY > 12);
+        setScrolled(window.scrollY > 20);
 
-        const sections = navLinks
-          .filter((link) => link.href.startsWith('#'))
-          .map((link) => link.href.substring(1));
-        const currentSection =
-          sections.find((section) => {
-            const element = document.getElementById(section);
-            if (element) {
-              const rect = element.getBoundingClientRect();
-              return rect.top <= 150 && rect.bottom >= 150;
+        const sections = NAV_LINKS.filter((l) => l.href.startsWith('#')).map((l) =>
+          l.href.substring(1)
+        );
+
+        for (const section of sections) {
+          const el = document.getElementById(section);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            if (rect.top <= 180 && rect.bottom >= 140) {
+              setActiveSection(section);
+              break;
             }
-            return false;
-          }) || '';
-
-        if (currentSection !== lastActive) {
-          lastActive = currentSection;
-          setActiveSection(currentSection);
+          }
         }
       });
     };
@@ -67,188 +86,426 @@ export default function Navigation({ contentVisible = true }: NavigationProps) {
   }, []);
 
   return (
-    <motion.header
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: booted ? 0 : -20, opacity: booted ? 1 : 0 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-      className={`khb-nav ${plexMono.variable} ${scrolled ? 'khb-nav-scrolled' : ''}`}
-    >
+    <header className={`ln-nav-wrap ${scrolled ? 'scrolled' : ''}`}>
       <style>{`
-        .khb-nav {
-          --brass: #d9a94e;
-          --teal: #5fe3d6;
-          --ink: #0b0d12;
-          --paper: #f5f1e8;
-          --muted: rgba(245, 241, 232, 0.62);
+        .ln-nav-wrap {
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
-          z-index: 50;
-          font-family: var(--khb-font-mono), monospace;
-          background: rgba(11, 13, 18, 0.4);
-          border-bottom: 1px solid transparent;
-          transition: background-color .3s ease, border-color .3s ease, backdrop-filter .3s ease;
+          z-index: 100;
+          padding: 16px 20px;
+          transition: all 0.35s var(--ease-out-expo);
+          pointer-events: none;
         }
-        .khb-nav-scrolled {
-          background: rgba(11, 13, 18, 0.82);
-          backdrop-filter: blur(10px);
-          border-bottom-color: rgba(245, 241, 232, 0.1);
-        }
-        .khb-nav *, .khb-nav *::before, .khb-nav *::after { box-sizing: border-box; }
 
-        .khb-nav-inner {
-          max-width: 1180px;
+        @media (min-width: 960px) {
+          .ln-nav-wrap {
+            padding: 20px 32px;
+          }
+          .ln-nav-wrap.scrolled {
+            padding: 12px 32px;
+          }
+        }
+
+        .ln-nav-bar {
+          max-width: var(--max-w);
           margin: 0 auto;
-          padding: 16px 24px;
           display: flex;
           align-items: center;
           justify-content: space-between;
+          padding: 8px 16px;
+          border-radius: 100px;
+          background: rgba(13, 15, 21, 0.7);
+          backdrop-filter: blur(20px) saturate(1.5);
+          -webkit-backdrop-filter: blur(20px) saturate(1.5);
+          border: 1px solid var(--border-subtle);
+          box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+          pointer-events: auto;
+          transition: all 0.3s ease;
         }
-        @media (min-width: 960px) { .khb-nav-inner { padding: 16px 40px; } }
 
-        .khb-nav-brand {
-          font-size: 13px;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: var(--paper);
-          text-decoration: none;
+        .ln-nav-wrap.scrolled .ln-nav-bar {
+          background: rgba(13, 15, 21, 0.88);
+          border-color: var(--border-hover);
+          box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.8);
         }
-        .khb-nav-brand span { color: var(--brass); }
 
-        .khb-nav-links {
-          display: none;
+        /* Brand Left */
+        .ln-brand {
+          display: flex;
           align-items: center;
-          gap: 28px;
-        }
-        @media (min-width: 768px) { .khb-nav-links { display: flex; } }
-
-        .khb-nav-link {
-          position: relative;
-          font-size: 11px;
-          letter-spacing: 0.15em;
-          text-transform: uppercase;
+          gap: 10px;
           text-decoration: none;
-          color: var(--muted);
-          padding: 4px 0;
-          transition: color .2s ease;
-        }
-        .khb-nav-link:hover { color: var(--paper); }
-        .khb-nav-link-active { color: var(--brass); }
-
-        .khb-nav-underline {
-          position: absolute;
-          left: 0;
-          bottom: -3px;
-          height: 1.5px;
-          background: var(--brass);
-          border-radius: 1px;
+          color: var(--ivory);
         }
 
-        .khb-nav-toggle {
-          display: inline-flex;
+        .ln-brand-mark {
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid var(--border-subtle);
+          display: flex;
           align-items: center;
           justify-content: center;
-          width: 34px;
-          height: 34px;
-          border-radius: 4px;
-          border: 1px solid rgba(245, 241, 232, 0.15);
-          color: var(--paper);
-          background: transparent;
+          font-family: var(--font-display);
+          font-weight: 600;
+          font-size: 12px;
+          color: var(--ivory);
         }
-        @media (min-width: 768px) { .khb-nav-toggle { display: none; } }
-        .khb-nav-toggle:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
 
-        .khb-nav-mobile {
-          overflow: hidden;
-          border-top: 1px solid rgba(245, 241, 232, 0.1);
-          background: rgba(11, 13, 18, 0.96);
-          backdrop-filter: blur(10px);
-        }
-        @media (min-width: 768px) { .khb-nav-mobile { display: none; } }
-
-        .khb-nav-mobile-inner {
-          padding: 10px 24px 18px;
+        .ln-brand-text {
           display: flex;
           flex-direction: column;
         }
 
-        .khb-nav-mobile-link {
-          padding: 13px 0;
-          border-bottom: 1px dashed rgba(245, 241, 232, 0.1);
-          font-size: 12px;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          text-decoration: none;
-          color: var(--muted);
+        .ln-brand-name {
+          font-family: var(--font-display);
+          font-weight: 600;
+          font-size: 13px;
+          letter-spacing: -0.01em;
+          color: var(--ivory);
         }
-        .khb-nav-mobile-link:last-child { border-bottom: none; }
-        .khb-nav-mobile-link-active { color: var(--brass); }
+
+        .ln-brand-status {
+          font-family: var(--font-mono);
+          font-size: 9px;
+          letter-spacing: 0.12em;
+          color: var(--opal-teal);
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+
+        .ln-brand-blip {
+          width: 4.5px;
+          height: 4.5px;
+          border-radius: 50%;
+          background: var(--opal-teal);
+          box-shadow: 0 0 6px var(--opal-teal);
+          animation: ln-nav-blip 2s infinite ease-in-out;
+        }
+
+        @keyframes ln-nav-blip {
+          0%, 100% { opacity: 0.35; transform: scale(0.9); }
+          50% { opacity: 1; transform: scale(1.25); }
+        }
+
+        /* Desktop Nav Links */
+        .ln-links-wrap {
+          display: none;
+          align-items: center;
+          gap: 4px;
+        }
+
+        @media (min-width: 860px) {
+          .ln-links-wrap {
+            display: flex;
+          }
+        }
+
+        .ln-link-item {
+          position: relative;
+          padding: 6px 14px;
+          font-family: var(--font-mono);
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--ivory-muted);
+          text-decoration: none;
+          border-radius: 100px;
+          transition: color 0.2s ease;
+          display: inline-flex;
+          align-items: center;
+        }
+
+        .ln-link-item:hover {
+          color: var(--ivory);
+        }
+
+        .ln-link-item.active {
+          color: #ffffff;
+        }
+
+        .ln-active-pill {
+          position: absolute;
+          inset: 0;
+          border-radius: 100px;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          z-index: -1;
+        }
+
+        /* Nav Actions Right */
+        .ln-nav-actions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .ln-cmd-trigger {
+          display: none;
+          align-items: center;
+          gap: 6px;
+          padding: 5px 11px;
+          border-radius: 100px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid var(--border-subtle);
+          color: var(--ivory-muted);
+          cursor: pointer;
+          font-family: var(--font-mono);
+          font-size: 10px;
+          letter-spacing: 0.04em;
+          transition: all 0.2s ease;
+        }
+
+        @media (min-width: 680px) {
+          .ln-cmd-trigger {
+            display: inline-flex;
+          }
+        }
+
+        .ln-cmd-trigger:hover {
+          border-color: var(--border-hover);
+          color: var(--ivory);
+          background: rgba(255, 255, 255, 0.06);
+        }
+
+        .ln-cmd-kbd {
+          padding: 1px 5px;
+          border-radius: 3px;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid var(--border-subtle);
+          font-size: 9px;
+          color: var(--opal-cyan);
+        }
+
+        /* Audio Equalizer Button */
+        .ln-audio-toggle {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 5px 12px;
+          border-radius: 100px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid var(--border-subtle);
+          color: var(--ivory-muted);
+          cursor: pointer;
+          font-family: var(--font-mono);
+          font-size: 10px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          transition: all 0.2s ease;
+        }
+
+        .ln-audio-toggle:hover {
+          border-color: var(--border-hover);
+          color: var(--ivory);
+        }
+
+        .ln-soundwave {
+          display: flex;
+          align-items: flex-end;
+          gap: 2px;
+          height: 10px;
+        }
+
+        .ln-wave-bar {
+          width: 1.5px;
+          background: var(--opal-cyan);
+          border-radius: 2px;
+          height: 3px;
+          transition: height 0.2s ease;
+        }
+
+        .ln-soundwave.playing .ln-wave-bar:nth-child(1) {
+          animation: wave-bounce 1s ease-in-out infinite alternate;
+        }
+        .ln-soundwave.playing .ln-wave-bar:nth-child(2) {
+          animation: wave-bounce 0.8s ease-in-out 0.2s infinite alternate;
+        }
+        .ln-soundwave.playing .ln-wave-bar:nth-child(3) {
+          animation: wave-bounce 1.1s ease-in-out 0.4s infinite alternate;
+        }
+        .ln-soundwave.playing .ln-wave-bar:nth-child(4) {
+          animation: wave-bounce 0.9s ease-in-out 0.1s infinite alternate;
+        }
+
+        @keyframes wave-bounce {
+          0% { height: 2px; }
+          100% { height: 10px; }
+        }
+
+        /* Mobile Hamburger */
+        .ln-mobile-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid var(--border-subtle);
+          color: var(--ivory);
+          cursor: pointer;
+        }
+
+        @media (min-width: 860px) {
+          .ln-mobile-btn {
+            display: none;
+          }
+        }
+
+        /* Fullscreen Mobile Drawer */
+        .ln-mobile-drawer {
+          position: fixed;
+          inset: 0;
+          background: rgba(8, 9, 13, 0.96);
+          backdrop-filter: blur(24px);
+          z-index: 99;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 32px;
+          pointer-events: auto;
+        }
+
+        .ln-mobile-links {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .ln-mobile-link {
+          font-family: var(--font-display);
+          font-size: 24px;
+          font-weight: 600;
+          letter-spacing: -0.02em;
+          color: var(--ivory);
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 1px solid var(--border-subtle);
+          padding-bottom: 12px;
+        }
+
+        .ln-mobile-link span.num {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          color: var(--opal-cyan);
+        }
       `}</style>
 
-      <div className="khb-nav-inner">
-        <Link href="/" className="khb-nav-brand">
-          KHB<span>.</span>SYS
+      <motion.nav
+        initial={{ y: -24, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        className="ln-nav-bar"
+      >
+        <Link href="/" className="ln-brand">
+          <div className="ln-brand-mark">K</div>
+          <div className="ln-brand-text">
+            <span className="ln-brand-name">Khaled Bin Aziz</span>
+            <div className="ln-brand-status">
+              <span className="ln-brand-blip" />
+              <span>ONLINE // BD</span>
+            </div>
+          </div>
         </Link>
 
-        <nav className="khb-nav-links" aria-label="Primary">
-          {navLinks.map((link) => {
-            const isActive = link.href.startsWith('#') && activeSection === link.href.substring(1);
+        <div className="ln-links-wrap">
+          {NAV_LINKS.map((link) => {
+            const isActive =
+              link.href.startsWith('#') &&
+              activeSection === link.href.substring(1);
+
             return (
               <Link
-                key={link.href}
+                key={link.name}
                 href={link.href}
-                className={`khb-nav-link ${isActive ? 'khb-nav-link-active' : ''}`}
-                aria-current={isActive ? 'true' : undefined}
+                onClick={() => sound.tick(1100, 0.02)}
+                className={`ln-link-item ${isActive ? 'active' : ''}`}
               >
-                {link.name}
                 {isActive && (
-                  <motion.span layoutId="khb-nav-underline" className="khb-nav-underline" style={{ width: '100%' }} />
+                  <motion.div
+                    layoutId="active-nav-pill"
+                    className="ln-active-pill"
+                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                  />
                 )}
+                <span>{link.name}</span>
               </Link>
             );
           })}
-        </nav>
+        </div>
 
-        <button
-          type="button"
-          className="khb-nav-toggle"
-          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((v) => !v)}
-        >
-          {menuOpen ? <FiX size={17} /> : <FiMenu size={17} />}
-        </button>
-      </div>
+        <div className="ln-nav-actions">
+          <button
+            type="button"
+            onClick={() => {
+              sound.tick(1200, 0.02);
+              window.dispatchEvent(new CustomEvent('open-command-palette'));
+            }}
+            className="ln-cmd-trigger"
+            aria-label="Open Command Palette (Cmd+K)"
+          >
+            <FiSearch size={11} />
+            <span className="ln-cmd-kbd">⌘K</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleAudio}
+            className="ln-audio-toggle"
+            aria-label={isPlayingAudio ? 'Mute ambient sound' : 'Play ambient sound'}
+          >
+            <div className={`ln-soundwave ${isPlayingAudio ? 'playing' : ''}`}>
+              <span className="ln-wave-bar" />
+              <span className="ln-wave-bar" />
+              <span className="ln-wave-bar" />
+              <span className="ln-wave-bar" />
+            </div>
+            <span>{isPlayingAudio ? 'On' : 'Sound'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="ln-mobile-btn"
+            aria-label="Toggle navigation menu"
+          >
+            {menuOpen ? <FiX size={16} /> : <FiMenu size={16} />}
+          </button>
+        </div>
+      </motion.nav>
 
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            className="khb-nav-mobile"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.25 }}
+            className="ln-mobile-drawer"
           >
-            <div className="khb-nav-mobile-inner">
-              {navLinks.map((link) => {
-                const isActive = link.href.startsWith('#') && activeSection === link.href.substring(1);
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`khb-nav-mobile-link ${isActive ? 'khb-nav-mobile-link-active' : ''}`}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {link.name}
-                  </Link>
-                );
-              })}
+            <div className="ln-mobile-links">
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="ln-mobile-link"
+                >
+                  <span>{link.name}</span>
+                  <span className="num">{link.num}</span>
+                </Link>
+              ))}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.header>
+    </header>
   );
 }
