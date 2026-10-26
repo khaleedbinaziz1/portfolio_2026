@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fi';
 import { SiWhatsapp } from 'react-icons/si';
 import { sound } from '@/lib/sound';
+import { FooterMinimal } from '@/components/SectionPatterns';
 
 const whatsappHref = `https://wa.me/${personalInfo.phone.replace(/\D/g, '')}`;
 
@@ -222,6 +223,9 @@ export default function Footer() {
         }
       `}</style>
 
+      {/* ── Minimal Architectural Dot Grid & Ambient Light Beam ── */}
+      <FooterMinimal />
+
       <div className="ln-footer-inner">
         <div className="ln-footer-grid">
           {/* Brand Col */}
@@ -230,6 +234,7 @@ export default function Footer() {
               <span className="ln-footer-dot" />
               <span>{personalInfo.name}</span>
             </div>
+            <p className="ln-footer-bio">{personalInfo.bio}</p>
             <div className="ln-footer-system-status">
               <FiCheckCircle size={11} />
               <span>SYSTEM ONLINE // 2026 EDITION</span>

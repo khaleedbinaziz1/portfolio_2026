@@ -16,6 +16,7 @@ import {
 import { SiWhatsapp } from 'react-icons/si';
 import TextScramble from '@/components/TextScramble';
 import { sound } from '@/lib/sound';
+import { ContactRipple } from '@/components/SectionPatterns';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -389,6 +390,9 @@ export default function Contact() {
           letter-spacing: 0.04em;
         }
       `}</style>
+
+      {/* ── Ripple Wave Pattern Background ── */}
+      <ContactRipple />
 
       <div className="ln-contact-inner">
         <div className="ln-section-label">

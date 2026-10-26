@@ -15,6 +15,7 @@ import {
 } from 'react-icons/fi';
 import TextScramble from '@/components/TextScramble';
 import { sound } from '@/lib/sound';
+import { ProjectsWireMesh } from '@/components/SectionPatterns';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -683,6 +684,9 @@ export default function Projects() {
           border-color: var(--border-hover);
         }
       `}</style>
+
+      {/* ── Wireframe Mesh Pattern Background ── */}
+      <ProjectsWireMesh />
 
       <div className="ln-projects-inner">
         {/* Section Header */}

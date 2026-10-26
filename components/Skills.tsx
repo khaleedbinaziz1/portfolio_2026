@@ -11,6 +11,7 @@ import { TbBrandFramerMotion } from 'react-icons/tb';
 import { FiCopy, FiCheck } from 'react-icons/fi';
 import TextScramble from '@/components/TextScramble';
 import { sound } from '@/lib/sound';
+import { SkillsMatrixRain } from '@/components/SectionPatterns';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -199,7 +200,7 @@ export default function Skills() {
           border: 1px solid var(--border-subtle);
           color: var(--ivory-dim);
           cursor: pointer;
-          transition: all 0.25s ease;
+          transition: all 0.35s ease;
         }
 
         .ln-filter-chip:hover {
@@ -242,7 +243,7 @@ export default function Skills() {
           display: flex;
           flex-direction: column;
           backdrop-filter: blur(16px);
-          transition: border-color var(--duration-normal) ease, box-shadow var(--duration-normal) ease;
+          transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .ln-skill-card:hover {
@@ -304,7 +305,7 @@ export default function Skills() {
           background: rgba(255, 255, 255, 0.02);
           border: 1px solid var(--border-subtle);
           border-radius: var(--radius-sm);
-          transition: all 0.2s ease;
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .ln-tech-row:hover {
@@ -339,13 +340,16 @@ export default function Skills() {
         }
       `}</style>
 
+      {/* ── Matrix Rain Pattern Background ── */}
+      <SkillsMatrixRain />
+
       <div className="ln-skills-inner">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-40px' }}
-          transition={{ duration: 0.6, ease: EASE }}
+          transition={{ duration: 0.95, ease: EASE }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <div className="ln-section-label" style={{ margin: 0 }}>
@@ -422,7 +426,7 @@ export default function Skills() {
                       border: '1px solid rgba(255, 255, 255, 0.22)',
                       zIndex: 0,
                     }}
-                    transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 26 }}
                   />
                 )}
                 <span style={{ position: 'relative', zIndex: 1 }}>{cat.label}</span>
@@ -438,7 +442,7 @@ export default function Skills() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.4, ease: EASE }}
+            transition={{ duration: 0.7, ease: EASE }}
             className="ln-categories-grid"
           >
             {filteredCategories.map((category, idx) => (
@@ -447,7 +451,7 @@ export default function Skills() {
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-20px' }}
-                transition={{ duration: 0.5, delay: idx * 0.06, ease: EASE }}
+                transition={{ duration: 0.85, delay: idx * 0.1, ease: EASE }}
                 className="ln-skill-card"
               >
                 <div className="ln-card-meta">

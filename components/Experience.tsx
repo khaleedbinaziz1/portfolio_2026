@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { FiBriefcase, FiBookOpen, FiCalendar, FiMapPin, FiChevronRight, FiCheckCircle } from 'react-icons/fi';
 import TextScramble from '@/components/TextScramble';
 import { sound } from '@/lib/sound';
+import { ExperienceCircuit } from '@/components/SectionPatterns';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -325,6 +326,9 @@ export default function Experience() {
           border-radius: 4px;
         }
       `}</style>
+
+      {/* ── Circuit Board Pattern Background ── */}
+      <ExperienceCircuit />
 
       <div className="ln-exp-inner">
         {/* Header */}
